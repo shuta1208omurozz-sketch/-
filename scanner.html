@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+<meta name="apple-mobile-web-app-title" content="Scanner"/>
+<meta name="theme-color" content="#0d1117"/>
+<title>Scanner + Camera</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:#0a0c0f;}
+body{color:#e0e8f0;font-family:'Rajdhani',sans-serif;}
+
+/* APP SHELL */
+#app{height:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:#0a0c0f;}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;gap:10px;padding:12px 14px;padding-top:max(12px,env(safe-area-inset-top));background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0;}
+.hdr-icon{width:28px;height:28px;background:#00d4ff;flex-shrink:0;display:flex;align-items:center;justify-content:center;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));}
+.hdr-title{font-size:16px;font-weight:700;letter-spacing:3px;text-transform:uppercase;}
+.hdr-sub{font-family:'Share Tech Mono',monospace;font-size:8px;color:#4a6a8a;letter-spacing:2px;}
+.hdr-count{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:9px;color:#00d4ff;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);padding:3px 7px;white-space:nowrap;}
+
+/* TABS */
+.tabs{display:flex;background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0;}
+.tab{flex:1;padding:10px 2px;text-align:center;font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;color:#4a6a8a;border:none;background:none;border-bottom:2px solid transparent;font-family:'Rajdhani',sans-serif;transition:color .2s,border-color .2s;}
+.tab.on{color:#00d4ff;border-bottom-color:#00d4ff;background:rgba(0,212,255,0.04);}
+
+/* TAB PAGES */
+.page{flex:1;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;-webkit-overflow-scrolling:touch;}
+.page.on{display:flex;}
+
+/* SCAN PAGE */
+.scan-pg{align-items:center;padding:12px 14px;gap:10px;}
+.mode-row{width:100%;max-width:360px;display:flex;border:1px solid #1e2a38;overflow:hidden;}
+.mode-btn{flex:1;padding:8px 4px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;background:#0d1117;color:#4a6a8a;transition:all .2s;font-family:'Rajdhani',sans-serif;}
+.mode-btn+.mode-btn{border-left:1px solid #1e2a38;}
+.mode-btn.on{background:rgba(0,212,255,0.1);color:#00d4ff;}
+.badge{display:inline-block;font-size:7px;font-family:'Share Tech Mono',monospace;background:rgba(255,170,0,0.15);color:#ffaa00;border:1px solid rgba(255,170,0,0.3);padding:1px 4px;margin-left:4px;vertical-align:middle;}
+.finder{position:relative;width:100%;max-width:360px;aspect-ratio:4/3;background:#060809;border:1px solid #1e2a38;overflow:hidden;}
+.finder video{width:100%;height:100%;object-fit:cover;display:block;}
+.corner{position:absolute;width:18px;height:18px;border-color:#00d4ff;border-style:solid;z-index:2;pointer-events:none;}
+.corner.tl{top:8px;left:8px;border-width:2px 0 0 2px;}
+.corner.tr{top:8px;right:8px;border-width:2px 2px 0 0;}
+.corner.bl{bottom:8px;left:8px;border-width:0 0 2px 2px;}
+.corner.br{bottom:8px;right:8px;border-width:0 2px 2px 0;}
+.scan-line{position:absolute;left:8px;right:8px;height:1px;background:linear-gradient(90deg,transparent,#00d4ff,transparent);animation:scanMove 2s ease-in-out infinite;z-index:2;box-shadow:0 0 5px #00d4ff;pointer-events:none;}
+@keyframes scanMove{0%{top:15%}50%{top:80%}100%{top:15%}}
+.ean-guide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;pointer-events:none;}
+.ean-box{border:1.5px dashed rgba(255,170,0,0.5);width:80%;height:36%;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.ean-line{position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,transparent,#ffaa00,transparent);box-shadow:0 0 5px #ffaa00;animation:eanP 1.2s ease-in-out infinite;}
+@keyframes eanP{0%,100%{opacity:.3}50%{opacity:1}}
+.ean-txt{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,170,0,.7);letter-spacing:1px;text-align:center;}
+.finder-ov{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(0,212,255,.6);z-index:2;pointer-events:none;}
+.finder-ov.ean{color:rgba(255,170,0,.6);}
+.ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+.ph p{font-family:'Share Tech Mono',monospace;font-size:10px;text-align:center;max-width:180px;line-height:1.7;color:#3a5a7a;}
+.sbar{width:100%;max-width:360px;padding:8px 12px;background:#0d1117;border:1px solid #1e2a38;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:#4a6a8a;display:flex;align-items:center;gap:8px;}
+.sdot{width:6px;height:6px;border-radius:50%;background:#2a3a4a;flex-shrink:0;transition:background .3s,box-shadow .3s;}
+.sdot.go{background:#00d4ff;box-shadow:0 0 6px #00d4ff;animation:pulse 1.2s ease-in-out infinite;}
+.sdot.go.ean{background:#ffaa00;box-shadow:0 0 6px #ffaa00;}
+.sdot.ok{background:#00ff88;box-shadow:0 0 6px #00ff88;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.result-box{width:100%;max-width:360px;background:rgba(0,255,136,.05);border:1px solid rgba(0,255,136,.2);padding:9px 12px;}
+.result-label{font-size:9px;font-weight:700;letter-spacing:3px;color:#00ff88;text-transform:uppercase;margin-bottom:3px;}
+.result-val{font-family:'Share Tech Mono',monospace;font-size:14px;color:#e0e8f0;word-break:break-all;}
+.result-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;margin-top:2px;}
+.bc-prev{width:100%;max-width:360px;background:#fff;padding:5px 3px;border:1px solid #1e2a38;text-align:center;}
+.bc-prev canvas{max-width:100%;display:block;margin:0 auto;}
+.btn-main{width:100%;max-width:360px;padding:13px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));transition:background .2s,transform .1s;}
+.btn-main:active{transform:scale(.98);}
+.btn-main.stop{background:#ff4466;}
+.btn-sub{width:100%;max-width:360px;padding:9px;background:transparent;border:1px solid rgba(0,212,255,.25);color:#00d4ff;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.btn-sub:active{background:rgba(0,212,255,.1);}
+
+/* HISTORY PAGE */
+.hist-pg{overflow:hidden;}
+.toolbar{display:flex;align-items:center;gap:8px;padding:9px 13px;border-bottom:1px solid #1e2a38;background:#0d1117;flex-shrink:0;}
+.sbox{flex:1;background:#0a0c0f;border:1px solid #1e2a38;padding:7px 10px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#e0e8f0;outline:none;transition:border-color .2s;}
+.sbox::placeholder{color:#2a3a4a;}.sbox:focus{border-color:#00d4ff;}
+.btn-del-all{padding:6px 11px;background:transparent;border:1px solid #2a3a4a;color:#ff4466;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.list{flex:1;overflow-y:auto;padding:8px 13px;display:flex;flex-direction:column;gap:5px;-webkit-overflow-scrolling:touch;}
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#2a3a4a;padding:40px;text-align:center;}
+.empty p{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;line-height:1.9;}
+.bc-card{background:#0d1117;border:1px solid #1e2a38;padding:7px 9px;display:flex;align-items:center;gap:8px;position:relative;overflow:hidden;cursor:pointer;transition:border-color .2s;}
+.bc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:#00d4ff;}
+.bc-card.ean::before{background:#ffaa00;}
+.bc-card:active{border-color:#2a4a6a;}
+.bc-thumb{background:#fff;width:68px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.bc-thumb canvas{width:68px !important;height:32px !important;}
+.bc-thumb-txt{font-family:monospace;font-size:7px;color:#aaa;text-align:center;line-height:1.4;padding:2px;}
+.card-info{flex:1;min-width:0;}
+.card-val{font-family:'Share Tech Mono',monospace;font-size:11px;color:#e0e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px;}
+.card-meta{display:flex;gap:7px;flex-wrap:wrap;}
+.card-fmt{font-size:8px;font-weight:700;letter-spacing:2px;color:#00d4ff;text-transform:uppercase;}
+.card-fmt.ean{color:#ffaa00;}
+.card-time{font-family:'Share Tech Mono',monospace;font-size:8px;color:#2a3a4a;}
+.card-num{font-family:'Share Tech Mono',monospace;font-size:8px;color:#2a3a4a;}
+.btn-x{background:none;border:none;color:#2a3a4a;cursor:pointer;padding:6px;font-size:14px;line-height:1;flex-shrink:0;}
+.btn-x:active{color:#ff4466;}
+
+/* CAMERA PAGE */
+.cam-pg{align-items:center;padding:12px 14px;gap:10px;}
+.vf{position:relative;width:100%;max-width:400px;border:1px solid #1e2a38;overflow:hidden;background:#000;}
+.vf video{width:100%;height:100%;display:block;object-fit:cover;}
+.flash{position:absolute;inset:0;background:#fff;z-index:10;pointer-events:none;opacity:0;transition:opacity .05s;}
+.flash.on{opacity:1;}
+.ratio-row{width:100%;max-width:400px;display:flex;gap:6px;}
+.ratio-btn{flex:1;padding:7px 4px;text-align:center;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:1px solid #1e2a38;background:#0d1117;color:#4a6a8a;font-family:'Rajdhani',sans-serif;transition:all .2s;}
+.ratio-btn.on{border-color:#00d4ff;color:#00d4ff;background:rgba(0,212,255,.07);}
+.zoom-row{width:100%;max-width:400px;display:flex;align-items:center;gap:10px;}
+.zoom-lbl{font-family:'Share Tech Mono',monospace;font-size:10px;color:#4a6a8a;white-space:nowrap;width:32px;text-align:right;}
+input[type=range]{flex:1;-webkit-appearance:none;height:2px;background:#1e2a38;outline:none;cursor:pointer;border-radius:1px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00d4ff;cursor:pointer;}
+.cam-ctrl{width:100%;max-width:400px;display:flex;align-items:center;justify-content:space-around;padding:0 4px;}
+.ctrl-btn{width:52px;height:52px;border-radius:50%;border:1px solid #1e2a38;background:#0d1117;color:#8ab4cc;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;transition:all .2s;flex-shrink:0;-webkit-tap-highlight-color:transparent;}
+.ctrl-btn:active{border-color:#00d4ff;color:#00d4ff;}
+.ctrl-btn.red{border-color:#ff4466;color:#ff4466;}
+.shutter{width:72px;height:72px;border-radius:50%;border:3px solid #e0e8f0;background:transparent;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;}
+.shutter::after{content:'';width:56px;height:56px;border-radius:50%;background:#e0e8f0;display:block;transition:transform .1s;}
+.shutter:active::after{transform:scale(.85);}
+.shutter:disabled{opacity:.3;cursor:default;}
+.thumb-strip{width:100%;max-width:400px;display:flex;gap:4px;overflow-x:auto;padding:2px 0;-webkit-overflow-scrolling:touch;}
+.thumb-strip::-webkit-scrollbar{display:none;}
+.mini-thumb{width:56px;height:56px;flex-shrink:0;overflow:hidden;cursor:pointer;border:1px solid #1e2a38;}
+.mini-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.more-btn{width:56px;height:56px;flex-shrink:0;background:#0d1117;border:1px solid #1e2a38;color:#4a6a8a;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center;}
+.err-box{width:100%;max-width:400px;padding:12px 14px;background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.35);display:flex;flex-direction:column;gap:8px;}
+.err-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;color:#ff4466;text-transform:uppercase;}
+.err-body{font-family:'Share Tech Mono',monospace;font-size:9px;color:#cc8888;line-height:1.9;}
+.err-retry{padding:7px 14px;background:transparent;border:1px solid rgba(255,68,102,.4);color:#ff8899;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;align-self:flex-start;}
+
+/* PHOTO PAGE */
+.photo-pg{overflow:hidden;}
+.photo-toolbar{display:flex;align-items:center;gap:8px;padding:9px 13px;border-bottom:1px solid #1e2a38;background:#0d1117;flex-shrink:0;}
+.photo-count{font-family:'Share Tech Mono',monospace;font-size:10px;color:#4a6a8a;flex:1;}
+.photo-grid{flex:1;overflow-y:auto;padding:3px;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;-webkit-overflow-scrolling:touch;}
+.photo-item{aspect-ratio:1;overflow:hidden;cursor:pointer;position:relative;background:#0d1117;}
+.photo-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.photo-badge{position:absolute;bottom:0;left:0;right:0;padding:2px 4px;background:rgba(0,0,0,.6);font-family:'Share Tech Mono',monospace;font-size:7px;color:#8ab4cc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* LIGHTBOX */
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:200;display:flex;flex-direction:column;}
+.lb-hdr{padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e2a38;flex-shrink:0;}
+.lb-ttl{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;letter-spacing:1px;}
+.lb-img{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px;}
+.lb-img img{max-width:100%;max-height:100%;object-fit:contain;display:block;}
+.lb-ftr{padding:10px 14px;padding-bottom:max(10px,env(safe-area-inset-bottom));display:flex;gap:8px;border-top:1px solid #1e2a38;flex-shrink:0;}
+.btn-dl{flex:1;padding:12px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));}
+.btn-dl:active{background:#33deff;}
+.btn-del{padding:12px 16px;background:transparent;border:1px solid #2a3a4a;color:#ff4466;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+.btn-del:active{background:rgba(255,68,102,.1);}
+.btn-close{background:none;border:none;color:#4a6a8a;cursor:pointer;font-size:24px;line-height:1;padding:4px;}
+.btn-close:active{color:#e0e8f0;}
+
+/* BC MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
+.modal{background:#0d1117;border:1px solid #1e2a38;border-bottom:none;width:100%;max-width:480px;padding:16px 14px;padding-bottom:max(24px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;}
+.modal-lbl{font-size:9px;font-weight:700;letter-spacing:3px;color:#4a6a8a;text-transform:uppercase;}
+.modal-val{font-family:'Share Tech Mono',monospace;font-size:16px;color:#e0e8f0;word-break:break-all;}
+.modal-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;}
+.modal-bc{background:#fff;padding:10px 6px;text-align:center;border:1px solid #1e2a38;}
+.modal-bc canvas{max-width:100%;display:block;margin:0 auto;}
+.modal-2d{background:#111;padding:12px;text-align:center;border:1px solid #1e2a38;font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;line-height:1.8;}
+.modal-acts{display:flex;gap:8px;}
+.btn-png{flex:1;padding:12px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));}
+.btn-copy{padding:12px 14px;background:transparent;border:1px solid #1e2a38;color:#8ab4cc;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+.copied{font-family:'Share Tech Mono',monospace;font-size:9px;color:#00ff88;text-align:center;}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-icon">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#0a0c0f"><rect x="2" y="2" width="3" height="20"/><rect x="6" y="2" width="1" height="20"/><rect x="8" y="2" width="2" height="20"/><rect x="11" y="2" width="1" height="20"/><rect x="13" y="2" width="3" height="20"/><rect x="17" y="2" width="1" height="20"/><rect x="19" y="2" width="3" height="20"/></svg>
+    </div>
+    <div><div class="hdr-title">Scanner + Camera</div><div class="hdr-sub">SCAN · PHOTO · STORE</div></div>
+    <div class="hdr-count" id="hdr-count">0BC / 0📷</div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab on" data-tab="scan">▶ スキャン</button>
+    <button class="tab" data-tab="history">≡ BC(<span id="bc-count">0</span>)</button>
+    <button class="tab" data-tab="camera">📷 カメラ</button>
+    <button class="tab" data-tab="photos">🖼 写真(<span id="ph-count">0</span>)</button>
+  </div>
+
+  <!-- SCAN PAGE -->
+  <div class="page on scan-pg" id="pg-scan">
+    <div class="mode-row">
+      <button class="mode-btn on" data-mode="all">全フォーマット</button>
+      <button class="mode-btn" data-mode="ean13">EAN-13のみ <span class="badge">EAN</span></button>
+    </div>
+    <div class="finder" id="scan-finder">
+      <video id="scan-video" muted playsinline autoplay></video>
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
+      <div class="scan-line" id="scan-line" style="display:none"></div>
+      <div class="ean-guide" id="ean-guide" style="display:none">
+        <div class="ean-box"><div class="ean-line"></div><div class="ean-txt">EAN-13バーコードを枠内に合わせる</div></div>
+      </div>
+      <div class="finder-ov" id="scan-ov" style="display:none">SCANNING...</div>
+      <div class="ph" id="scan-ph">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4a6a8a" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <p id="scan-ph-txt">スキャン開始を押してください</p>
+      </div>
+    </div>
+    <div class="sbar"><div class="sdot" id="sdot"></div><span id="stxt">待機中</span></div>
+    <div class="result-box" id="result-box" style="display:none">
+      <div class="result-label">最後に読み取ったコード</div>
+      <div class="result-val" id="result-val"></div>
+      <div class="result-meta" id="result-meta"></div>
+    </div>
+    <div class="bc-prev" id="bc-prev" style="display:none"><canvas id="bc-prev-canvas"></canvas></div>
+    <button class="btn-sub" id="btn-bc-detail" style="display:none">🖼 バーコード画像を確認・PNG保存</button>
+    <button class="btn-main" id="btn-scan">▶ スキャン開始</button>
+  </div>
+
+  <!-- HISTORY PAGE -->
+  <div class="page hist-pg" id="pg-history">
+    <div class="toolbar">
+      <input class="sbox" id="search-box" placeholder="バーコード値を検索..." type="search"/>
+      <button class="btn-del-all" id="btn-bc-clear" style="display:none">全削除</button>
+    </div>
+    <div class="empty" id="bc-empty"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#2a3a4a" stroke-width="1.5"><rect x="2" y="2" width="4" height="16"/><rect x="7" y="2" width="2" height="16"/><rect x="10" y="2" width="4" height="16"/><rect x="15" y="2" width="2" height="16"/><rect x="18" y="2" width="4" height="16"/></svg><p>スキャン履歴がありません<br/>バーコードを読み取ると<br/>ここに表示されます</p></div>
+    <div class="list" id="bc-list" style="display:none"></div>
+  </div>
+
+  <!-- CAMERA PAGE -->
+  <div class="page cam-pg" id="pg-camera">
+    <div class="ratio-row">
+      <button class="ratio-btn on" data-r="4/3">4:3</button>
+      <button class="ratio-btn" data-r="3/4">3:4</button>
+      <button class="ratio-btn" data-r="1/1">1:1</button>
+    </div>
+    <div class="vf" id="cam-vf" style="aspect-ratio:4/3">
+      <video id="cam-video" muted playsinline autoplay></video>
+      <div class="flash" id="flash"></div>
+      <div class="ph" id="cam-ph">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#4a6a8a" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <p id="cam-ph-txt">カメラを起動中...</p>
+      </div>
+    </div>
+    <div class="err-box" id="cam-err" style="display:none">
+      <div class="err-title">🚫 カメラの許可が必要です</div>
+      <div class="err-body" id="cam-err-body"></div>
+      <button class="err-retry" id="cam-retry">↺ 再試行</button>
+    </div>
+    <div class="zoom-row" id="zoom-row" style="display:none">
+      <span class="zoom-lbl" id="zoom-lbl">1.0×</span>
+      <input type="range" id="zoom-slider" min="1" max="5" step="0.1" value="1"/>
+    </div>
+    <div class="cam-ctrl">
+      <button class="ctrl-btn" id="btn-flip" title="カメラ切替">⟳</button>
+      <button class="shutter" id="btn-shutter" disabled></button>
+      <button class="ctrl-btn" id="btn-cam-toggle">▶</button>
+    </div>
+    <div class="thumb-strip" id="thumb-strip" style="display:none"></div>
+  </div>
+
+  <!-- PHOTO PAGE -->
+  <div class="page photo-pg" id="pg-photos">
+    <div class="photo-toolbar">
+      <span class="photo-count" id="photo-count-txt">0 / 200 枚</span>
+      <button class="btn-del-all" id="btn-photo-clear" style="display:none">全削除</button>
+    </div>
+    <div class="empty" id="photo-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2a3a4a" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><p>写真がありません<br/>カメラタブから撮影してください</p></div>
+    <div class="photo-grid" id="photo-grid" style="display:none"></div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lb" id="lightbox" style="display:none">
+  <div class="lb-hdr">
+    <span class="lb-ttl" id="lb-ttl"></span>
+    <button class="btn-close" id="lb-close">×</button>
+  </div>
+  <div class="lb-img"><img id="lb-img" src="" alt=""/></div>
+  <div class="lb-ftr">
+    <button class="btn-dl" id="lb-dl">↓ 保存</button>
+    <button class="btn-del" id="lb-del">削除</button>
+  </div>
+</div>
+
+<!-- BC MODAL -->
+<div class="modal-bg" id="bc-modal" style="display:none">
+  <div class="modal">
+    <div class="modal-hdr"><span class="modal-lbl">バーコード詳細</span><button class="btn-close" id="modal-close">×</button></div>
+    <div class="modal-val" id="modal-val"></div>
+    <div class="modal-meta" id="modal-meta"></div>
+    <div class="modal-bc" id="modal-bc"><canvas id="modal-canvas"></canvas></div>
+    <div class="modal-2d" id="modal-2d" style="display:none">QRコード・2Dコードの画像生成は非対応です</div>
+    <div class="copied" id="copied-msg" style="display:none">✓ コピーしました</div>
+    <div class="modal-acts">
+      <button class="btn-png" id="btn-png" style="display:none">↓ PNG保存</button>
+      <button class="btn-copy" id="btn-copy">コピー</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ── CONSTANTS ── */
+const BC_KEY = 'sc-bc-v2';
+const MAX_PH = 200;
+const JS_FMT = {ean_13:'EAN13',ean_8:'EAN8',code_128:'CODE128',code_39:'CODE39',code_93:'CODE93',upc_a:'UPC',upc_e:'UPC',itf:'ITF14'};
+const ALL_FMTS = ['qr_code','ean_13','ean_8','code_128','code_39','code_93','itf','upc_a','upc_e','aztec','data_matrix','pdf417'];
+
+/* ── INDEXEDDB ── */
+let _db = null;
+function openDB() {
+  if (_db) return Promise.resolve(_db);
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('scanner-v1', 1);
+    r.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('photos')) {
+        const s = db.createObjectStore('photos', {keyPath:'id'});
+        s.createIndex('ts','timestamp');
+      }
+    };
+    r.onsuccess = e => { _db = e.target.result; res(_db); };
+    r.onerror = e => rej(e.target.error);
+  });
+}
+async function dbTx(mode, fn) {
+  const db = await openDB();
+  return new Promise((res, rej) => {
+    const tx = db.transaction('photos', mode);
+    const st = tx.objectStore('photos');
+    const req = fn(st);
+    if (req) req.onsuccess = e => res(e.target.result);
+    tx.oncomplete = () => { if (!req) res(); };
+    tx.onerror = e => rej(e.target.error);
+  });
+}
+const dbPut    = p  => dbTx('readwrite', s => s.put(p));
+const dbDel    = id => dbTx('readwrite', s => s.delete(id));
+const dbClear  = () => dbTx('readwrite', s => s.clear());
+const dbAll    = () => dbTx('readonly',  s => s.index('ts').getAll());
+const dbCount  = () => dbTx('readonly',  s => s.count());
+
+async function dbPrune(max) {
+  const all = await dbAll();
+  if (all.length <= max) return;
+  const db = await openDB();
+  await new Promise((res, rej) => {
+    const tx = db.transaction('photos', 'readwrite');
+    const st = tx.objectStore('photos');
+    all.slice(0, all.length - max).forEach(p => st.delete(p.id));
+    tx.oncomplete = res; tx.onerror = e => rej(e.target.error);
+  });
+}
+
+/* ── STATE ── */
+let bcHistory = [];
+let photos    = [];
+let scanning  = false;
+let scanMode  = 'all';
+let camActive = false;
+let facingMode= 'environment';
+let ratio     = '4/3';
+let scanStream= null, camStream = null, detector = null, raf = null;
+let lastCode  = null, lastCodeTime = 0;
+let camTrack  = null;
+let activeTab = 'scan';
+let currentDetail = null;
+let currentLightbox = null;
+
+/* ── HELPERS ── */
+function fmtTime(ts) {
+  return new Date(ts).toLocaleString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+function fmtShort(ts) {
+  return new Date(ts).toLocaleString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+function $(id) { return document.getElementById(id); }
+
+/* ── BARCODE RENDER ── */
+function renderBC(canvas, value, format, height, showVal) {
+  const jf = JS_FMT[format];
+  if (!jf || !window.JsBarcode) return false;
+  try {
+    JsBarcode(canvas, value, {format:jf, width:2, height:height||65, displayValue:!!showVal, fontSize:10, background:'#fff', lineColor:'#111', margin:7});
+    return true;
+  } catch(e) { return false; }
+}
+
+/* ── COUNTS ── */
+function updateCounts() {
+  $('hdr-count').textContent = `${bcHistory.length}BC / ${photos.length}📷`;
+  $('bc-count').textContent = bcHistory.length;
+  $('ph-count').textContent = photos.length;
+  $('photo-count-txt').textContent = `${photos.length} / ${MAX_PH} 枚`;
+  $('btn-bc-clear').style.display  = bcHistory.length ? '' : 'none';
+  $('btn-photo-clear').style.display = photos.length ? '' : 'none';
+}
+
+/* ── TABS ── */
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const t = btn.dataset.tab;
+    if (t === activeTab) return;
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+    btn.classList.add('on');
+    $('pg-'+t).classList.add('on');
+    activeTab = t;
+    if (t !== 'scan') stopScan();
+    if (t !== 'camera') stopCam();
+    if (t === 'camera') setTimeout(startCam, 80);
+    if (t === 'history') renderBcList();
+    if (t === 'photos') renderPhotoGrid();
+  });
+});
+
+/* ════════════════════════════════════
+   SCAN
+═══════════════════════════════════════ */
+function setScanUI(active) {
+  $('scan-line').style.display  = (!active || scanMode !== 'all') ? 'none' : '';
+  $('ean-guide').style.display  = (active && scanMode === 'ean13') ? '' : 'none';
+  $('scan-ov').style.display    = active ? '' : 'none';
+  $('scan-ph').style.display    = active ? 'none' : '';
+  $('scan-ov').className        = 'finder-ov' + (scanMode === 'ean13' ? ' ean' : '');
+  $('scan-ov').textContent      = scanMode === 'ean13' ? 'EAN-13 MODE' : 'SCANNING...';
+}
+function setStatus(dot, txt) {
+  $('sdot').className = 'sdot' + (dot === 'go' ? ' go' + (scanMode === 'ean13' ? ' ean' : '') : dot === 'ok' ? ' ok' : '');
+  $('stxt').textContent = txt;
+}
+
+function stopScan() {
+  if (raf) { cancelAnimationFrame(raf); raf = null; }
+  if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+  const v = $('scan-video'); if (v) v.srcObject = null;
+  scanning = false;
+  setScanUI(false);
+  setStatus('', '待機中');
+  $('btn-scan').textContent = '▶ スキャン開始';
+  $('btn-scan').classList.remove('stop');
+}
+
+async function startScan() {
+  if (!('BarcodeDetector' in window)) {
+    setStatus('', 'BarcodeDetector 非対応ブラウザ (Chrome/Edgeが必要)');
+    return;
+  }
+  try {
+    scanStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const v = $('scan-video');
+    v.srcObject = scanStream;
+    v.setAttribute('playsinline','');
+    v.setAttribute('muted','');
+    await v.play();
+    detector = new BarcodeDetector({formats: scanMode === 'ean13' ? ['ean_13'] : ALL_FMTS});
+    scanning = true;
+    setScanUI(true);
+    setStatus('go', scanMode === 'ean13' ? 'EAN-13 スキャン中...' : 'スキャン中...');
+    $('btn-scan').textContent = '■ スキャン停止';
+    $('btn-scan').classList.add('stop');
+    detect();
+  } catch(e) {
+    const msg = (e.name === 'NotAllowedError') ? 'カメラの許可が必要です' : 'カメラエラー: ' + e.message;
+    setStatus('', msg);
+  }
+}
+
+async function detect() {
+  const v = $('scan-video');
+  if (!v || !scanning || v.readyState < 2) { raf = requestAnimationFrame(detect); return; }
+  try {
+    const codes = await detector.detect(v);
+    if (codes.length) {
+      const c = codes[0], now = Date.now();
+      if (c.rawValue !== lastCode || now - lastCodeTime > 3000) {
+        lastCode = c.rawValue; lastCodeTime = now;
+        onDetected(c.rawValue, c.format);
+      }
+    }
+  } catch(e) {}
+  if (scanning) raf = requestAnimationFrame(detect);
+}
+
+function onDetected(value, format) {
+  const entry = {id: Date.now() + Math.random(), value, format, timestamp: Date.now()};
+  bcHistory = [entry, ...bcHistory];
+  localStorage.setItem(BC_KEY, JSON.stringify(bcHistory));
+  updateCounts();
+  // UI
+  $('result-box').style.display = '';
+  $('result-val').textContent = value;
+  $('result-meta').textContent = (format||'').toUpperCase() + ' · ' + fmtTime(entry.timestamp);
+  // BC preview
+  const ok = JS_FMT[format];
+  $('bc-prev').style.display = ok ? '' : 'none';
+  $('btn-bc-detail').style.display = ok ? '' : 'none';
+  if (ok) { setTimeout(() => renderBC($('bc-prev-canvas'), value, format, 50, true), 10); }
+  $('btn-bc-detail').onclick = () => openBcModal(entry);
+  setStatus('ok', '検出！ ' + value.slice(0,22));
+  setTimeout(() => {
+    if (scanning) setStatus('go', scanMode === 'ean13' ? 'EAN-13 スキャン中...' : 'スキャン中...');
+  }, 1500);
+}
+
+$('btn-scan').addEventListener('click', () => { scanning ? stopScan() : startScan(); });
+
+// Mode toggle
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const m = btn.dataset.mode;
+    if (m === scanMode) return;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    scanMode = m;
+    $('scan-ph-txt').textContent = m === 'ean13' ? 'EAN-13専用モード' : 'スキャン開始を押してください';
+    if (scanning) { stopScan(); setTimeout(startScan, 200); }
+  });
+});
+
+/* ════════════════════════════════════
+   CAMERA
+═══════════════════════════════════════ */
+function showCamError(type, detail) {
+  const box = $('cam-err'), body = $('cam-err-body');
+  if (type === 'permission') {
+    box.style.display = '';
+    body.innerHTML = 'ブラウザのアドレスバー左端の 🔒 → カメラ → 「許可する」<br/>→ ページを再読み込みしてください。<br/><br/><b style="color:#ffaa88">Safari(iOS)</b>: 設定 → Safari → カメラ → 許可';
+  } else if (type === 'notfound') {
+    box.style.display = '';
+    body.textContent = 'カメラが見つかりません。デバイスにカメラがあるか確認してください。';
+  } else if (type === 'busy') {
+    box.style.display = '';
+    body.textContent = 'カメラが他のアプリで使用中です。他のアプリを閉じてから再試行してください。';
+  } else {
+    box.style.display = '';
+    body.textContent = detail || 'カメラを起動できませんでした。';
+  }
+}
+function hideCamError() { $('cam-err').style.display = 'none'; }
+
+function setCamActive(active) {
+  camActive = active;
+  $('cam-ph').style.display   = active ? 'none' : '';
+  $('zoom-row').style.display = active ? '' : 'none';
+  $('btn-shutter').disabled   = !active;
+  $('btn-cam-toggle').textContent = active ? '■' : '▶';
+  $('btn-cam-toggle').classList.toggle('red', active);
+  if (active) hideCamError();
+}
+
+function stopCam() {
+  if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+  const v = $('cam-video'); if (v) v.srcObject = null;
+  camTrack = null;
+  setCamActive(false);
+}
+
+async function startCam(facing) {
+  const fm = facing || facingMode;
+  hideCamError();
+  $('cam-ph-txt').textContent = 'カメラを起動中...';
+
+  // カメラ制約: シンプルなものから試す
+  const constraints = [
+    {video: {facingMode: {ideal: fm}}},   // ideal (失敗しにくい)
+    {video: {facingMode: fm}},             // exact でない
+    {video: true},                         // 最終フォールバック
+  ];
+
+  let stream = null;
+  for (const c of constraints) {
+    try {
+      if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+      stream = await navigator.mediaDevices.getUserMedia(c);
+      break;
+    } catch(e) {
+      if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+        showCamError('permission'); return;
+      }
+      if (e.name === 'NotFoundError') { /* try next */ continue; }
+    }
+  }
+
+  if (!stream) { showCamError('notfound'); return; }
+
+  camStream = stream;
+  camTrack  = stream.getVideoTracks()[0];
+  const v   = $('cam-video');
+
+  // iOS Safari 必須属性
+  v.setAttribute('playsinline', '');
+  v.setAttribute('muted', '');
+  v.setAttribute('autoplay', '');
+  v.muted    = true;
+  v.srcObject = stream;
+
+  try {
+    await new Promise((res, rej) => {
+      v.onloadedmetadata = res;
+      v.onerror = rej;
+      setTimeout(res, 4000); // タイムアウト保険
+    });
+    await v.play();
+    setCamActive(true);
+    $('zoom-slider').value = 1;
+    applyZoom(1);
+    updateThumbStrip();
+  } catch(e) {
+    showCamError('other', 'カメラの再生に失敗: ' + e.message);
+  }
+}
+
+// アスペクト比
+document.querySelectorAll('.ratio-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    ratio = btn.dataset.r;
+    $('cam-vf').style.aspectRatio = ratio;
+    $('cam-vf').style.maxWidth = ratio === '3/4' ? '280px' : '400px';
+    const v = $('cam-video');
+    v.style.aspectRatio = ratio;
+  });
+});
+
+// ズーム
+function applyZoom(z) {
+  $('zoom-lbl').textContent = z.toFixed(1) + '×';
+  if (!camTrack) return;
+  try {
+    const caps = camTrack.getCapabilities?.();
+    if (caps?.zoom) {
+      const zc = Math.min(Math.max(z, caps.zoom.min||1), caps.zoom.max||8);
+      camTrack.applyConstraints({advanced:[{zoom:zc}]}).catch(()=>{});
+    }
+  } catch(e) {}
+}
+$('zoom-slider').addEventListener('input', e => applyZoom(parseFloat(e.target.value)));
+
+// Flip
+$('btn-flip').addEventListener('click', async () => {
+  facingMode = facingMode === 'environment' ? 'user' : 'environment';
+  const v = $('cam-video');
+  v.style.transform = facingMode === 'user' ? 'scaleX(-1)' : '';
+  if (camActive) { stopCam(); await new Promise(r=>setTimeout(r,150)); await startCam(facingMode); }
+});
+
+// Toggle
+$('btn-cam-toggle').addEventListener('click', () => { camActive ? stopCam() : startCam(); });
+
+// Retry
+$('cam-retry').addEventListener('click', startCam);
+
+// Shutter
+$('btn-shutter').addEventListener('click', takePhoto);
+
+function takePhoto() {
+  const v = $('cam-video');
+  if (!v || !camActive) return;
+  const w = v.videoWidth, h = v.videoHeight;
+  if (!w || !h) { $('cam-ph-txt').textContent = '映像準備中...'; return; }
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  if (facingMode === 'user') { ctx.translate(w,0); ctx.scale(-1,1); }
+  ctx.drawImage(v,0,0,w,h);
+  const dataUrl = c.toDataURL('image/jpeg', 0.88);
+  if (!dataUrl || dataUrl === 'data:,') return;
+  const photo = {id: Date.now()+Math.random(), dataUrl, timestamp:Date.now(), facingMode};
+  // Flash
+  const fl = $('flash'); fl.classList.add('on'); setTimeout(()=>fl.classList.remove('on'), 200);
+  // Save
+  dbPut(photo).then(()=>dbPrune(MAX_PH)).then(async()=>{
+    photos = (await dbAll()).reverse();
+    updateCounts(); updateThumbStrip();
+  }).catch(()=>{});
+}
+
+function updateThumbStrip() {
+  const strip = $('thumb-strip');
+  strip.style.display = photos.length ? '' : 'none';
+  strip.innerHTML = '';
+  photos.slice(0,8).forEach(p => {
+    const d = document.createElement('div'); d.className='mini-thumb';
+    const img = document.createElement('img'); img.src = p.dataUrl;
+    d.appendChild(img); d.onclick = ()=>openLightbox(p);
+    strip.appendChild(d);
+  });
+  if (photos.length > 8) {
+    const m = document.createElement('button'); m.className='more-btn';
+    m.textContent='+' + (photos.length-8);
+    m.onclick = () => {
+      document.querySelector('[data-tab="photos"]').click();
+    };
+    strip.appendChild(m);
+  }
+}
+
+/* ════════════════════════════════════
+   BC HISTORY
+═══════════════════════════════════════ */
+function renderBcList() {
+  const q = $('search-box').value.toLowerCase();
+  const filtered = q ? bcHistory.filter(x=>x.value.toLowerCase().includes(q)) : bcHistory;
+  const list = $('bc-list'), empty = $('bc-empty');
+  if (!filtered.length) { list.style.display='none'; empty.style.display=''; return; }
+  empty.style.display='none'; list.style.display='';
+  list.innerHTML = '';
+  filtered.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'bc-card' + (item.format==='ean_13'?' ean':'');
+    card.innerHTML = `
+      <div class="bc-thumb"><canvas></canvas></div>
+      <div class="card-info">
+        <div class="card-val">${item.value}</div>
+        <div class="card-meta">
+          <span class="card-fmt ${item.format==='ean_13'?'ean':''}">${(item.format||'').replace('_',' ')}</span>
+          <span class="card-time">${fmtTime(item.timestamp)}</span>
+          <span class="card-num">#${String(filtered.length-i).padStart(3,'0')}</span>
+        </div>
+      </div>
+      <button class="btn-x">✕</button>`;
+    card.querySelector('.bc-card,.card-info,div').addEventListener('click', (e)=>{
+      if (!e.target.classList.contains('btn-x')) openBcModal(item);
+    });
+    card.addEventListener('click', (e)=>{ if (!e.target.classList.contains('btn-x')) openBcModal(item); });
+    card.querySelector('.btn-x').addEventListener('click', e=>{ e.stopPropagation(); deleteBc(item.id); });
+    // render thumb
+    const cv = card.querySelector('canvas');
+    setTimeout(()=>{ if (!renderBC(cv, item.value, item.format, 24, false)) { cv.replaceWith(Object.assign(document.createElement('div'),{className:'bc-thumb-txt',textContent:(item.format||'').toUpperCase().replace('_',' ')})); } }, 10);
+    list.appendChild(card);
+  });
+}
+
+$('search-box').addEventListener('input', renderBcList);
+
+function deleteBc(id) {
+  bcHistory = bcHistory.filter(x=>x.id!==id);
+  localStorage.setItem(BC_KEY, JSON.stringify(bcHistory));
+  updateCounts(); renderBcList();
+}
+$('btn-bc-clear').addEventListener('click', ()=>{ bcHistory=[]; localStorage.setItem(BC_KEY,'[]'); updateCounts(); renderBcList(); });
+
+/* ════════════════════════════════════
+   BC MODAL
+═══════════════════════════════════════ */
+function openBcModal(item) {
+  currentDetail = item;
+  $('modal-val').textContent  = item.value;
+  $('modal-meta').textContent = (item.format||'').toUpperCase().replace('_',' ') + ' · ' + fmtTime(item.timestamp);
+  $('copied-msg').style.display = 'none';
+  const hasFmt = !!JS_FMT[item.format];
+  $('modal-bc').style.display   = hasFmt ? '' : 'none';
+  $('modal-2d').style.display   = hasFmt ? 'none' : '';
+  $('btn-png').style.display    = hasFmt ? '' : 'none';
+  if (hasFmt) { setTimeout(()=>renderBC($('modal-canvas'), item.value, item.format, 68, true), 10); }
+  $('bc-modal').style.display = '';
+}
+function closeBcModal() { $('bc-modal').style.display='none'; currentDetail=null; }
+$('modal-close').addEventListener('click', closeBcModal);
+$('bc-modal').addEventListener('click', e=>{ if(e.target===$('bc-modal')) closeBcModal(); });
+$('btn-copy').addEventListener('click', ()=>{
+  if (!currentDetail) return;
+  navigator.clipboard?.writeText(currentDetail.value).catch(()=>{});
+  $('copied-msg').style.display='';
+  setTimeout(()=>$('copied-msg').style.display='none', 2000);
+});
+$('btn-png').addEventListener('click', ()=>{
+  const cv = $('modal-canvas'); if (!cv) return;
+  const a = document.createElement('a');
+  a.href = cv.toDataURL('image/png');
+  a.download = `barcode_${currentDetail?.value||'code'}.png`;
+  a.click();
+});
+
+/* ════════════════════════════════════
+   PHOTO GRID & LIGHTBOX
+═══════════════════════════════════════ */
+function renderPhotoGrid() {
+  const grid=$('photo-grid'), empty=$('photo-empty');
+  if (!photos.length) { grid.style.display='none'; empty.style.display=''; return; }
+  empty.style.display='none'; grid.style.display='';
+  grid.innerHTML='';
+  photos.forEach(p=>{
+    const item=document.createElement('div'); item.className='photo-item';
+    const img=document.createElement('img'); img.src=p.dataUrl; img.loading='lazy';
+    const badge=document.createElement('div'); badge.className='photo-badge'; badge.textContent=fmtShort(p.timestamp);
+    item.appendChild(img); item.appendChild(badge);
+    item.addEventListener('click', ()=>openLightbox(p));
+    grid.appendChild(item);
+  });
+}
+
+function openLightbox(p) {
+  currentLightbox = p;
+  $('lb-img').src = p.dataUrl;
+  $('lb-ttl').textContent = fmtTime(p.timestamp) + ' · ' + (p.facingMode==='user'?'フロント':'リア');
+  $('lightbox').style.display='';
+}
+function closeLightbox() { $('lightbox').style.display='none'; currentLightbox=null; }
+$('lb-close').addEventListener('click', closeLightbox);
+$('lb-dl').addEventListener('click', ()=>{
+  if (!currentLightbox) return;
+  const a=document.createElement('a');
+  a.href=currentLightbox.dataUrl;
+  a.download=`photo_${fmtTime(currentLightbox.timestamp).replace(/[/:]/g,'-')}.jpg`;
+  a.click();
+});
+$('lb-del').addEventListener('click', ()=>{
+  if (!currentLightbox) return;
+  const id=currentLightbox.id;
+  dbDel(id).then(async()=>{
+    photos=photos.filter(p=>p.id!==id);
+    updateCounts(); renderPhotoGrid(); updateThumbStrip(); closeLightbox();
+  });
+});
+$('btn-photo-clear').addEventListener('click', ()=>{
+  dbClear().then(()=>{ photos=[]; updateCounts(); renderPhotoGrid(); updateThumbStrip(); });
+});
+
+/* ════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
+async function init() {
+  // Load BC from localStorage
+  try { bcHistory = JSON.parse(localStorage.getItem(BC_KEY)||'[]'); } catch{bcHistory=[];}
+  // Load photos from IndexedDB
+  try { photos = (await dbAll()).reverse(); } catch(e){ photos=[]; }
+  updateCounts();
+}
+init();
+</script>
+</body>
+</html>
