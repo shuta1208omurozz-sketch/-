@@ -105,7 +105,44 @@ body{color:#e0e8f0;font-family:'Rajdhani',sans-serif;}
 .btn-x:active{color:#ff4466;}
 
 /* CAMERA PAGE */
+/* フォーカスリング */
+.focus-ring{position:absolute;width:64px;height:64px;border:2px solid #ffdd00;border-radius:4px;pointer-events:none;z-index:5;transform:translate(-50%,-50%) scale(1.2);transition:transform .15s,opacity .3s;opacity:0;}
+.focus-ring.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+.focus-ring::before,.focus-ring::after{content:'';position:absolute;background:#ffdd00;}
+.focus-ring::before{left:50%;top:-6px;width:1px;height:5px;transform:translateX(-50%);}
+.focus-ring::after{top:50%;left:-6px;height:1px;width:5px;transform:translateY(-50%));}
+/* 懐中電灯ボタン */
+.ctrl-btn.torch-on{border-color:#ffdd00 !important;color:#ffdd00 !important;box-shadow:0 0 10px rgba(255,221,0,.35);}
+/* フォーカスモードバッジ */
+.focus-badge{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;letter-spacing:1px;text-align:center;}
+.focus-badge.on{color:#ffdd00;}
+/* カメラサブ行（タッチフォーカス表示） */
+.cam-sub-row{width:100%;max-width:400px;display:flex;align-items:center;justify-content:center;gap:16px;}
 .cam-pg{align-items:center;padding:12px 14px;gap:10px;}
+/* 横向きカメラオーバーレイ */
+.cam-landscape{position:fixed;inset:0;z-index:300;background:#000;display:flex;flex-direction:column;align-items:stretch;justify-content:stretch;}
+.cam-landscape .vf{flex:1;width:100%;max-width:none;border:none;border-radius:0;aspect-ratio:unset !important;}
+.cam-landscape .vf video{width:100%;height:100%;object-fit:cover;}
+.cam-overlay-top{position:absolute;top:0;left:0;right:0;padding:max(10px,env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(0,0,0,.6),transparent);z-index:10;pointer-events:none;}
+.cam-overlay-top > *{pointer-events:auto;}
+.cam-overlay-bottom{position:absolute;bottom:0;left:0;right:0;padding:10px 16px max(16px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;background:linear-gradient(to top,rgba(0,0,0,.65),transparent);z-index:10;}
+.cam-overlay-ctrl{display:flex;align-items:center;justify-content:space-around;}
+.cam-overlay-zoom{display:flex;align-items:center;gap:10px;}
+.cam-overlay-lbl{font-family:"Share Tech Mono",monospace;font-size:11px;color:rgba(255,255,255,.7);white-space:nowrap;width:36px;text-align:right;}
+.cam-landscape input[type=range]{background:rgba(255,255,255,.25);}
+.cam-landscape input[type=range]::-webkit-slider-thumb{background:#fff;}
+.cam-close-btn{background:none;border:none;color:rgba(255,255,255,.8);font-size:26px;cursor:pointer;line-height:1;padding:4px;}
+.cam-close-btn:active{color:#fff;}
+.cam-landscape .ctrl-btn{background:rgba(0,0,0,.4);border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.9);}
+.cam-landscape .ctrl-btn:active{border-color:#fff;color:#fff;}
+.cam-landscape .ctrl-btn.torch-on{border-color:#ffdd00 !important;color:#ffdd00 !important;}
+.cam-landscape .ctrl-btn.red{border-color:rgba(255,68,102,.7);color:#ff6688;}
+.cam-landscape .shutter{border-color:rgba(255,255,255,.9);}
+.cam-landscape .shutter::after{background:rgba(255,255,255,.95);}
+.cam-launch-btn{width:100%;max-width:360px;padding:13px;background:#00d4ff;color:#0a0c0f;border:none;font-family:"Rajdhani",sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));transition:background .2s;}
+.cam-launch-btn:active{background:#33deff;}
+.cam-tab-preview{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:30px;}
+.cam-tab-preview p{font-family:"Share Tech Mono",monospace;font-size:10px;color:#3a5a7a;text-align:center;line-height:1.8;}
 .vf{position:relative;width:100%;max-width:400px;border:1px solid #1e2a38;overflow:hidden;background:#000;}
 .vf video{width:100%;height:100%;display:block;object-fit:cover;}
 .flash{position:absolute;inset:0;background:#fff;z-index:10;pointer-events:none;opacity:0;transition:opacity .05s;}
@@ -141,8 +178,13 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .photo-count{font-family:'Share Tech Mono',monospace;font-size:10px;color:#4a6a8a;flex:1;}
 .photo-grid{flex:1;overflow-y:auto;padding:3px;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;-webkit-overflow-scrolling:touch;}
 .photo-item{aspect-ratio:1;overflow:hidden;cursor:pointer;position:relative;background:#0d1117;}
-.photo-item img{width:100%;height:100%;object-fit:cover;display:block;}
-.photo-badge{position:absolute;bottom:0;left:0;right:0;padding:2px 4px;background:rgba(0,0,0,.6);font-family:'Share Tech Mono',monospace;font-size:7px;color:#8ab4cc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.photo-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .15s;}
+.photo-item:active img{transform:scale(.96);}
+.photo-badge{position:absolute;bottom:0;left:0;right:0;padding:2px 4px;background:rgba(0,0,0,.65);font-family:'Share Tech Mono',monospace;font-size:7px;color:#8ab4cc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.photo-trash{position:absolute;top:5px;right:5px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.72);border:1px solid rgba(255,68,102,.5);color:#ff4466;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;-webkit-tap-highlight-color:transparent;transition:background .15s,border-color .15s;}
+.photo-trash:active{background:rgba(255,68,102,.3);border-color:#ff4466;}
+.photo-save{position:absolute;top:5px;left:5px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.72);border:1px solid rgba(0,212,255,.4);color:#00d4ff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;-webkit-tap-highlight-color:transparent;transition:background .15s;}
+.photo-save:active{background:rgba(0,212,255,.2);}
 
 /* LIGHTBOX */
 .lb{position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:200;display:flex;flex-direction:column;}
@@ -172,6 +214,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .btn-png{flex:1;padding:12px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));}
 .btn-copy{padding:12px 14px;background:transparent;border:1px solid #1e2a38;color:#8ab4cc;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
 .copied{font-family:'Share Tech Mono',monospace;font-size:9px;color:#00ff88;text-align:center;}
+
+/* TOAST */
+.toast{position:fixed;bottom:max(80px,env(safe-area-inset-bottom)+70px);left:50%;transform:translateX(-50%) translateY(20px);background:#1a2a3a;border:1px solid #2a4a6a;color:#e0e8f0;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;padding:10px 18px;white-space:nowrap;z-index:500;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;border-radius:2px;max-width:90vw;text-align:center;}
+.toast.ok{border-color:rgba(0,255,136,.4);color:#00ff88;}
+.toast.warn{border-color:rgba(255,170,0,.4);color:#ffcc66;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* POPUP */
+.popup-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;}
+.popup{background:#0d1117;border:1px solid #1e2a38;width:100%;max-width:340px;padding:20px 18px;display:flex;flex-direction:column;gap:12px;}
+.popup-title{font-size:13px;font-weight:700;letter-spacing:2px;color:#e0e8f0;text-transform:uppercase;}
+.popup-body{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8ab4cc;line-height:1.9;letter-spacing:.5px;}
+.popup-body b{color:#ffcc66;}
+.popup-btn{padding:11px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));}
+.popup-btn:active{background:#33deff;}
 </style>
 </head>
 <body>
@@ -235,36 +292,57 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
     <div class="list" id="bc-list" style="display:none"></div>
   </div>
 
-  <!-- CAMERA PAGE -->
+  <!-- CAMERA PAGE (タブ) -->
   <div class="page cam-pg" id="pg-camera">
-    <div class="ratio-row">
-      <button class="ratio-btn on" data-r="4/3">4:3</button>
-      <button class="ratio-btn" data-r="3/4">3:4</button>
-      <button class="ratio-btn" data-r="1/1">1:1</button>
+    <div class="cam-tab-preview">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#2a4a6a" stroke-width="1.2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <p>横向きカメラが起動します<br/>撮影後は右上の × で戻れます</p>
+      <button class="cam-launch-btn" id="btn-cam-launch">📷 カメラを起動</button>
+      <div class="thumb-strip" id="thumb-strip" style="display:none;width:100%;max-width:360px;"></div>
     </div>
-    <div class="vf" id="cam-vf" style="aspect-ratio:4/3">
-      <video id="cam-video" muted playsinline autoplay></video>
-      <div class="flash" id="flash"></div>
-      <div class="ph" id="cam-ph">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#4a6a8a" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <p id="cam-ph-txt">カメラを起動中...</p>
+  </div>
+
+  <!-- CAMERA OVERLAY (横向き全画面) -->
+  <div id="cam-overlay" style="display:none">
+    <div class="cam-landscape" id="cam-landscape">
+      <div class="vf" id="cam-vf">
+        <video id="cam-video" muted playsinline autoplay></video>
+        <div class="flash" id="flash"></div>
+        <div class="focus-ring" id="focus-ring"></div>
+        <div class="cam-ph" id="cam-ph" style="display:flex;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#000;">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#4a6a8a" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <p id="cam-ph-txt" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#3a5a7a;text-align:center;max-width:200px;line-height:1.7;">カメラを起動中...</p>
+        </div>
+      </div>
+      <!-- 上オーバーレイ: 閉じる＋フォーカスバッジ -->
+      <div class="cam-overlay-top">
+        <span class="focus-badge" id="focus-badge"></span>
+        <button class="cam-close-btn" id="btn-cam-close">×</button>
+      </div>
+      <!-- 下オーバーレイ: ズーム＋コントロール -->
+      <div class="cam-overlay-bottom">
+        <div class="cam-overlay-zoom" id="zoom-row" style="display:none">
+          <span class="cam-overlay-lbl" id="zoom-lbl">1.0×</span>
+          <input type="range" id="zoom-slider" min="1" max="5" step="0.1" value="1"/>
+        </div>
+        <div class="err-box" id="cam-err" style="display:none">
+          <div class="err-title">🚫 カメラの許可が必要です</div>
+          <div class="err-body" id="cam-err-body"></div>
+          <button class="err-retry" id="cam-retry">↺ 再試行</button>
+        </div>
+        <div class="cam-sub-row" id="cam-sub-row" style="display:none">
+        </div>
+        <div class="cam-overlay-ctrl">
+          <button class="ctrl-btn" id="btn-flip" title="カメラ切替">⟳</button>
+          <button class="ctrl-btn" id="btn-torch" title="懐中電灯" style="font-size:20px;">🔦</button>
+          <button class="shutter" id="btn-shutter" disabled></button>
+          <button class="ctrl-btn" id="btn-cam-toggle">▶</button>
+          <button class="ctrl-btn" id="btn-focus-mode" title="タップフォーカス">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M3 9V6a1 1 0 011-1h3M3 15v3a1 1 0 001 1h3M21 9V6a1 1 0 00-1-1h-3M21 15v3a1 1 0 01-1 1h-3"/></svg>
+          </button>
+        </div>
       </div>
     </div>
-    <div class="err-box" id="cam-err" style="display:none">
-      <div class="err-title">🚫 カメラの許可が必要です</div>
-      <div class="err-body" id="cam-err-body"></div>
-      <button class="err-retry" id="cam-retry">↺ 再試行</button>
-    </div>
-    <div class="zoom-row" id="zoom-row" style="display:none">
-      <span class="zoom-lbl" id="zoom-lbl">1.0×</span>
-      <input type="range" id="zoom-slider" min="1" max="5" step="0.1" value="1"/>
-    </div>
-    <div class="cam-ctrl">
-      <button class="ctrl-btn" id="btn-flip" title="カメラ切替">⟳</button>
-      <button class="shutter" id="btn-shutter" disabled></button>
-      <button class="ctrl-btn" id="btn-cam-toggle">▶</button>
-    </div>
-    <div class="thumb-strip" id="thumb-strip" style="display:none"></div>
   </div>
 
   <!-- PHOTO PAGE -->
@@ -286,7 +364,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
   </div>
   <div class="lb-img"><img id="lb-img" src="" alt=""/></div>
   <div class="lb-ftr">
-    <button class="btn-dl" id="lb-dl">↓ 保存</button>
+    <button class="btn-dl" id="lb-dl">↓ 本体に保存</button>
     <button class="btn-del" id="lb-del">削除</button>
   </div>
 </div>
@@ -309,6 +387,44 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 
 <script>
 'use strict';
+
+/* ── PLATFORM ── */
+const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent) ||
+              (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+let iosPopupShown = false;
+
+/* ── TOAST ── */
+let toastTimer = null;
+function showToast(msg, type='', duration=2800) {
+  const el = document.getElementById('toast');
+  if (toastTimer) clearTimeout(toastTimer);
+  el.textContent = msg;
+  el.className = 'toast' + (type?' '+type:'');
+  requestAnimationFrame(()=>{ el.classList.add('show'); });
+  toastTimer = setTimeout(()=>el.classList.remove('show'), duration);
+}
+
+/* ── AUTO SAVE (Android) ── */
+function autoSaveToDevice(photo) {
+  if (isIOS) {
+    // iOS: ポップアップを初回のみ表示
+    if (!iosPopupShown) {
+      iosPopupShown = true;
+      document.getElementById('ios-popup').style.display = '';
+    }
+    return;
+  }
+  // Android / Desktop: <a download> で自動保存
+  const ts   = fmtTime(photo.timestamp).replace(/[/:\s]/g,'-');
+  const name = 'photo_' + ts + '.jpg';
+  const a    = document.createElement('a');
+  a.href     = photo.dataUrl;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('✓ Downloadsに自動保存しました', 'ok');
+}
 
 /* ── CONSTANTS ── */
 const BC_KEY = 'sc-bc-v2';
@@ -417,8 +533,8 @@ document.querySelectorAll('.tab').forEach(btn => {
     $('pg-'+t).classList.add('on');
     activeTab = t;
     if (t !== 'scan') stopScan();
-    if (t !== 'camera') stopCam();
-    if (t === 'camera') setTimeout(startCam, 80);
+    if (t !== 'camera') closeCamOverlay();
+    if (t !== 'camera') { /* カメラはオーバーレイで管理 */ }
     if (t === 'history') renderBcList();
     if (t === 'photos') renderPhotoGrid();
   });
@@ -549,20 +665,119 @@ function showCamError(type, detail) {
 }
 function hideCamError() { $('cam-err').style.display = 'none'; }
 
+/* ── カメラオーバーレイ (横向き) ── */
+function openCamOverlay() {
+  $('cam-overlay').style.display = '';
+  startCam();
+}
+
+function closeCamOverlay() {
+  stopCam();
+  $('cam-overlay').style.display = 'none';
+}
+
+$('btn-cam-launch').addEventListener('click', openCamOverlay);
+$('btn-cam-close').addEventListener('click', closeCamOverlay);
+
 function setCamActive(active) {
   camActive = active;
-  $('cam-ph').style.display   = active ? 'none' : '';
-  $('zoom-row').style.display = active ? '' : 'none';
-  $('btn-shutter').disabled   = !active;
+  $('cam-ph').style.display     = active ? 'none' : '';
+  $('zoom-row').style.display   = active ? '' : 'none';
+  $('cam-sub-row').style.display= active ? '' : 'none';
+  $('btn-shutter').disabled     = !active;
   $('btn-cam-toggle').textContent = active ? '■' : '▶';
   $('btn-cam-toggle').classList.toggle('red', active);
+  if (!active) { setFocusModeUI(false); }
   if (active) hideCamError();
 }
+
+/* ── TORCH (懐中電灯) ── */
+let torchOn = false;
+
+async function toggleTorch() {
+  if (!camTrack) { showToast('カメラを起動してください', 'warn'); return; }
+  try {
+    const caps = camTrack.getCapabilities ? camTrack.getCapabilities() : {};
+    if (!caps.torch) {
+      showToast('このデバイスはフラッシュ非対応です', 'warn'); return;
+    }
+    torchOn = !torchOn;
+    await camTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
+    const btn = $('btn-torch');
+    btn.classList.toggle('torch-on', torchOn);
+    btn.title = torchOn ? '懐中電灯 ON' : '懐中電灯';
+    showToast(torchOn ? '🔦 懐中電灯 ON' : '懐中電灯 OFF', torchOn ? 'ok' : '');
+  } catch(e) {
+    showToast('フラッシュ非対応: ' + (e.message||e.name), 'warn');
+  }
+}
+
+$('btn-torch').addEventListener('click', toggleTorch);
+
+/* ── TAP TO FOCUS (タップフォーカス) ── */
+let focusModeActive = false;
+let focusTimer = null;
+
+function setFocusModeUI(active) {
+  focusModeActive = active;
+  const btn = $('btn-focus-mode');
+  const badge = $('focus-badge');
+  btn.classList.toggle('torch-on', active); // 黄色で光らせる
+  badge.textContent = active ? '📍 タップしてフォーカス（有効）' : 'タップしてフォーカス';
+  badge.classList.toggle('on', active);
+}
+
+$('btn-focus-mode').addEventListener('click', () => {
+  if (!camActive) { showToast('カメラを起動してください', 'warn'); return; }
+  setFocusModeUI(!focusModeActive);
+  showToast(focusModeActive ? '📍 タップフォーカス ON' : 'タップフォーカス OFF',
+            focusModeActive ? 'ok' : '');
+});
+
+// ビューファインダータップ → フォーカス
+$('cam-vf').addEventListener('click', async (e) => {
+  if (!camActive || !focusModeActive || !camTrack) return;
+
+  const vf   = $('cam-vf');
+  const rect = vf.getBoundingClientRect();
+  const x    = (e.clientX - rect.left) / rect.width;
+  const y    = (e.clientY - rect.top)  / rect.height;
+
+  // フォーカスリング表示
+  const ring = $('focus-ring');
+  ring.style.left = (x * 100) + '%';
+  ring.style.top  = (y * 100) + '%';
+  ring.classList.add('show');
+  if (focusTimer) clearTimeout(focusTimer);
+  focusTimer = setTimeout(() => ring.classList.remove('show'), 1200);
+
+  try {
+    const caps = camTrack.getCapabilities ? camTrack.getCapabilities() : {};
+
+    // pointsOfInterest 対応チェック
+    if (caps.focusMode && caps.focusMode.includes('manual')) {
+      await camTrack.applyConstraints({
+        advanced: [{ focusMode: 'single-shot', pointsOfInterest: [{ x, y }] }]
+      });
+    } else if (caps.focusMode && caps.focusMode.includes('continuous')) {
+      // フォールバック: continuous でポイント指定
+      await camTrack.applyConstraints({
+        advanced: [{ focusMode: 'continuous', pointsOfInterest: [{ x, y }] }]
+      });
+    } else {
+      showToast('このデバイスはタップフォーカス非対応', 'warn');
+    }
+  } catch(e) {
+    // エラーでも UI だけ見せる（静音）
+  }
+});
 
 function stopCam() {
   if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
   const v = $('cam-video'); if (v) v.srcObject = null;
-  camTrack = null;
+  camTrack = null; torchOn = false;
+  $('btn-torch').classList.remove('torch-on');
+  $('focus-ring').classList.remove('show');
   setCamActive(false);
 }
 
@@ -680,7 +895,9 @@ function takePhoto() {
   const photo = {id: Date.now()+Math.random(), dataUrl, timestamp:Date.now(), facingMode};
   // Flash
   const fl = $('flash'); fl.classList.add('on'); setTimeout(()=>fl.classList.remove('on'), 200);
-  // Save
+  // 自動保存（Android: Downloads / iOS: ポップアップ）
+  autoSaveToDevice(photo);
+  // IndexedDB 保存
   dbPut(photo).then(()=>dbPrune(MAX_PH)).then(async()=>{
     photos = (await dbAll()).reverse();
     updateCounts(); updateThumbStrip();
@@ -794,12 +1011,69 @@ function renderPhotoGrid() {
   grid.innerHTML='';
   photos.forEach(p=>{
     const item=document.createElement('div'); item.className='photo-item';
+
     const img=document.createElement('img'); img.src=p.dataUrl; img.loading='lazy';
+
+    // ゴミ箱ボタン（右上）
+    const trash=document.createElement('button'); trash.className='photo-trash'; trash.title='削除';
+    trash.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
+    trash.addEventListener('click', e=>{
+      e.stopPropagation();
+      deletePhoto(p.id);
+    });
+
+    // 保存ボタン（左上）
+    const save=document.createElement('button'); save.className='photo-save'; save.title='本体に保存';
+    save.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+    save.addEventListener('click', e=>{ e.stopPropagation(); savePhotoToDevice(p); });
+
     const badge=document.createElement('div'); badge.className='photo-badge'; badge.textContent=fmtShort(p.timestamp);
-    item.appendChild(img); item.appendChild(badge);
+
+    item.appendChild(img);
+    item.appendChild(save);
+    item.appendChild(trash);
+    item.appendChild(badge);
     item.addEventListener('click', ()=>openLightbox(p));
     grid.appendChild(item);
   });
+}
+
+function deletePhoto(id) {
+  dbDel(id).then(async()=>{
+    photos=photos.filter(p=>p.id!==id);
+    updateCounts(); renderPhotoGrid(); updateThumbStrip();
+    if (currentLightbox && currentLightbox.id===id) closeLightbox();
+  });
+}
+
+/* 本体に保存 (Web Share API → fallback download) */
+async function savePhotoToDevice(photo) {
+  const ts   = fmtTime(photo.timestamp).replace(/[/:\s]/g,'-');
+  const name = `photo_${ts}.jpg`;
+
+  // Web Share API - iOS/Android で「写真に保存」「ファイルに保存」が使える
+  if (navigator.share && navigator.canShare) {
+    try {
+      const res  = await fetch(photo.dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], name, {type:'image/jpeg'});
+      if (navigator.canShare({files:[file]})) {
+        await navigator.share({files:[file], title:'写真を保存'});
+        return;
+      }
+    } catch(e) {
+      if (e.name === 'AbortError') return; // キャンセル
+      // Share失敗 → fallback
+    }
+  }
+
+  // Fallback: <a download> → Downloadsフォルダ（Androidファイルマネージャーから確認可能）
+  const a = document.createElement('a');
+  a.href     = photo.dataUrl;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function openLightbox(p) {
@@ -812,21 +1086,23 @@ function closeLightbox() { $('lightbox').style.display='none'; currentLightbox=n
 $('lb-close').addEventListener('click', closeLightbox);
 $('lb-dl').addEventListener('click', ()=>{
   if (!currentLightbox) return;
-  const a=document.createElement('a');
-  a.href=currentLightbox.dataUrl;
-  a.download=`photo_${fmtTime(currentLightbox.timestamp).replace(/[/:]/g,'-')}.jpg`;
-  a.click();
+  savePhotoToDevice(currentLightbox);
 });
 $('lb-del').addEventListener('click', ()=>{
   if (!currentLightbox) return;
-  const id=currentLightbox.id;
-  dbDel(id).then(async()=>{
-    photos=photos.filter(p=>p.id!==id);
-    updateCounts(); renderPhotoGrid(); updateThumbStrip(); closeLightbox();
-  });
+  deletePhoto(currentLightbox.id);
 });
 $('btn-photo-clear').addEventListener('click', ()=>{
   dbClear().then(()=>{ photos=[]; updateCounts(); renderPhotoGrid(); updateThumbStrip(); });
+});
+
+/* iOS popup */
+document.getElementById('ios-popup-close').addEventListener('click', ()=>{
+  document.getElementById('ios-popup').style.display = 'none';
+});
+document.getElementById('ios-popup').addEventListener('click', e=>{
+  if (e.target === document.getElementById('ios-popup'))
+    document.getElementById('ios-popup').style.display = 'none';
 });
 
 /* ════════════════════════════════════
@@ -841,5 +1117,22 @@ async function init() {
 }
 init();
 </script>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- iOS SAVE POPUP -->
+<div class="popup-bg" id="ios-popup" style="display:none">
+  <div class="popup">
+    <div class="popup-title">📷 写真を保存する</div>
+    <div class="popup-body">
+      iOSではブラウザのセキュリティ制限のため<br/>
+      <b>自動保存ができません。</b><br/><br/>
+      写真グリッドの左上 <b>↓ ボタン</b> をタップすると<br/>
+      共有シートが開き「<b>写真に保存</b>」または<br/>
+      「<b>"ファイル"に保存</b>」が選べます。
+    </div>
+    <button class="popup-btn" id="ios-popup-close">わかりました</button>
+  </div>
+</div>
 </body>
 </html>
