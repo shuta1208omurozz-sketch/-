@@ -110,25 +110,13 @@
           <p id="cam-ph-txt" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#3a5a7a;text-align:center;max-width:200px;line-height:1.7;">カメラを起動中...</p>
         </div>
       </div>
-      <!-- 上オーバーレイ: 向きインジケーター＋フォーカスバッジ＋閉じる -->
+      <!-- 上オーバーレイ: 向き表示＋フォーカス＋閉じる -->
       <div class="cam-overlay-top">
         <div style="display:flex;align-items:center;gap:10px;">
-          <!-- 向きインジケーター -->
           <div class="orient-bar">
-            <div class="orient-icon" id="orient-icon">
-              <svg id="orient-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="5" width="18" height="14" rx="2"/>
-                <circle cx="12" cy="12" r="2"/>
-              </svg>
-            </div>
-            <span class="orient-txt" id="orient-txt">--</span>
+            <div class="orient-dot" id="orient-dot"></div>
+            <span class="orient-label" id="orient-label">センサー待機中</span>
           </div>
-          <!-- 手動回転ボタン -->
-          <button class="rotate-btn" id="btn-rotate" title="画面を回転">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/>
-            </svg>
-          </button>
           <span class="focus-badge" id="focus-badge"></span>
         </div>
         <button class="cam-close-btn" id="btn-cam-close">×</button>
@@ -136,7 +124,9 @@
       <!-- 下オーバーレイ: ズーム＋コントロール -->
       <div class="cam-overlay-bottom">
         <div class="cam-overlay-zoom" id="zoom-row" style="display:none">
-          <span class="cam-overlay-lbl" id="zoom-lbl">1.0×</span>
+          <div class="zoom-anchor" id="zoom-anchor">
+            <span class="zoom-lbl-float" id="zoom-lbl" style="top:50%;left:50%;transform:translate(-50%,-50%)">1.0×</span>
+          </div>
           <input type="range" id="zoom-slider" min="1" max="5" step="0.1" value="1"/>
         </div>
         <div class="err-box" id="cam-err" style="display:none">
@@ -179,6 +169,7 @@
   <div class="lb-img"><img id="lb-img" src="" alt=""/></div>
   <div class="lb-ftr">
     <button class="btn-dl" id="lb-dl">↓ 本体に保存</button>
+    <button class="lb-rotate-btn" id="lb-rotate">↻ 回転</button>
     <button class="btn-del" id="lb-del">削除</button>
   </div>
 </div>
@@ -213,6 +204,77 @@ el.className = 'toast' + (type?' '+type:'');
 requestAnimationFrame(()=>{ el.classList.add('show'); });
 toastTimer = setTimeout(()=>el.classList.remove('show'), duration);
 }
+/* ════ SENSOR ORIENTATION ════
+   DeviceOrientationEvent でスマホの傾きを取得し
+   撮影時にcanvasで補正する。CSSは一切回転しない。
+*/
+let sensorAngle = 0;   // 端末が実際に向いている角度 (0/90/180/270)
+let sensorGranted = false;
+
+function startOrientSensor() {
+  if (typeof DeviceOrientationEvent === 'undefined') return;
+  // iOS 13+ は許可が必要
+  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission().then(s => {
+      if (s === 'granted') listenOrientation();
+    }).catch(() => {});
+  } else {
+    listenOrientation();
+  }
+}
+
+function listenOrientation() {
+  sensorGranted = true;
+  window.addEventListener('deviceorientation', onDeviceOrientation, {passive:true});
+}
+
+let _lastAngle = -1;
+function onDeviceOrientation(e) {
+  const gamma = e.gamma || 0; // 左右 -90~+90
+  const beta  = e.beta  || 0; // 前後 -180~+180
+  let angle = 0;
+  if      (gamma >  45) angle = 90;   // 右に傾いている
+  else if (gamma < -45) angle = 270;  // 左に傾いている
+  else if (beta  < -45) angle = 180;  // 上下逆
+  else                  angle = 0;    // 縦持ち (正面)
+  if (angle !== _lastAngle) { _lastAngle = angle; sensorAngle = angle; updateOrientUI(); }
+}
+
+// 画面回転でも更新
+window.addEventListener('orientationchange', () => setTimeout(updateOrientUI, 400), {passive:true});
+
+function updateOrientUI() {
+  const dot   = $('orient-dot');
+  const label = $('orient-label');
+  if (!dot) return;
+  const ok = (sensorAngle === 0);  // 正面 = 縦持ち補正が0度
+  dot.className   = 'orient-dot '  + (sensorGranted ? (ok ? 'ok' : 'warn') : '');
+  label.className = 'orient-label '+ (sensorGranted ? (ok ? 'ok' : 'warn') : '');
+  if (!sensorGranted) { label.textContent = 'センサー待機中'; return; }
+  const labels = {0:'正面 ✓', 90:'右向き', 180:'上下逆', 270:'左向き'};
+  label.textContent = labels[sensorAngle] || '調整中';
+  // ズームラベルをファインダー内で正面方向に移動
+  updateZoomLabelPosition();
+}
+
+function updateZoomLabelPosition() {
+  const lbl = $('zoom-lbl');
+  if (!lbl) return;
+  // sensorAngle = スマホが傾いている方向
+  // 正面は常にファインダーの「上」なので、正面がどこにあるか示す
+  const positions = {
+    0:   {top:'8px',   left:'50%',  transform:'translateX(-50%)'},  // 上
+    90:  {top:'50%',   left:'92%',  transform:'translateY(-50%)'},  // 右
+    180: {top:'92%',   left:'50%',  transform:'translateX(-50%)'},  // 下
+    270: {top:'50%',   left:'8px',  transform:'translateY(-50%)'},  // 左
+  };
+  // zoom-lbl は cam-overlay-bottom の中にいるので位置を更新
+  const p = positions[sensorAngle] || positions[0];
+  lbl.style.top       = p.top;
+  lbl.style.left      = p.left;
+  lbl.style.transform = p.transform;
+}
+
 let folderHandle = null;
 async function pickSaveFolder() {
 if (!window.showDirectoryPicker) {
@@ -254,41 +316,9 @@ return false;
 }
 }
 let camRotation = 0; // 0, 90, 180, 270
-function rotateCam() {
-camRotation = (camRotation + 90) % 360;
-applyCamRotation();
-}
-function applyCamRotation() {
-const vf  = $('cam-vf');
-const v   = $('cam-video');
-const r   = camRotation;
-const swap = (r === 90 || r === 270);
-v.style.transform = `rotate(${r}deg)` + (facingMode==='user' ? ' scaleX(-1)' : '');
-v.style.width     = swap ? '100vh' : '100%';
-v.style.height    = swap ? '100vw' : '100%';
-v.style.objectFit = 'cover';
-updateOrientUI();
-}
-function resetCamRotation() { camRotation = 0; applyCamRotation(); }
-$('btn-rotate').addEventListener('click', rotateCam);
-function updateOrientUI() {
-const icon  = $('orient-icon');
-const txt   = $('orient-txt');
-const r     = camRotation;
-const v = $('cam-video');
-const vw = v.videoWidth || 0, vh = v.videoHeight || 0;
-const swap = (r === 90 || r === 270);
-const finalW = swap ? vh : vw;
-const finalH = swap ? vw : vh;
-const isLandscape = finalW >= finalH;
-icon.className  = 'orient-icon ' + (isLandscape ? 'good' : 'bad');
-txt.className   = 'orient-txt '  + (isLandscape ? 'good' : 'bad');
-$('orient-svg').style.transform = `rotate(${r}deg)`;
-if (r === 0)   txt.textContent = isLandscape ? '横向き ✓' : '縦向き';
-if (r === 90)  txt.textContent = '90° 回転';
-if (r === 180) txt.textContent = '180° 反転';
-if (r === 270) txt.textContent = '270° 回転';
-}
+function rotateCam() { /* CSS回転は廃止、センサー補正を使用 */ }
+function applyCamRotation() { /* 廃止 */ }
+function resetCamRotation() { camRotation = 0; }
 function autoSaveToDevice(photo) {
 if (isIOS) {
 if (!iosPopupShown) {
@@ -546,7 +576,7 @@ $('btn-shutter').disabled     = !active;
 $('btn-cam-toggle').textContent = active ? '■' : '▶';
 $('btn-cam-toggle').classList.toggle('red', active);
 if (!active) { setFocusModeUI(false); }
-if (active) { hideCamError(); setTimeout(updateOrientUI, 300); }
+if (active) { hideCamError(); startOrientSensor(); setTimeout(updateOrientUI, 300); }
 }
 let torchOn = false;
 async function toggleTorch() {
@@ -618,8 +648,6 @@ camTrack = null; torchOn = false;
 $('btn-torch').classList.remove('torch-on');
 $('focus-ring').classList.remove('show');
 camRotation = 0;
-const v2 = $('cam-video');
-if (v2) { v2.style.transform=''; v2.style.width=''; v2.style.height=''; }
 setCamActive(false);
 }
 async function startCam(facing) {
@@ -693,8 +721,6 @@ camTrack.applyConstraints({advanced:[{zoom:zc}]}).catch(()=>{});
 $('zoom-slider').addEventListener('input', e => applyZoom(parseFloat(e.target.value)));
 $('btn-flip').addEventListener('click', async () => {
 facingMode = facingMode === 'environment' ? 'user' : 'environment';
-const v = $('cam-video');
-v.style.transform = facingMode === 'user' ? 'scaleX(-1)' : '';
 if (camActive) { stopCam(); await new Promise(r=>setTimeout(r,150)); await startCam(facingMode); }
 });
 $('btn-cam-toggle').addEventListener('click', () => { camActive ? stopCam() : startCam(); });
@@ -705,18 +731,20 @@ const v = $('cam-video');
 if (!v || !camActive) return;
 const vw = v.videoWidth, vh = v.videoHeight;
 if (!vw || !vh) { $('cam-ph-txt').textContent = '映像準備中...'; return; }
-const swap = (camRotation === 90 || camRotation === 270);
+// センサー角度で補正（スマホが傾いていても写真は正面向きになる）
+const corrAngle = (360 - sensorAngle) % 360; // 逆回転で補正
+const swap = (corrAngle === 90 || corrAngle === 270);
 const c = document.createElement('canvas');
 c.width  = swap ? vh : vw;
 c.height = swap ? vw : vh;
 const ctx = c.getContext('2d');
 ctx.translate(c.width/2, c.height/2);
-if (camRotation) ctx.rotate(camRotation * Math.PI / 180);
+if (corrAngle) ctx.rotate(corrAngle * Math.PI / 180);
 if (facingMode === 'user') ctx.scale(-1, 1);
 ctx.drawImage(v, -vw/2, -vh/2, vw, vh);
 const dataUrl = c.toDataURL('image/jpeg', 0.88);
 if (!dataUrl || dataUrl === 'data:,') return;
-const photo = {id: Date.now()+Math.random(), dataUrl, timestamp:Date.now(), facingMode};
+const photo = {id: Date.now()+Math.random(), dataUrl, timestamp:Date.now(), facingMode, rotation:0};
 const fl = $('flash'); fl.classList.add('on'); setTimeout(()=>fl.classList.remove('on'), 200);
 autoSaveToDevice(photo);
 dbPut(photo).then(()=>dbPrune(MAX_PH)).then(async()=>{
@@ -877,11 +905,39 @@ document.body.removeChild(a);
 function openLightbox(p) {
 currentLightbox = p;
 $('lb-img').src = p.dataUrl;
+$('lb-img').style.transform = `rotate(${p.rotation||0}deg)`;
 $('lb-ttl').textContent = fmtTime(p.timestamp) + ' · ' + (p.facingMode==='user'?'フロント':'リア');
 $('lightbox').style.display='';
 }
+
+async function rotateLightboxPhoto() {
+if (!currentLightbox) return;
+// canvas で実際に回転して dataUrl を更新
+const img = new Image();
+img.src = currentLightbox.dataUrl;
+await new Promise(r => { img.onload = r; });
+const sw = (img.width + img.height) !== (img.naturalWidth + img.naturalHeight) ? false : true;
+const c = document.createElement('canvas');
+c.width = img.height; c.height = img.width;
+const ctx = c.getContext('2d');
+ctx.translate(c.width/2, c.height/2);
+ctx.rotate(90 * Math.PI / 180);
+ctx.drawImage(img, -img.width/2, -img.height/2);
+const newDataUrl = c.toDataURL('image/jpeg', 0.9);
+currentLightbox = {...currentLightbox, dataUrl: newDataUrl, rotation: 0};
+// IndexedDB 更新
+await dbPut(currentLightbox);
+photos = (await dbAll()).reverse();
+// UI 更新
+$('lb-img').src = newDataUrl;
+$('lb-img').style.transform = '';
+renderPhotoGrid();
+updateThumbStrip();
+showToast('↻ 回転しました', 'ok');
+}
 function closeLightbox() { $('lightbox').style.display='none'; currentLightbox=null; }
 $('lb-close').addEventListener('click', closeLightbox);
+$('lb-rotate').addEventListener('click', rotateLightboxPhoto);
 $('lb-dl').addEventListener('click', ()=>{
 if (!currentLightbox) return;
 savePhotoToDevice(currentLightbox);
@@ -900,12 +956,7 @@ document.getElementById('ios-popup').addEventListener('click', e=>{
 if (e.target === document.getElementById('ios-popup'))
 document.getElementById('ios-popup').style.display = 'none';
 });
-window.addEventListener('orientationchange', () => {
-setTimeout(updateOrientUI, 400);
-});
-window.addEventListener('resize', () => {
-setTimeout(updateOrientUI, 200);
-});
+
 /* ════════════════════════════════════
 INIT
 ═══════════════════════════════════════ */
