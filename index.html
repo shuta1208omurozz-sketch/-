@@ -16,148 +16,152 @@
 html,body{height:100%;overflow:hidden;background:#0a0c0f}
 body{color:#e0e8f0;font-family:'Rajdhani',sans-serif}
 #app{height:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:#0a0c0f}
-.hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0}
+
+/* HDR */
+.hdr{display:flex;align-items:center;gap:10px;padding:9px 14px;padding-top:max(9px,env(safe-area-inset-top));background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0}
 .hdr-icon{width:26px;height:26px;background:#00d4ff;flex-shrink:0;display:flex;align-items:center;justify-content:center;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
 .hdr-title{font-size:15px;font-weight:700;letter-spacing:3px;text-transform:uppercase}
 .hdr-sub{font-family:'Share Tech Mono',monospace;font-size:8px;color:#4a6a8a;letter-spacing:2px}
-.hdr-count{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:9px;color:#00d4ff;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);padding:3px 7px;white-space:nowrap}
+.hdr-count{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:9px;color:#00d4ff;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);padding:3px 7px;white-space:nowrap}
+
+/* TABS */
 .tabs{display:flex;background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0}
 .tab{flex:1;padding:9px 2px;text-align:center;font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;color:#4a6a8a;border:none;background:none;border-bottom:2px solid transparent;font-family:'Rajdhani',sans-serif;transition:color .2s,border-color .2s}
-.tab.on{color:#00d4ff;border-bottom-color:#00d4ff;background:rgba(0,212,255,0.04)}
+.tab.on{color:#00d4ff;border-bottom-color:#00d4ff;background:rgba(0,212,255,.04)}
 .page{flex:1;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;-webkit-overflow-scrolling:touch;min-height:0}
 .page.on{display:flex}
 
-/* ── SCAN ── */
-.scan-pg{align-items:center;padding:8px 12px;gap:8px;overflow:hidden}
-.mode-row{width:100%;max-width:400px;display:flex;border:1px solid #1e2a38;overflow:hidden;flex-shrink:0}
+/* ─── SCAN ─── */
+.scan-pg{align-items:center;padding:6px 10px;gap:6px;overflow:hidden}
+.mode-row{width:100%;max-width:420px;display:flex;border:1px solid #1e2a38;overflow:hidden;flex-shrink:0}
 .mode-btn{flex:1;padding:7px 4px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;background:#0d1117;color:#4a6a8a;transition:all .2s;font-family:'Rajdhani',sans-serif}
 .mode-btn+.mode-btn{border-left:1px solid #1e2a38}
-.mode-btn.on{background:rgba(0,212,255,0.1);color:#00d4ff}
-.badge{display:inline-block;font-size:7px;font-family:'Share Tech Mono',monospace;background:rgba(255,170,0,0.15);color:#ffaa00;border:1px solid rgba(255,170,0,0.3);padding:1px 4px;margin-left:4px;vertical-align:middle}
-/* finder が flex:1 で残り全スペースを占有 */
-.finder{position:relative;width:100%;max-width:400px;flex:1;min-height:0;background:#060809;border:1px solid #1e2a38;overflow:hidden}
+.mode-btn.on{background:rgba(0,212,255,.1);color:#00d4ff}
+.badge{display:inline-block;font-size:7px;font-family:'Share Tech Mono',monospace;background:rgba(255,170,0,.15);color:#ffaa00;border:1px solid rgba(255,170,0,.3);padding:1px 4px;margin-left:4px;vertical-align:middle}
+/* ファインダー：flex:1 で画面を全部使う */
+.finder{position:relative;width:100%;max-width:420px;flex:1;min-height:0;background:#060809;border:1px solid #1e2a38;overflow:hidden}
 .finder video{width:100%;height:100%;object-fit:cover;display:block}
-.corner{position:absolute;width:20px;height:20px;border-color:#00d4ff;border-style:solid;z-index:2;pointer-events:none}
-.corner.tl{top:8px;left:8px;border-width:2px 0 0 2px}
-.corner.tr{top:8px;right:8px;border-width:2px 2px 0 0}
-.corner.bl{bottom:8px;left:8px;border-width:0 0 2px 2px}
-.corner.br{bottom:8px;right:8px;border-width:0 2px 2px 0}
-.scan-line{position:absolute;left:8px;right:8px;height:1px;background:linear-gradient(90deg,transparent,#00d4ff,transparent);animation:scanMove 2s ease-in-out infinite;z-index:2;box-shadow:0 0 5px #00d4ff;pointer-events:none}
-@keyframes scanMove{0%{top:15%}50%{top:80%}100%{top:15%}}
+.corner{position:absolute;width:22px;height:22px;border-color:#00d4ff;border-style:solid;z-index:2;pointer-events:none}
+.corner.tl{top:10px;left:10px;border-width:2px 0 0 2px}
+.corner.tr{top:10px;right:10px;border-width:2px 2px 0 0}
+.corner.bl{bottom:10px;left:10px;border-width:0 0 2px 2px}
+.corner.br{bottom:10px;right:10px;border-width:0 2px 2px 0}
+.scan-line{position:absolute;left:10px;right:10px;height:1px;background:linear-gradient(90deg,transparent,#00d4ff,transparent);animation:scanMove 2s ease-in-out infinite;z-index:2;box-shadow:0 0 6px #00d4ff;pointer-events:none}
+@keyframes scanMove{0%{top:15%}50%{top:82%}100%{top:15%}}
 .ean-guide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;pointer-events:none}
-.ean-box{border:1.5px dashed rgba(255,170,0,0.5);width:85%;height:30%;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
-.ean-line{position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,transparent,#ffaa00,transparent);box-shadow:0 0 5px #ffaa00;animation:eanP 1.2s ease-in-out infinite}
+.ean-box{border:2px dashed rgba(255,170,0,.55);width:88%;height:28%;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.ean-line{position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,transparent,#ffaa00,transparent);box-shadow:0 0 6px #ffaa00;animation:eanP 1.1s ease-in-out infinite}
 @keyframes eanP{0%,100%{opacity:.3}50%{opacity:1}}
-.ean-txt{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,170,0,.7);letter-spacing:1px;text-align:center}
-.finder-ov{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(0,212,255,.7);z-index:2;pointer-events:none}
+.ean-txt{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,170,0,.75);letter-spacing:1px;text-align:center}
+.finder-ov{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(0,212,255,.7);z-index:2;pointer-events:none}
 .finder-ov.ean{color:rgba(255,170,0,.7)}
-/* 検出時に大きく中央表示 */
-.finder-detect{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:3;pointer-events:none;opacity:0;transition:opacity .15s}
+/* 検出オーバーレイ（中央に大きく） */
+.finder-detect{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:4;pointer-events:none;opacity:0;transition:opacity .1s;background:rgba(0,0,0,.45)}
 .finder-detect.show{opacity:1}
-.finder-detect-val{font-family:'Share Tech Mono',monospace;font-size:clamp(18px,5vw,28px);color:#00ff88;font-weight:700;letter-spacing:2px;text-shadow:0 0 20px rgba(0,255,136,.8);text-align:center;padding:0 12px;word-break:break-all;max-width:100%}
-.finder-detect-fmt{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(0,255,136,.6);letter-spacing:3px;margin-top:4px}
-.ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
-.ph p{font-family:'Share Tech Mono',monospace;font-size:10px;text-align:center;max-width:180px;line-height:1.7;color:#3a5a7a}
-.sbar{width:100%;max-width:400px;padding:7px 12px;background:#0d1117;border:1px solid #1e2a38;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:#4a6a8a;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.finder-detect-val{font-family:'Share Tech Mono',monospace;font-size:clamp(20px,6vw,32px);color:#00ff88;font-weight:700;letter-spacing:2px;text-shadow:0 0 24px rgba(0,255,136,.9);text-align:center;padding:0 14px;word-break:break-all;max-width:100%}
+.finder-detect-fmt{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(0,255,136,.65);letter-spacing:3px;margin-top:5px}
+.finder-detect-dup{font-family:'Share Tech Mono',monospace;font-size:10px;color:#ffaa00;letter-spacing:2px;margin-top:3px}
+.ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.ph p{font-family:'Share Tech Mono',monospace;font-size:10px;text-align:center;max-width:200px;line-height:1.8;color:#3a5a7a}
+.sbar{width:100%;max-width:420px;padding:7px 12px;background:#0d1117;border:1px solid #1e2a38;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:#4a6a8a;display:flex;align-items:center;gap:8px;flex-shrink:0}
 .sdot{width:6px;height:6px;border-radius:50%;background:#2a3a4a;flex-shrink:0;transition:background .3s,box-shadow .3s}
 .sdot.go{background:#00d4ff;box-shadow:0 0 6px #00d4ff;animation:pulse 1.2s ease-in-out infinite}
 .sdot.go.ean{background:#ffaa00;box-shadow:0 0 6px #ffaa00}
 .sdot.ok{background:#00ff88;box-shadow:0 0 6px #00ff88}
+.sdot.err{background:#ff4466;box-shadow:0 0 6px #ff4466}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.btn-main{width:100%;max-width:400px;padding:12px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));transition:background .2s,transform .1s;flex-shrink:0}
+.btn-main{width:100%;max-width:420px;padding:12px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));transition:background .2s,transform .1s;flex-shrink:0}
 .btn-main:active{transform:scale(.98)}
 .btn-main.stop{background:#ff4466}
-.btn-sub{width:100%;max-width:400px;padding:8px;background:transparent;border:1px solid rgba(0,212,255,.25);color:#00d4ff;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;flex-shrink:0}
-.btn-sub:active{background:rgba(0,212,255,.1)}
 
-/* ── HISTORY ── */
+/* ─── HISTORY ─── */
 .hist-pg{overflow:hidden}
-.toolbar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #1e2a38;background:#0d1117;flex-shrink:0}
+.toolbar{display:flex;align-items:center;gap:7px;padding:7px 12px;border-bottom:1px solid #1e2a38;background:#0d1117;flex-shrink:0}
 .sbox{flex:1;background:#0a0c0f;border:1px solid #1e2a38;padding:7px 10px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#e0e8f0;outline:none;transition:border-color .2s}
 .sbox::placeholder{color:#2a3a4a}
 .sbox:focus{border-color:#00d4ff}
-.btn-del-all{padding:6px 10px;background:transparent;border:1px solid #2a3a4a;color:#ff4466;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;white-space:nowrap}
-.hist-filter-row{display:flex;align-items:center;gap:6px;padding:5px 12px;background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0}
-.hist-filter-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a}
-.hist-filter-btn{padding:3px 9px;background:transparent;border:1px solid #1e2a38;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s}
-.hist-filter-btn.on{border-color:#00d4ff;color:#00d4ff;background:rgba(0,212,255,.07)}
-.hist-filter-btn.checked-filter.on{border-color:#00ff88;color:#00ff88;background:rgba(0,255,136,.07)}
+.btn-sm{padding:6px 10px;background:transparent;border:1px solid #2a3a4a;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.btn-sm.danger{color:#ff4466;border-color:#2a3a4a}
+.btn-sm.accent{color:#00d4ff;border-color:#1e2a38}
+.hist-filter-row{display:flex;align-items:center;gap:5px;padding:5px 12px;background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0}
+.hist-filter-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;flex-shrink:0}
+.flt-btn{padding:3px 9px;background:transparent;border:1px solid #1e2a38;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s}
+.flt-btn.on{border-color:#00d4ff;color:#00d4ff;background:rgba(0,212,255,.07)}
+.flt-btn.grn.on{border-color:#00ff88;color:#00ff88;background:rgba(0,255,136,.07)}
 .list{flex:1;overflow-y:auto;padding:6px 12px;display:flex;flex-direction:column;gap:4px;-webkit-overflow-scrolling:touch}
 .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#2a3a4a;padding:40px;text-align:center}
 .empty p{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;line-height:1.9}
-/* バーコードカード */
 .bc-card{background:#0d1117;border:1px solid #1e2a38;padding:6px 8px;display:flex;align-items:center;gap:7px;position:relative;overflow:hidden;transition:border-color .2s,background .2s}
 .bc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#00d4ff}
 .bc-card.ean::before{background:#ffaa00}
-/* チェック済み */
-.bc-card.checked{background:rgba(0,255,136,0.07);border-color:rgba(0,255,136,0.3)}
+.bc-card.checked{background:rgba(0,255,136,.06);border-color:rgba(0,255,136,.28)}
 .bc-card.checked::before{background:#00ff88}
-.card-check{width:32px;height:32px;border-radius:50%;border:1.5px solid #2a3a4a;background:transparent;color:#2a3a4a;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-size:14px;-webkit-tap-highlight-color:transparent}
+.card-check{width:30px;height:30px;border-radius:50%;border:1.5px solid #2a3a4a;background:transparent;color:#2a3a4a;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-size:13px;-webkit-tap-highlight-color:transparent}
 .bc-card.checked .card-check{border-color:#00ff88;background:rgba(0,255,136,.15);color:#00ff88}
-.card-check:active{transform:scale(.9)}
-.bc-thumb{background:#fff;width:64px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.bc-thumb canvas{width:64px !important;height:30px !important}
-.bc-thumb-txt{font-family:monospace;font-size:7px;color:#aaa;text-align:center;line-height:1.4;padding:2px}
+.bc-thumb{background:#fff;width:62px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.bc-thumb canvas{width:62px !important;height:28px !important}
+.bc-thumb-txt{font-family:monospace;font-size:7px;color:#aaa;text-align:center;line-height:1.3;padding:2px}
 .card-info{flex:1;min-width:0;cursor:pointer}
 .card-val{font-family:'Share Tech Mono',monospace;font-size:11px;color:#e0e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
-.card-meta{display:flex;gap:6px;flex-wrap:wrap}
+.card-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .card-fmt{font-size:8px;font-weight:700;letter-spacing:2px;color:#00d4ff;text-transform:uppercase}
 .card-fmt.ean{color:#ffaa00}
 .card-time{font-family:'Share Tech Mono',monospace;font-size:8px;color:#2a3a4a}
 .card-num{font-family:'Share Tech Mono',monospace;font-size:8px;color:#2a3a4a}
+.card-chk-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;color:#00ff88}
 .btn-x{background:none;border:none;color:#2a3a4a;cursor:pointer;padding:5px;font-size:14px;line-height:1;flex-shrink:0}
 .btn-x:active{color:#ff4466}
 
-/* ── CAMERA ── */
+/* ─── CAMERA ─── */
+.cam-pg{align-items:center;padding:0 10px 6px;gap:4px;overflow:hidden;padding-bottom:max(6px,env(safe-area-inset-bottom))}
+.vf{position:relative;width:100%;max-width:440px;border:1px solid #1e2a38;overflow:hidden;background:#000;flex:1;min-height:0}
+.vf video{width:100%;height:100%;display:block;object-fit:cover}
+.flash{position:absolute;inset:0;background:#fff;z-index:10;pointer-events:none;opacity:0;transition:opacity .05s}
+.flash.on{opacity:1}
 .focus-ring{position:absolute;width:64px;height:64px;border:2px solid #ffdd00;border-radius:4px;pointer-events:none;z-index:5;transform:translate(-50%,-50%) scale(1.2);transition:transform .15s,opacity .3s;opacity:0}
 .focus-ring.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .focus-ring::before,.focus-ring::after{content:'';position:absolute;background:#ffdd00}
 .focus-ring::before{left:50%;top:-6px;width:1px;height:5px;transform:translateX(-50%)}
 .focus-ring::after{top:50%;left:-6px;height:1px;width:5px;transform:translateY(-50%)}
-.ctrl-btn.torch-on{border-color:#ffdd00 !important;color:#ffdd00 !important;box-shadow:0 0 10px rgba(255,221,0,.35)}
-.focus-badge{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;letter-spacing:1px;text-align:center}
-.focus-badge.on{color:#ffdd00}
-.cam-pg{align-items:center;padding:6px 10px;gap:5px;overflow:hidden}
-.vf{position:relative;width:100%;max-width:440px;border:1px solid #1e2a38;overflow:hidden;background:#000;flex:1;min-height:0}
-.vf video{width:100%;height:100%;display:block;object-fit:cover}
-.flash{position:absolute;inset:0;background:#fff;z-index:10;pointer-events:none;opacity:0;transition:opacity .05s}
-.flash.on{opacity:1}
-/* ズームスライダー */
-.zoom-row{width:100%;max-width:440px;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.err-box{width:100%;max-width:440px;padding:10px 12px;background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.35);display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.err-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;color:#ff4466;text-transform:uppercase}
+.err-body{font-family:'Share Tech Mono',monospace;font-size:9px;color:#cc8888;line-height:1.8}
+.err-code{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:8px;color:#ff8888;background:rgba(255,68,102,.15);border:1px solid rgba(255,68,102,.3);padding:1px 6px;margin-bottom:4px;letter-spacing:2px}
+.err-retry{padding:6px 12px;background:transparent;border:1px solid rgba(255,68,102,.4);color:#ff8899;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;align-self:flex-start}
+/* ズーム */
+.zoom-row{width:100%;max-width:440px;display:flex;align-items:center;gap:8px;flex-shrink:0;margin-top:2px}
 .zoom-lbl{font-family:'Share Tech Mono',monospace;font-size:11px;color:#00d4ff;width:36px;text-align:right;white-space:nowrap;flex-shrink:0}
 input[type=range]{flex:1;-webkit-appearance:none;height:2px;background:#1e2a38;outline:none;cursor:pointer;border-radius:1px}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00d4ff;cursor:pointer}
-/* 画質セレクタ */
-.quality-row{width:100%;max-width:440px;display:flex;align-items:center;gap:6px;flex-shrink:0}
-.quality-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;white-space:nowrap}
-.quality-btn{flex:1;padding:5px 2px;text-align:center;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer;border:1px solid #1e2a38;background:#0d1117;color:#4a6a8a;font-family:'Rajdhani',sans-serif;transition:all .2s}
+/* 画質 */
+.quality-row{width:100%;max-width:440px;display:flex;align-items:center;gap:5px;flex-shrink:0}
+.quality-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;white-space:nowrap;flex-shrink:0}
+.quality-btn{flex:1;padding:4px 2px;text-align:center;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer;border:1px solid #1e2a38;background:#0d1117;color:#4a6a8a;font-family:'Rajdhani',sans-serif;transition:all .2s}
 .quality-btn.on{border-color:#00d4ff;color:#00d4ff;background:rgba(0,212,255,.08)}
-/* サムネストリップ */
-.thumb-strip-wrap{width:100%;max-width:440px;flex-shrink:0}
-.thumb-strip-hdr{display:flex;align-items:center;justify-content:space-between;padding:2px 0;margin-bottom:3px}
-.thumb-strip-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;letter-spacing:1px}
-.thumb-strip-toggle{background:none;border:1px solid #1e2a38;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;padding:2px 8px;cursor:pointer;letter-spacing:1px}
-.thumb-strip-toggle.on{border-color:#00d4ff;color:#00d4ff}
-.thumb-strip{display:flex;gap:4px;overflow-x:auto;padding:2px 0;-webkit-overflow-scrolling:touch}
-.thumb-strip::-webkit-scrollbar{display:none}
-.mini-thumb{width:54px;height:54px;flex-shrink:0;overflow:hidden;cursor:pointer;border:1px solid #1e2a38}
-.mini-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.more-btn{width:54px;height:54px;flex-shrink:0;background:#0d1117;border:1px solid #1e2a38;color:#4a6a8a;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center}
 /* カメラコントロール */
 .cam-ctrl{width:100%;max-width:440px;display:flex;align-items:center;justify-content:space-around;padding:0 4px;flex-shrink:0}
 .ctrl-btn{width:50px;height:50px;border-radius:50%;border:1px solid #1e2a38;background:#0d1117;color:#8ab4cc;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .2s;flex-shrink:0;-webkit-tap-highlight-color:transparent}
 .ctrl-btn:active{border-color:#00d4ff;color:#00d4ff}
 .ctrl-btn.red{border-color:#ff4466;color:#ff4466}
+.ctrl-btn.torch-on{border-color:#ffdd00 !important;color:#ffdd00 !important;box-shadow:0 0 10px rgba(255,221,0,.35)}
 .shutter{width:68px;height:68px;border-radius:50%;border:3px solid #e0e8f0;background:transparent;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;flex-shrink:0}
 .shutter::after{content:'';width:52px;height:52px;border-radius:50%;background:#e0e8f0;display:block;transition:transform .1s}
 .shutter:active::after{transform:scale(.85)}
 .shutter:disabled{opacity:.3;cursor:default}
-.err-box{width:100%;max-width:440px;padding:12px 14px;background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.35);display:flex;flex-direction:column;gap:8px;flex-shrink:0}
-.err-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;color:#ff4466;text-transform:uppercase}
-.err-body{font-family:'Share Tech Mono',monospace;font-size:9px;color:#cc8888;line-height:1.9}
-.err-retry{padding:7px 14px;background:transparent;border:1px solid rgba(255,68,102,.4);color:#ff8899;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;align-self:flex-start}
-/* 向きバー */
-.orient-bar{display:flex;align-items:center;gap:8px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px}
+/* サムネストリップ（下に配置） */
+.thumb-strip-wrap{width:100%;max-width:440px;flex-shrink:0}
+.thumb-strip-hdr{display:flex;align-items:center;justify-content:space-between;padding:2px 0;margin-bottom:2px}
+.thumb-strip-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;letter-spacing:1px}
+.thumb-toggle-btn{background:none;border:1px solid #1e2a38;color:#4a6a8a;font-family:'Share Tech Mono',monospace;font-size:9px;padding:2px 8px;cursor:pointer;letter-spacing:1px}
+.thumb-toggle-btn.on{border-color:#00d4ff;color:#00d4ff}
+.thumb-strip{display:flex;gap:3px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.thumb-strip::-webkit-scrollbar{display:none}
+.mini-thumb{width:52px;height:52px;flex-shrink:0;overflow:hidden;cursor:pointer;border:1px solid #1e2a38}
+.mini-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.more-btn{width:52px;height:52px;flex-shrink:0;background:#0d1117;border:1px solid #1e2a38;color:#4a6a8a;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center}
+/* 向きバー（下に配置） */
+.cam-bottom-row{width:100%;max-width:440px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;padding:2px 0}
+.orient-bar{display:flex;align-items:center;gap:7px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px}
 .orient-dot{width:8px;height:8px;border-radius:50%;background:#2a3a4a;flex-shrink:0;transition:background .3s,box-shadow .3s}
 .orient-dot.ok{background:#00ff88;box-shadow:0 0 5px rgba(0,255,136,.5)}
 .orient-dot.warn{background:#ffaa00;box-shadow:0 0 5px rgba(255,170,0,.5)}
@@ -165,22 +169,27 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .orient-label.ok{color:#00ff88}
 .orient-label.warn{color:#ffaa00}
 /* 保存先 */
-.save-folder-row{width:100%;max-width:440px;background:#0d1117;border:1px solid #1e2a38;padding:8px 10px;display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.save-folder-row{width:100%;max-width:440px;background:#0d1117;border:1px solid #1e2a38;padding:8px 10px;display:flex;flex-direction:column;gap:4px;flex-shrink:0}
 .save-folder-hdr{display:flex;align-items:center;justify-content:space-between}
 .save-folder-label{font-size:10px;font-weight:700;letter-spacing:2px;color:#4a6a8a;text-transform:uppercase;font-family:'Rajdhani',sans-serif}
 .save-folder-android{font-size:8px;font-family:'Share Tech Mono',monospace;color:#ffaa00;background:rgba(255,170,0,.1);border:1px solid rgba(255,170,0,.3);padding:1px 5px;letter-spacing:1px}
 .save-folder-path{font-family:'Share Tech Mono',monospace;font-size:9px;color:#8ab4cc;word-break:break-all;min-height:12px}
 .save-folder-path.none{color:#2a3a4a;font-style:italic}
-.btn-folder-pick{padding:5px 10px;background:transparent;border:1px solid rgba(0,212,255,.3);color:#00d4ff;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap}
-.btn-folder-pick:active{background:rgba(0,212,255,.1)}
-.btn-folder-clear{padding:5px 8px;background:transparent;border:1px solid #2a3a4a;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;cursor:pointer}
-.btn-folder-clear:active{color:#ff4466}
-.save-folder-note{font-family:'Share Tech Mono',monospace;font-size:7px;color:#2a3a4a;line-height:1.6}
+.btn-folder-pick{padding:4px 10px;background:transparent;border:1px solid rgba(0,212,255,.3);color:#00d4ff;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-folder-clear{padding:4px 8px;background:transparent;border:1px solid #2a3a4a;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;cursor:pointer}
+.save-folder-note{font-family:'Share Tech Mono',monospace;font-size:7px;color:#2a3a4a;line-height:1.5}
 
-/* ── PHOTOS ── */
+/* ─── PHOTOS ─── */
 .photo-pg{overflow:hidden}
-.photo-toolbar{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #1e2a38;background:#0d1117;flex-shrink:0}
+.photo-toolbar{display:flex;align-items:center;gap:6px;padding:7px 12px;border-bottom:1px solid #1e2a38;background:#0d1117;flex-shrink:0}
 .photo-count{font-family:'Share Tech Mono',monospace;font-size:10px;color:#4a6a8a;flex:1}
+/* 結合モード */
+.merge-bar{display:none;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid rgba(0,212,255,.2);background:rgba(0,212,255,.04);flex-shrink:0}
+.merge-bar.on{display:flex}
+.merge-bar-txt{font-family:'Share Tech Mono',monospace;font-size:10px;color:#00d4ff;flex:1}
+.btn-merge-exec{padding:7px 14px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))}
+.btn-merge-exec:disabled{opacity:.4;cursor:default}
+.btn-merge-cancel{padding:7px 12px;background:transparent;border:1px solid #2a3a4a;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;cursor:pointer}
 .photo-grid{flex:1;overflow-y:auto;padding:3px;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;-webkit-overflow-scrolling:touch}
 .photo-item{aspect-ratio:1;overflow:hidden;cursor:pointer;position:relative;background:#0d1117}
 .photo-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .15s}
@@ -190,14 +199,29 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .photo-trash:active{background:rgba(255,68,102,.3)}
 .photo-save{position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.72);border:1px solid rgba(0,212,255,.4);color:#00d4ff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;-webkit-tap-highlight-color:transparent}
 .photo-save:active{background:rgba(0,212,255,.2)}
+/* 結合選択チェック */
+.photo-select-overlay{position:absolute;inset:0;z-index:4;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.3);pointer-events:none}
+.merge-mode .photo-select-overlay{display:flex}
+.photo-select-check{width:28px;height:28px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:16px;color:transparent}
+.photo-item.selected .photo-select-check{background:#00d4ff;color:#fff;border-color:#00d4ff}
+.photo-item.selected img{transform:scale(.92);outline:2px solid #00d4ff}
+/* 結合レイアウトモーダル */
+.merge-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px}
+.merge-modal{background:#0d1117;border:1px solid #1e2a38;width:100%;max-width:340px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.merge-modal-title{font-size:12px;font-weight:700;letter-spacing:2px;color:#00d4ff;text-transform:uppercase;font-family:'Rajdhani',sans-serif}
+.merge-layout-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.merge-layout-btn{padding:14px 8px;border:1px solid #1e2a38;background:#0a0c0f;color:#8ab4cc;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;text-align:center;transition:all .2s}
+.merge-layout-btn:active{border-color:#00d4ff;color:#00d4ff}
+.merge-layout-icon{font-size:22px;display:block;margin-bottom:4px}
+.merge-cancel-btn{padding:10px;background:transparent;border:1px solid #2a3a4a;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;cursor:pointer;text-align:center}
 
-/* ── LIGHTBOX ── */
+/* ─── LIGHTBOX ─── */
 .lb{position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:200;display:flex;flex-direction:column}
-.lb-hdr{padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e2a38;flex-shrink:0}
+.lb-hdr{padding:9px 14px;padding-top:max(9px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e2a38;flex-shrink:0}
 .lb-ttl{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;letter-spacing:1px}
 .lb-img{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px}
 .lb-img img{max-width:100%;max-height:100%;object-fit:contain;display:block}
-.lb-ftr{padding:10px 14px;padding-bottom:max(10px,env(safe-area-inset-bottom));display:flex;gap:8px;border-top:1px solid #1e2a38;flex-shrink:0}
+.lb-ftr{padding:9px 14px;padding-bottom:max(9px,env(safe-area-inset-bottom));display:flex;gap:8px;border-top:1px solid #1e2a38;flex-shrink:0}
 .btn-dl{flex:1;padding:11px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
 .btn-dl:active{background:#33deff}
 .lb-rotate-btn{padding:11px 14px;background:transparent;border:1px solid #2a3a4a;color:#8ab4cc;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
@@ -207,9 +231,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .btn-close{background:none;border:none;color:#4a6a8a;cursor:pointer;font-size:24px;line-height:1;padding:4px}
 .btn-close:active{color:#e0e8f0}
 
-/* ── BC MODAL ── */
+/* ─── BC MODAL ─── */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100;display:flex;align-items:flex-end;justify-content:center}
-.modal{background:#0d1117;border:1px solid #1e2a38;border-bottom:none;width:100%;max-width:480px;padding:15px 14px;padding-bottom:max(22px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:9px}
+.modal{background:#0d1117;border:1px solid #1e2a38;border-bottom:none;width:100%;max-width:480px;padding:15px 14px;padding-bottom:max(20px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:9px}
 .modal-hdr{display:flex;align-items:center;justify-content:space-between}
 .modal-lbl{font-size:9px;font-weight:700;letter-spacing:3px;color:#4a6a8a;text-transform:uppercase}
 .modal-val{font-family:'Share Tech Mono',monospace;font-size:16px;color:#e0e8f0;word-break:break-all}
@@ -222,11 +246,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .btn-copy{padding:11px 14px;background:transparent;border:1px solid #1e2a38;color:#8ab4cc;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
 .copied{font-family:'Share Tech Mono',monospace;font-size:9px;color:#00ff88;text-align:center}
 
-/* ── TOAST / POPUP ── */
-.toast{position:fixed;bottom:max(80px,env(safe-area-inset-bottom)+70px);left:50%;transform:translateX(-50%) translateY(20px);background:#1a2a3a;border:1px solid #2a4a6a;color:#e0e8f0;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;padding:10px 18px;white-space:nowrap;z-index:500;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;border-radius:2px;max-width:90vw;text-align:center}
+/* ─── TOAST / POPUP ─── */
+.toast{position:fixed;bottom:max(80px,calc(env(safe-area-inset-bottom)+70px));left:50%;transform:translateX(-50%) translateY(20px);background:#1a2a3a;border:1px solid #2a4a6a;color:#e0e8f0;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;padding:10px 18px;white-space:nowrap;z-index:500;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;border-radius:2px;max-width:92vw;text-align:center}
 .toast.ok{border-color:rgba(0,255,136,.4);color:#00ff88}
 .toast.warn{border-color:rgba(255,170,0,.4);color:#ffcc66}
-.toast.dup{border-color:rgba(255,68,102,.4);color:#ff8899}
+.toast.dup{border-color:rgba(255,100,0,.4);color:#ffaa66}
+.toast.err{border-color:rgba(255,68,102,.5);color:#ff8899}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .popup-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px}
 .popup{background:#0d1117;border:1px solid #1e2a38;width:100%;max-width:340px;padding:20px 18px;display:flex;flex-direction:column;gap:12px}
@@ -258,12 +283,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 
   <!-- SCAN PAGE -->
   <div class="page on scan-pg" id="pg-scan">
-    <!-- モード選択 -->
     <div class="mode-row">
       <button class="mode-btn" data-mode="all">全フォーマット</button>
       <button class="mode-btn on" data-mode="ean13">EAN-13のみ <span class="badge">EAN</span></button>
     </div>
-    <!-- ファインダー (flex:1 で画面いっぱい) -->
+    <!-- ファインダー flex:1 で最大化 -->
     <div class="finder" id="scan-finder">
       <video id="scan-video" muted playsinline autoplay></video>
       <div class="corner tl"></div><div class="corner tr"></div>
@@ -273,19 +297,19 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
         <div class="ean-box"><div class="ean-line"></div><div class="ean-txt">EAN-13バーコードを枠内に合わせる</div></div>
       </div>
       <div class="finder-ov" id="scan-ov" style="display:none">SCANNING...</div>
-      <!-- 検出時オーバーレイ -->
+      <!-- 検出オーバーレイ (大きく表示) -->
       <div class="finder-detect" id="finder-detect">
         <div class="finder-detect-val" id="finder-detect-val"></div>
         <div class="finder-detect-fmt" id="finder-detect-fmt"></div>
+        <div class="finder-detect-dup" id="finder-detect-dup" style="display:none">⊘ 登録済み</div>
       </div>
+      <!-- プレースホルダー -->
       <div class="ph" id="scan-ph">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#4a6a8a" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#4a6a8a" stroke-width="1.2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
         <p id="scan-ph-txt">スキャン開始を押してください</p>
       </div>
     </div>
-    <!-- ステータスバー -->
     <div class="sbar"><div class="sdot" id="sdot"></div><span id="stxt">待機中</span></div>
-    <!-- スタート/ストップ -->
     <button class="btn-main" id="btn-scan">▶ スキャン開始</button>
   </div>
 
@@ -293,15 +317,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
   <div class="page hist-pg" id="pg-history">
     <div class="toolbar">
       <input class="sbox" id="search-box" placeholder="バーコード値を検索..." type="search"/>
-      <button class="btn-del-all" id="btn-bc-clear" style="display:none">全削除</button>
+      <button class="btn-sm accent" id="btn-bc-csv" style="display:none">CSV</button>
+      <button class="btn-sm danger" id="btn-bc-clear" style="display:none">全削除</button>
     </div>
-    <!-- フィルタ行 -->
     <div class="hist-filter-row">
       <span class="hist-filter-lbl">表示:</span>
-      <button class="hist-filter-btn on" data-filter="all">全て</button>
-      <button class="hist-filter-btn checked-filter" data-filter="checked">✓ 済み</button>
-      <button class="hist-filter-btn" data-filter="unchecked">未チェック</button>
-      <button class="btn-del-all" id="btn-bc-csv" style="margin-left:auto;color:#00d4ff;border-color:#1e2a38;display:none">CSV</button>
+      <button class="flt-btn on" data-filter="all">全て</button>
+      <button class="flt-btn grn" data-filter="checked">✓ 済み</button>
+      <button class="flt-btn" data-filter="unchecked">未確認</button>
     </div>
     <div class="empty" id="bc-empty">
       <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#2a3a4a" stroke-width="1.5"><rect x="2" y="2" width="4" height="16"/><rect x="7" y="2" width="2" height="16"/><rect x="10" y="2" width="4" height="16"/><rect x="15" y="2" width="2" height="16"/><rect x="18" y="2" width="4" height="16"/></svg>
@@ -312,20 +335,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 
   <!-- CAMERA PAGE -->
   <div class="page cam-pg" id="pg-camera">
-    <!-- 向きインジケーター + トグルボタン群 -->
-    <div style="width:100%;max-width:440px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-      <div class="orient-bar">
-        <div class="orient-dot" id="orient-dot"></div>
-        <span class="orient-label" id="orient-label">センサー待機中</span>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <span class="focus-badge" id="focus-badge"></span>
-        <button id="btn-thumb-toggle" class="thumb-strip-toggle" title="サムネON/OFF">🖼</button>
-        <button id="btn-folder-toggle" title="保存先" style="background:none;border:1px solid #1e2a38;color:#4a6a8a;font-size:13px;padding:3px 7px;cursor:pointer;font-family:'Share Tech Mono',monospace;">📁</button>
-      </div>
-    </div>
-
-    <!-- ビューファインダー (flex:1 で最大化) -->
+    <!-- ビューファインダー (flex:1 で上部最大化) -->
     <div class="vf" id="cam-vf">
       <video id="cam-video" muted playsinline autoplay></video>
       <div class="flash" id="flash"></div>
@@ -335,20 +345,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
         <p id="cam-ph-txt" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#3a5a7a;text-align:center;max-width:180px;line-height:1.7;">カメラを起動中...</p>
       </div>
     </div>
-
     <!-- エラー -->
     <div class="err-box" id="cam-err" style="display:none;">
-      <div class="err-title">🚫 カメラの許可が必要です</div>
+      <div class="err-title">🚫 カメラエラー</div>
+      <span class="err-code" id="cam-err-code">E000</span>
       <div class="err-body" id="cam-err-body"></div>
       <button class="err-retry" id="cam-retry">↺ 再試行</button>
     </div>
-
     <!-- ズーム -->
     <div id="zoom-row" style="display:none;" class="zoom-row">
       <span id="zoom-lbl" class="zoom-lbl">1.0×</span>
       <input type="range" id="zoom-slider" min="0.1" max="5" step="0.1" value="1"/>
     </div>
-
     <!-- 画質 -->
     <div class="quality-row" id="quality-row" style="display:none;">
       <span class="quality-lbl">画質:</span>
@@ -357,34 +365,37 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
       <button class="quality-btn" data-q="high">高</button>
       <button class="quality-btn" data-q="max">最高</button>
     </div>
-
     <!-- コントロール -->
     <div class="cam-ctrl">
       <button class="ctrl-btn" id="btn-flip" title="カメラ切替">⟳</button>
       <button class="ctrl-btn" id="btn-torch" title="懐中電灯" style="font-size:18px;">🔦</button>
       <button class="shutter" id="btn-shutter" disabled></button>
       <button class="ctrl-btn" id="btn-cam-toggle">▶</button>
-      <button class="ctrl-btn" id="btn-focus-mode" title="タップフォーカス">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M3 9V6a1 1 0 011-1h3M3 15v3a1 1 0 001 1h3M21 9V6a1 1 0 00-1-1h-3M21 15v3a1 1 0 01-1 1h-3"/></svg>
-      </button>
+      <button class="ctrl-btn" id="btn-folder-toggle" title="保存先設定" style="font-size:16px;">📁</button>
     </div>
-
-    <!-- サムネストリップ (ON/OFFトグル) -->
+    <!-- サムネストリップ (下に配置) -->
     <div class="thumb-strip-wrap" id="thumb-strip-wrap" style="display:none;">
       <div class="thumb-strip-hdr">
         <span class="thumb-strip-lbl">最近の写真</span>
-        <button class="thumb-strip-toggle on" id="btn-thumb-toggle2">非表示</button>
+        <button class="thumb-toggle-btn on" id="btn-thumb-toggle2">非表示</button>
       </div>
       <div class="thumb-strip" id="thumb-strip"></div>
     </div>
-
-    <!-- 保存先フォルダ -->
+    <!-- 向きインジケーター + サムネON/OFFボタン (最下部) -->
+    <div class="cam-bottom-row">
+      <div class="orient-bar">
+        <div class="orient-dot" id="orient-dot"></div>
+        <span class="orient-label" id="orient-label">センサー待機中</span>
+      </div>
+      <button class="thumb-toggle-btn" id="btn-thumb-toggle" title="サムネON/OFF">🖼 サムネ</button>
+    </div>
+    <!-- 保存先フォルダ (📁で開閉) -->
     <div class="save-folder-row" id="save-folder-row" style="display:none;">
       <div class="save-folder-hdr">
         <span class="save-folder-label">📁 自動保存先</span>
         <span class="save-folder-android">Android Chrome 限定</span>
       </div>
-      <div class="save-folder-path none" id="folder-path-txt">未設定（Downloadsフォルダに保存）</div>
+      <div class="save-folder-path none" id="folder-path-txt">未設定（Downloadsに保存）</div>
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
         <button class="btn-folder-pick" id="btn-folder-pick">📂 フォルダを選択</button>
         <button class="btn-folder-clear" id="btn-folder-clear" style="display:none">× 解除</button>
@@ -397,7 +408,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
   <div class="page photo-pg" id="pg-photos">
     <div class="photo-toolbar">
       <span class="photo-count" id="photo-count-txt">0 / 200 枚</span>
-      <button class="btn-del-all" id="btn-photo-clear" style="display:none">全削除</button>
+      <button class="btn-sm accent" id="btn-merge-mode">📐 結合</button>
+      <button class="btn-sm danger" id="btn-photo-clear" style="display:none">全削除</button>
+    </div>
+    <!-- 結合モードバー -->
+    <div class="merge-bar" id="merge-bar">
+      <span class="merge-bar-txt" id="merge-bar-txt">写真をタップして選択</span>
+      <button class="btn-merge-exec" id="btn-merge-exec" disabled>結合する</button>
+      <button class="btn-merge-cancel" id="btn-merge-cancel">✕</button>
     </div>
     <div class="empty" id="photo-empty">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2a3a4a" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
@@ -437,6 +455,28 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
   </div>
 </div>
 
+<!-- 画像結合レイアウト選択 -->
+<div class="merge-modal-bg" id="merge-modal" style="display:none">
+  <div class="merge-modal">
+    <div class="merge-modal-title">結合レイアウトを選択</div>
+    <div class="merge-layout-grid">
+      <button class="merge-layout-btn" data-layout="h">
+        <span class="merge-layout-icon">⬛⬛</span>横並び
+      </button>
+      <button class="merge-layout-btn" data-layout="v">
+        <span class="merge-layout-icon">⬛<br>⬛</span>縦並び
+      </button>
+      <button class="merge-layout-btn" data-layout="grid">
+        <span class="merge-layout-icon">⬛⬛<br>⬛⬛</span>グリッド
+      </button>
+      <button class="merge-layout-btn" data-layout="strip">
+        <span class="merge-layout-icon">⬛⬛⬛</span>ストリップ
+      </button>
+    </div>
+    <button class="merge-cancel-btn" id="merge-modal-cancel">キャンセル</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- iOS SAVE POPUP -->
@@ -459,17 +499,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 /* ════════════════════════════════════
    UTILS
 ════════════════════════════════════ */
-const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent) ||
-  (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
-let iosPopupShown = false;
-let toastTimer = null;
-function showToast(msg, type='', duration=2600) {
-  const el = document.getElementById('toast');
+const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent)||
+  (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+let iosPopupShown=false, toastTimer=null;
+
+function showToast(msg,type='',duration=2600){
+  const el=document.getElementById('toast');
   if (toastTimer) clearTimeout(toastTimer);
-  el.textContent = msg;
-  el.className = 'toast' + (type?' '+type:'');
-  requestAnimationFrame(()=>{ el.classList.add('show'); });
-  toastTimer = setTimeout(()=>el.classList.remove('show'), duration);
+  el.textContent=msg; el.className='toast'+(type?' '+type:'');
+  requestAnimationFrame(()=>el.classList.add('show'));
+  toastTimer=setTimeout(()=>el.classList.remove('show'),duration);
 }
 function $(id){ return document.getElementById(id); }
 function fmtTime(ts){
@@ -479,41 +518,54 @@ function fmtShort(ts){
   return new Date(ts).toLocaleString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
 }
 
+/* ─── dataUrl → Blob (0Bバグの根本修正) ─── */
+function dataUrlToBlob(dataUrl){
+  try {
+    const arr=dataUrl.split(',');
+    if (arr.length<2) throw new Error('E010: Invalid dataUrl format');
+    const mimeMatch=arr[0].match(/:(.*?);/);
+    const mime=mimeMatch?mimeMatch[1]:'image/jpeg';
+    const bstr=atob(arr[1]);
+    const u8=new Uint8Array(bstr.length);
+    for (let i=0;i<bstr.length;i++) u8[i]=bstr.charCodeAt(i);
+    const blob=new Blob([u8],{type:mime});
+    if (blob.size===0) throw new Error('E011: Converted blob is empty');
+    return blob;
+  } catch(e){ console.error('dataUrlToBlob:',e.message); return null; }
+}
+
 /* ════════════════════════════════════
    SENSOR ORIENTATION
 ════════════════════════════════════ */
-let sensorAngle = 0;
-let sensorGranted = false;
-function startOrientSensor() {
-  if (typeof DeviceOrientationEvent === 'undefined') return;
-  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-    DeviceOrientationEvent.requestPermission().then(s => {
-      if (s === 'granted') listenOrientation();
+let sensorAngle=0, sensorGranted=false;
+function startOrientSensor(){
+  if (typeof DeviceOrientationEvent==='undefined') return;
+  if (typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission().then(s=>{
+      if (s==='granted') listenOrientation();
     }).catch(()=>{});
-  } else {
-    listenOrientation();
-  }
+  } else { listenOrientation(); }
 }
-function listenOrientation() {
-  sensorGranted = true;
-  window.addEventListener('deviceorientation', onDeviceOrientation, {passive:true});
+function listenOrientation(){
+  sensorGranted=true;
+  window.addEventListener('deviceorientation',onDeviceOrientation,{passive:true});
 }
-let _lastAngle = -1;
-function onDeviceOrientation(e) {
-  const gamma = e.gamma||0; const beta = e.beta||0;
-  let angle = 0;
+let _lastAngle=-1;
+function onDeviceOrientation(e){
+  const gamma=e.gamma||0, beta=e.beta||0;
+  let angle=0;
   if (gamma>45) angle=90; else if (gamma<-45) angle=270;
-  else if (beta<-45) angle=180; else angle=0;
+  else if (beta<-45) angle=180;
   if (angle!==_lastAngle){ _lastAngle=angle; sensorAngle=angle; updateOrientUI(); }
 }
 window.addEventListener('orientationchange',()=>setTimeout(updateOrientUI,400),{passive:true});
-function updateOrientUI() {
-  const dot=$('orient-dot'), label=$('orient-label');
+function updateOrientUI(){
+  const dot=$('orient-dot'),label=$('orient-label');
   if (!dot) return;
   const ok=(sensorAngle===0);
   dot.className='orient-dot '+(sensorGranted?(ok?'ok':'warn'):'');
   label.className='orient-label '+(sensorGranted?(ok?'ok':'warn'):'');
-  if (!sensorGranted){label.textContent='センサー待機中';return;}
+  if (!sensorGranted){ label.textContent='センサー待機中'; return; }
   const labels={0:'↑ 正面',90:'→',180:'↓ 逆さ',270:'←'};
   label.textContent=labels[sensorAngle]||'調整中';
 }
@@ -521,41 +573,39 @@ function updateOrientUI() {
 /* ════════════════════════════════════
    FOLDER HANDLE IDB
 ════════════════════════════════════ */
-let folderHandle = null;
-let _pendingFolderHandle = null;
-let _folderDB = null;
-async function openFolderDB() {
+let folderHandle=null, _pendingFolderHandle=null, _folderDB=null;
+async function openFolderDB(){
   if (_folderDB) return _folderDB;
   return new Promise((res,rej)=>{
-    const r = indexedDB.open('scanner-folder-v1',1);
-    r.onupgradeneeded = e=>{ e.target.result.createObjectStore('handles',{keyPath:'id'}); };
-    r.onsuccess = e=>{ _folderDB=e.target.result; res(_folderDB); };
-    r.onerror = e=>rej(e.target.error);
+    const r=indexedDB.open('scanner-folder-v1',1);
+    r.onupgradeneeded=e=>e.target.result.createObjectStore('handles',{keyPath:'id'});
+    r.onsuccess=e=>{ _folderDB=e.target.result; res(_folderDB); };
+    r.onerror=e=>rej(e.target.error);
   });
 }
-async function saveFolderHandleToIDB(handle) {
+async function saveFolderHandleToIDB(handle){
   try {
-    const db = await openFolderDB();
+    const db=await openFolderDB();
     await new Promise((res,rej)=>{
-      const tx = db.transaction('handles','readwrite');
+      const tx=db.transaction('handles','readwrite');
       tx.objectStore('handles').put({id:'folder',handle});
       tx.oncomplete=res; tx.onerror=e=>rej(e.target.error);
     });
     localStorage.setItem('sc-folder-name',handle.name);
-  } catch(e) { localStorage.setItem('sc-folder-name',handle.name); }
+  } catch(e){ localStorage.setItem('sc-folder-name',handle.name); }
 }
-async function restoreFolderHandle() {
+async function restoreFolderHandle(){
   try {
-    const db = await openFolderDB();
-    const record = await new Promise((res,rej)=>{
-      const tx = db.transaction('handles','readonly');
-      const req = tx.objectStore('handles').get('folder');
-      req.onsuccess = e=>res(e.target.result);
-      tx.onerror = e=>rej(e.target.error);
+    const db=await openFolderDB();
+    const record=await new Promise((res,rej)=>{
+      const tx=db.transaction('handles','readonly');
+      const req=tx.objectStore('handles').get('folder');
+      req.onsuccess=e=>res(e.target.result);
+      tx.onerror=e=>rej(e.target.error);
     });
-    if (record?.handle) {
-      const h = record.handle;
-      const perm = await h.queryPermission({mode:'readwrite'});
+    if (record?.handle){
+      const h=record.handle;
+      const perm=await h.queryPermission({mode:'readwrite'});
       if (perm==='granted'){ folderHandle=h; updateFolderUI(h,h.name,false); return; }
       else { _pendingFolderHandle=h; updateFolderUI(null,h.name,true); return; }
     }
@@ -563,11 +613,11 @@ async function restoreFolderHandle() {
   const name=localStorage.getItem('sc-folder-name');
   if (name) updateFolderUI(null,name,true);
 }
-async function pickSaveFolder() {
-  if (!window.showDirectoryPicker){ showToast('このブラウザはフォルダ選択非対応','warn',4000); return; }
-  if (_pendingFolderHandle) {
+async function pickSaveFolder(){
+  if (!window.showDirectoryPicker){ showToast('[E003] フォルダ選択非対応（Android Chromeをお使いください）','err',4000); return; }
+  if (_pendingFolderHandle){
     try {
-      const perm = await _pendingFolderHandle.requestPermission({mode:'readwrite'});
+      const perm=await _pendingFolderHandle.requestPermission({mode:'readwrite'});
       if (perm==='granted'){
         folderHandle=_pendingFolderHandle; _pendingFolderHandle=null;
         updateFolderUI(folderHandle,folderHandle.name,false);
@@ -577,19 +627,21 @@ async function pickSaveFolder() {
     _pendingFolderHandle=null;
   }
   try {
-    const h = await window.showDirectoryPicker({mode:'readwrite',startIn:'pictures'});
+    const h=await window.showDirectoryPicker({mode:'readwrite',startIn:'pictures'});
     folderHandle=h; await saveFolderHandleToIDB(h);
     updateFolderUI(h,h.name,false);
     showToast('✓ 保存先を固定: '+h.name,'ok');
-  } catch(e){ if (e.name!=='AbortError') showToast('フォルダ選択エラー: '+e.message,'warn'); }
+  } catch(e){
+    if (e.name!=='AbortError') showToast('[E004] フォルダ選択エラー: '+e.message,'err');
+  }
 }
-function updateFolderUI(handle,name,needReselect) {
-  const pe=$('folder-path-txt'), ce=$('btn-folder-clear'), pk=$('btn-folder-pick');
+function updateFolderUI(handle,name,needReselect){
+  const pe=$('folder-path-txt'),ce=$('btn-folder-clear'),pk=$('btn-folder-pick');
   if (!name){
     pe.textContent='未設定（Downloadsフォルダに保存）'; pe.className='save-folder-path none';
     if(ce)ce.style.display='none'; if(pk)pk.textContent='📂 フォルダを選択';
   } else if (needReselect){
-    pe.innerHTML='📂 '+name+' <span style="color:#ffaa00;font-size:8px;">※ 再起動時は再選択が必要</span>';
+    pe.innerHTML='📂 '+name+' <span style="color:#ffaa00;font-size:8px;">※ 再起動後は再選択が必要</span>';
     pe.className='save-folder-path';
     if(ce)ce.style.display=''; if(pk)pk.textContent='🔄 再選択（固定済み）';
   } else {
@@ -597,40 +649,50 @@ function updateFolderUI(handle,name,needReselect) {
     if(ce)ce.style.display=''; if(pk)pk.textContent='📂 変更する';
   }
 }
-function clearSaveFolder() {
+function clearSaveFolder(){
   folderHandle=null; _pendingFolderHandle=null; localStorage.removeItem('sc-folder-name');
   openFolderDB().then(db=>{ const tx=db.transaction('handles','readwrite'); tx.objectStore('handles').delete('folder'); }).catch(()=>{});
   updateFolderUI(null,'',false); showToast('保存先をリセットしました');
 }
-$('btn-folder-pick').addEventListener('click', pickSaveFolder);
-$('btn-folder-clear').addEventListener('click', clearSaveFolder);
+$('btn-folder-pick').addEventListener('click',pickSaveFolder);
+$('btn-folder-clear').addEventListener('click',clearSaveFolder);
 $('btn-folder-toggle').addEventListener('click',()=>{
   const row=$('save-folder-row');
   const vis=row.style.display!=='none';
   row.style.display=vis?'none':'';
-  $('btn-folder-toggle').style.color=vis?'#4a6a8a':'#00d4ff';
-  $('btn-folder-toggle').style.borderColor=vis?'#1e2a38':'rgba(0,212,255,0.4)';
+  $('btn-folder-toggle').classList.toggle('torch-on',!vis);
 });
 
-async function saveToFolderHandle(dataUrl,filename) {
+/* 保存先フォルダへ書き込み (0Bバグ修正版) */
+async function saveToFolderHandle(dataUrl,filename){
   try {
     const perm=await folderHandle.queryPermission({mode:'readwrite'});
     if (perm!=='granted'){
       const req=await folderHandle.requestPermission({mode:'readwrite'});
-      if (req!=='granted') return false;
+      if (req!=='granted') return {ok:false,code:'E006',msg:'フォルダへのアクセス権限がありません'};
     }
-    const res=await fetch(dataUrl); const blob=await res.blob();
+    /* ★ fetch()ではなく手動変換でBlob生成 → 0Bバグを根本修正 */
+    const blob=dataUrlToBlob(dataUrl);
+    if (!blob||blob.size===0) return {ok:false,code:'E011',msg:'画像データの変換に失敗（dataUrl→Blob）'};
     const fh=await folderHandle.getFileHandle(filename,{create:true});
     const writable=await fh.createWritable();
-    await writable.write(blob); await writable.close();
-    return true;
-  } catch(e){ console.warn('FolderHandle save failed:',e); return false; }
+    await writable.write(blob);
+    await writable.close();
+    // 書き込み後に検証
+    const verFh=await folderHandle.getFileHandle(filename);
+    const verFile=await verFh.getFile();
+    if (verFile.size===0) return {ok:false,code:'E012',msg:'ファイルが0Bで保存されました。デバイスの空き容量を確認してください'};
+    return {ok:true};
+  } catch(e){
+    console.error('saveToFolderHandle:',e);
+    return {ok:false,code:'E007',msg:e.message};
+  }
 }
 
 /* ════════════════════════════════════
    PHOTO SAVE
 ════════════════════════════════════ */
-function autoSaveToDevice(photo) {
+function autoSaveToDevice(photo){
   if (isIOS){
     if (!iosPopupShown){ iosPopupShown=true; $('ios-popup').style.display=''; }
     return;
@@ -638,9 +700,13 @@ function autoSaveToDevice(photo) {
   const ts=fmtTime(photo.timestamp).replace(/[/:\s]/g,'-');
   const name='photo_'+ts+'.jpg';
   if (folderHandle){
-    saveToFolderHandle(photo.dataUrl,name).then(ok=>{
-      showToast(ok?('✓ '+folderHandle.name+' に保存'):'⚠ 保存失敗 → Downloadsへ', ok?'ok':'warn');
-      if (!ok) fallbackDownload(photo.dataUrl,name);
+    saveToFolderHandle(photo.dataUrl,name).then(result=>{
+      if (result.ok){
+        showToast('✓ '+folderHandle.name+' に保存しました','ok');
+      } else {
+        showToast('['+result.code+'] 保存失敗→Downloadsへ: '+result.msg,'err',4000);
+        fallbackDownload(photo.dataUrl,name);
+      }
     });
   } else {
     fallbackDownload(photo.dataUrl,name);
@@ -655,7 +721,7 @@ function fallbackDownload(dataUrl,name){
 /* ════════════════════════════════════
    INDEXEDDB (PHOTOS)
 ════════════════════════════════════ */
-const BC_KEY='sc-bc-v3'; // v3: checked フラグ対応
+const BC_KEY='sc-bc-v3';
 const MAX_PH=200;
 const JS_FMT={ean_13:'EAN13',ean_8:'EAN8',code_128:'CODE128',code_39:'CODE39',code_93:'CODE93',upc_a:'UPC',upc_e:'UPC',itf:'ITF14'};
 const ALL_FMTS=['qr_code','ean_13','ean_8','code_128','code_39','code_93','itf','upc_a','upc_e','aztec','data_matrix','pdf417'];
@@ -691,7 +757,7 @@ const dbDel=id=>dbTx('readwrite',s=>s.delete(id));
 const dbClear=()=>dbTx('readwrite',s=>s.clear());
 const dbAll=()=>dbTx('readonly',s=>s.index('ts').getAll());
 async function dbPrune(max){
-  const all=await dbAll(); if(all.length<=max)return;
+  const all=await dbAll(); if(all.length<=max) return;
   const db=await openDB();
   await new Promise((res,rej)=>{
     const tx=db.transaction('photos','readwrite'); const st=tx.objectStore('photos');
@@ -703,24 +769,18 @@ async function dbPrune(max){
 /* ════════════════════════════════════
    STATE
 ════════════════════════════════════ */
-let bcHistory=[];
-let photos=[];
-let scanning=false;
-let scanMode='ean13';
-let camActive=false;
-let facingMode='environment';
-let camQuality='mid'; // low/mid/high/max
+let bcHistory=[], photos=[];
+let scanning=false, scanMode='ean13';
+let camActive=false, facingMode='environment', camQuality='mid';
 let scanStream=null, camStream=null, detector=null, raf=null;
-let lastCode=null, lastCodeTime=0;
-let camTrack=null;
-let activeTab='scan';
-let currentDetail=null;
-let currentLightbox=null;
-let histFilter='all'; // all/checked/unchecked
+let lastCode=null, lastCodeTime=0, camTrack=null;
+let activeTab='scan', currentDetail=null, currentLightbox=null;
+let histFilter='all';
 let thumbStripVisible=localStorage.getItem('sc-thumb-vis')!=='0';
+let mergeMode=false, mergeSelected=[];
 
 /* ════════════════════════════════════
-   BARCODE RENDER
+   BC RENDER
 ════════════════════════════════════ */
 function renderBC(canvas,value,format,height,showVal){
   const jf=JS_FMT[format];
@@ -742,6 +802,7 @@ function updateCounts(){
   $('btn-bc-clear').style.display=bcHistory.length?'':'none';
   $('btn-bc-csv').style.display=bcHistory.length?'':'none';
   $('btn-photo-clear').style.display=photos.length?'':'none';
+  $('btn-merge-mode').style.display=photos.length>=2?'':'none';
 }
 document.querySelectorAll('.tab').forEach(btn=>{
   btn.addEventListener('click',()=>{
@@ -754,7 +815,7 @@ document.querySelectorAll('.tab').forEach(btn=>{
     if (t!=='camera') stopCam();
     if (t==='camera') setTimeout(startCam,80);
     if (t==='history') renderBcList();
-    if (t==='photos') renderPhotoGrid();
+    if (t==='photos'){ exitMergeMode(); renderPhotoGrid(); }
   });
 });
 
@@ -770,7 +831,7 @@ function setScanUI(active){
   $('scan-ov').textContent=scanMode==='ean13'?'EAN-13 MODE':'SCANNING...';
 }
 function setStatus(dot,txt){
-  $('sdot').className='sdot'+(dot==='go'?' go'+(scanMode==='ean13'?' ean':''):dot==='ok'?' ok':'');
+  $('sdot').className='sdot'+(dot==='go'?' go'+(scanMode==='ean13'?' ean':''):dot==='ok'?' ok':dot==='err'?' err':'');
   $('stxt').textContent=txt;
 }
 function stopScan(){
@@ -783,7 +844,7 @@ function stopScan(){
 }
 async function startScan(){
   if (!('BarcodeDetector' in window)){
-    setStatus('','BarcodeDetector 非対応ブラウザ (Chrome/Edgeが必要)'); return;
+    setStatus('err','[E001] BarcodeDetector 非対応 (Chrome/Edgeが必要)'); return;
   }
   try {
     scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
@@ -797,7 +858,8 @@ async function startScan(){
     $('btn-scan').classList.add('stop');
     detect();
   } catch(e){
-    setStatus('',e.name==='NotAllowedError'?'カメラの許可が必要です':'カメラエラー: '+e.message);
+    const code=e.name==='NotAllowedError'?'E002':'E005';
+    setStatus('err',`[${code}] `+(e.name==='NotAllowedError'?'カメラの許可が必要です':'カメラエラー: '+e.message));
   }
 }
 async function detect(){
@@ -807,9 +869,9 @@ async function detect(){
     const codes=await detector.detect(v);
     if (codes.length){
       const c=codes[0], now=Date.now();
-      // 13桁チェック
+      // 13桁以外は破棄
       if (c.rawValue.length!==13){
-        // skip silently
+        /* skip */
       } else if (c.rawValue!==lastCode||now-lastCodeTime>3000){
         lastCode=c.rawValue; lastCodeTime=now;
         onDetected(c.rawValue,c.format);
@@ -819,23 +881,24 @@ async function detect(){
   if (scanning) raf=requestAnimationFrame(detect);
 }
 
-// 検出時に画面中央に大きく表示するタイマー
 let detectOverlayTimer=null;
-function showDetectOverlay(value,format){
-  const ov=$('finder-detect');
+function showDetectOverlay(value,format,isDup){
   $('finder-detect-val').textContent=value;
   $('finder-detect-fmt').textContent=(format||'').toUpperCase().replace('_',' ');
+  $('finder-detect-dup').style.display=isDup?'':'none';
+  const ov=$('finder-detect');
+  ov.style.background=isDup?'rgba(0,0,0,.55)':'rgba(0,0,0,.45)';
   ov.classList.add('show');
   if (detectOverlayTimer) clearTimeout(detectOverlayTimer);
-  detectOverlayTimer=setTimeout(()=>ov.classList.remove('show'),2000);
+  detectOverlayTimer=setTimeout(()=>ov.classList.remove('show'),2200);
 }
 
 function onDetected(value,format){
-  // 重複チェック：同じ値が既に存在する場合はスキップ
+  // 重複チェック
   if (bcHistory.some(x=>x.value===value)){
-    showToast('⊘ 登録済み: '+value.slice(0,16),'dup',1800);
-    showDetectOverlay(value,format);
-    setStatus('ok','登録済み: '+value.slice(0,16));
+    showDetectOverlay(value,format,true);
+    showToast('⊘ 登録済み: '+value,'dup',1800);
+    setStatus('ok','登録済み: '+value.slice(0,20));
     setTimeout(()=>{ if(scanning)setStatus('go',scanMode==='ean13'?'EAN-13 スキャン中...':'スキャン中...'); },1500);
     return;
   }
@@ -843,8 +906,7 @@ function onDetected(value,format){
   bcHistory=[entry,...bcHistory];
   localStorage.setItem(BC_KEY,JSON.stringify(bcHistory));
   updateCounts();
-  // ファインダーにデカく表示
-  showDetectOverlay(value,format);
+  showDetectOverlay(value,format,false);
   setStatus('ok','検出！ '+value.slice(0,22));
   setTimeout(()=>{ if(scanning)setStatus('go',scanMode==='ean13'?'EAN-13 スキャン中...':'スキャン中...'); },1500);
 }
@@ -862,17 +924,15 @@ document.querySelectorAll('.mode-btn').forEach(btn=>{
 /* ════════════════════════════════════
    CAMERA
 ════════════════════════════════════ */
-// 画質プリセット
 const CAM_QUALITY={
-  low:  {width:{ideal:640},  height:{ideal:480}},
-  mid:  {width:{ideal:1280}, height:{ideal:720}},
-  high: {width:{ideal:1920}, height:{ideal:1080}},
-  max:  {width:{ideal:3840}, height:{ideal:2160}},
+  low: {width:{ideal:640},height:{ideal:480}},
+  mid: {width:{ideal:1280},height:{ideal:720}},
+  high:{width:{ideal:1920},height:{ideal:1080}},
+  max: {width:{ideal:3840},height:{ideal:2160}},
 };
 document.querySelectorAll('.quality-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    const q=btn.dataset.q;
-    if (q===camQuality) return;
+    const q=btn.dataset.q; if(q===camQuality)return;
     document.querySelectorAll('.quality-btn').forEach(b=>b.classList.remove('on'));
     btn.classList.add('on'); camQuality=q;
     localStorage.setItem('sc-cam-quality',q);
@@ -880,25 +940,21 @@ document.querySelectorAll('.quality-btn').forEach(btn=>{
     showToast('画質: '+{low:'低',mid:'標準',high:'高',max:'最高'}[q],'ok');
   });
 });
-// 保存済み画質を復元
 (()=>{
   const saved=localStorage.getItem('sc-cam-quality');
-  if (saved && CAM_QUALITY[saved]){
+  if (saved&&CAM_QUALITY[saved]){
     camQuality=saved;
-    document.querySelectorAll('.quality-btn').forEach(b=>{
-      b.classList.toggle('on',b.dataset.q===saved);
-    });
+    document.querySelectorAll('.quality-btn').forEach(b=>b.classList.toggle('on',b.dataset.q===saved));
   }
 })();
 
-function showCamError(type,detail){
-  const box=$('cam-err'), body=$('cam-err-body');
-  box.style.display='';
-  if (type==='permission') body.innerHTML='ブラウザのアドレスバー左端の 🔒 → カメラ → 「許可する」<br/>→ ページを再読み込みしてください。<br/><br/><b style="color:#ffaa88">Safari(iOS)</b>: 設定 → Safari → カメラ → 許可';
-  else if (type==='notfound') body.textContent='カメラが見つかりません。';
-  else body.textContent=detail||'カメラを起動できませんでした。';
+function showCamError(code,msg){
+  $('cam-err').style.display='';
+  $('cam-err-code').textContent=code;
+  $('cam-err-body').textContent=msg;
 }
 function hideCamError(){ $('cam-err').style.display='none'; }
+
 function setCamActive(active){
   camActive=active;
   $('cam-ph').style.display=active?'none':'';
@@ -907,45 +963,34 @@ function setCamActive(active){
   $('btn-shutter').disabled=!active;
   $('btn-cam-toggle').textContent=active?'■':'▶';
   $('btn-cam-toggle').classList.toggle('red',active);
-  if (!active) setFocusModeUI(false);
   if (active){ hideCamError(); startOrientSensor(); setTimeout(updateOrientUI,300); }
 }
+
 let torchOn=false;
 async function toggleTorch(){
   if (!camTrack){ showToast('カメラを起動してください','warn'); return; }
   try {
     const caps=camTrack.getCapabilities?camTrack.getCapabilities():{};
-    if (!caps.torch){ showToast('このデバイスはフラッシュ非対応です','warn'); return; }
+    if (!caps.torch){ showToast('[E008] このデバイスはフラッシュ非対応です','warn'); return; }
     torchOn=!torchOn;
     await camTrack.applyConstraints({advanced:[{torch:torchOn}]});
     $('btn-torch').classList.toggle('torch-on',torchOn);
     showToast(torchOn?'🔦 懐中電灯 ON':'懐中電灯 OFF',torchOn?'ok':'');
-  } catch(e){ showToast('フラッシュ非対応: '+(e.message||e.name),'warn'); }
+  } catch(e){ showToast('[E008] '+e.message,'warn'); }
 }
 $('btn-torch').addEventListener('click',toggleTorch);
 
-let focusModeActive=false, focusTimer=null;
-function setFocusModeUI(active){
-  focusModeActive=active;
-  $('btn-focus-mode').classList.toggle('torch-on',active);
-  const badge=$('focus-badge');
-  badge.textContent=active?'📍タップフォーカス有効':'';
-  badge.classList.toggle('on',active);
-}
-$('btn-focus-mode').addEventListener('click',()=>{
-  if (!camActive){ showToast('カメラを起動してください','warn'); return; }
-  setFocusModeUI(!focusModeActive);
-  showToast(focusModeActive?'📍 タップフォーカス ON':'タップフォーカス OFF',focusModeActive?'ok':'');
-});
+/* フォーカスは常時ON（ボタン廃止・VFタップで常に適用） */
+let focusTimer=null;
 $('cam-vf').addEventListener('click',async(e)=>{
-  if (!camActive||!focusModeActive||!camTrack) return;
+  if (!camActive||!camTrack) return;
   const vf=$('cam-vf'), rect=vf.getBoundingClientRect();
   const x=(e.clientX-rect.left)/rect.width, y=(e.clientY-rect.top)/rect.height;
   const ring=$('focus-ring');
   ring.style.left=(x*100)+'%'; ring.style.top=(y*100)+'%';
   ring.classList.add('show');
   if (focusTimer) clearTimeout(focusTimer);
-  focusTimer=setTimeout(()=>ring.classList.remove('show'),1200);
+  focusTimer=setTimeout(()=>ring.classList.remove('show'),1000);
   try {
     const caps=camTrack.getCapabilities?camTrack.getCapabilities():{};
     if (caps.focusMode&&caps.focusMode.includes('manual')){
@@ -955,6 +1000,7 @@ $('cam-vf').addEventListener('click',async(e)=>{
     }
   } catch(e){}
 });
+
 function stopCam(){
   if (camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
   const v=$('cam-video'); if(v){ v.srcObject=null; v.style.transform=''; }
@@ -979,10 +1025,14 @@ async function startCam(facing){
       if (camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
       stream=await navigator.mediaDevices.getUserMedia(c); break;
     } catch(e){
-      if (e.name==='NotAllowedError'||e.name==='PermissionDeniedError'){ showCamError('permission'); return; }
+      if (e.name==='NotAllowedError'||e.name==='PermissionDeniedError'){
+        showCamError('E002','カメラの許可が必要です。ブラウザのアドレスバー左端 🔒 → カメラ → 許可 → ページを再読み込み'); return;
+      }
+      if (e.name==='NotFoundError') continue;
+      showCamError('E005',e.message);
     }
   }
-  if (!stream){ showCamError('notfound'); return; }
+  if (!stream){ showCamError('E001','カメラが見つかりません。デバイスにカメラがあるか確認してください。'); return; }
   camStream=stream; camTrack=stream.getVideoTracks()[0];
   const v=$('cam-video');
   v.setAttribute('playsinline',''); v.setAttribute('muted',''); v.setAttribute('autoplay','');
@@ -993,7 +1043,7 @@ async function startCam(facing){
     setCamActive(true);
     $('zoom-slider').value=1; applyZoom(1);
     updateThumbStrip();
-  } catch(e){ showCamError('other','カメラの再生に失敗: '+e.message); }
+  } catch(e){ showCamError('E005','カメラの再生に失敗: '+e.message); }
 }
 function applyZoom(z){
   const v=$('cam-video');
@@ -1022,6 +1072,7 @@ $('btn-flip').addEventListener('click',async()=>{
 $('btn-cam-toggle').addEventListener('click',()=>{ camActive?stopCam():startCam(); });
 $('cam-retry').addEventListener('click',startCam);
 $('btn-shutter').addEventListener('click',takePhoto);
+
 function takePhoto(){
   const v=$('cam-video'); if(!v||!camActive)return;
   const vw=v.videoWidth, vh=v.videoHeight;
@@ -1035,8 +1086,7 @@ function takePhoto(){
   if (corrAngle) ctx.rotate(corrAngle*Math.PI/180);
   if (facingMode==='user') ctx.scale(-1,1);
   ctx.drawImage(v,-vw/2,-vh/2,vw,vh);
-  // 画質に応じた圧縮率
-  const quality={low:0.6,mid:0.82,high:0.92,max:0.98}[camQuality]||0.82;
+  const quality={low:0.62,mid:0.82,high:0.92,max:0.98}[camQuality]||0.82;
   const dataUrl=c.toDataURL('image/jpeg',quality);
   if (!dataUrl||dataUrl==='data:,') return;
   const photo={id:Date.now()+Math.random(),dataUrl,timestamp:Date.now(),facingMode,rotation:0};
@@ -1048,7 +1098,7 @@ function takePhoto(){
   }).catch(()=>{});
 }
 
-/* ── サムネストリップ ── */
+/* サムネストリップ */
 function updateThumbStrip(){
   const wrap=$('thumb-strip-wrap');
   if (!thumbStripVisible||!photos.length){ wrap.style.display='none'; return; }
@@ -1063,34 +1113,30 @@ function updateThumbStrip(){
   });
   if (photos.length>10){
     const m=document.createElement('button'); m.className='more-btn';
-    m.textContent='+' +(photos.length-10);
-    m.onclick=()=>{ document.querySelector('[data-tab="photos"]').click(); };
+    m.textContent='+'+(photos.length-10);
+    m.onclick=()=>document.querySelector('[data-tab="photos"]').click();
     strip.appendChild(m);
   }
 }
 function setThumbVisible(v){
   thumbStripVisible=v;
   localStorage.setItem('sc-thumb-vis',v?'1':'0');
-  const btn=$('btn-thumb-toggle'), btn2=$('btn-thumb-toggle2');
-  btn.classList.toggle('on',v);
-  btn2.textContent=v?'非表示':'表示';
-  btn2.classList.toggle('on',v);
+  $('btn-thumb-toggle').classList.toggle('on',v);
+  $('btn-thumb-toggle').textContent=v?'🖼 サムネ ON':'🖼 サムネ OFF';
+  $('btn-thumb-toggle2').textContent=v?'非表示':'表示';
+  $('btn-thumb-toggle2').classList.toggle('on',v);
   updateThumbStrip();
 }
 $('btn-thumb-toggle').addEventListener('click',()=>setThumbVisible(!thumbStripVisible));
 $('btn-thumb-toggle2').addEventListener('click',()=>setThumbVisible(!thumbStripVisible));
-// 初期状態適用
-(()=>{
-  $('btn-thumb-toggle').classList.toggle('on',thumbStripVisible);
-})();
+// 初期化
+setThumbVisible(thumbStripVisible);
 
 /* ════════════════════════════════════
    BC HISTORY
 ════════════════════════════════════ */
-// チェック状態トグル
 function toggleBcChecked(id){
-  const item=bcHistory.find(x=>x.id===id);
-  if (!item) return;
+  const item=bcHistory.find(x=>x.id===id); if(!item)return;
   item.checked=!item.checked;
   localStorage.setItem(BC_KEY,JSON.stringify(bcHistory));
   renderBcList();
@@ -1098,7 +1144,6 @@ function toggleBcChecked(id){
 function renderBcList(){
   const q=$('search-box').value.toLowerCase();
   let filtered=q?bcHistory.filter(x=>x.value.toLowerCase().includes(q)):bcHistory;
-  // フィルタ
   if (histFilter==='checked') filtered=filtered.filter(x=>x.checked);
   else if (histFilter==='unchecked') filtered=filtered.filter(x=>!x.checked);
   const list=$('bc-list'), empty=$('bc-empty');
@@ -1109,7 +1154,7 @@ function renderBcList(){
     const card=document.createElement('div');
     card.className='bc-card'+(item.format==='ean_13'?' ean':'')+(item.checked?' checked':'');
     card.innerHTML=`
-<button class="card-check" title="チェック済みにする">✓</button>
+<button class="card-check">✓</button>
 <div class="bc-thumb"><canvas></canvas></div>
 <div class="card-info">
   <div class="card-val">${item.value}</div>
@@ -1117,19 +1162,15 @@ function renderBcList(){
     <span class="card-fmt ${item.format==='ean_13'?'ean':''}">${(item.format||'').replace('_',' ')}</span>
     <span class="card-time">${fmtTime(item.timestamp)}</span>
     <span class="card-num">#${String(filtered.length-i).padStart(3,'0')}</span>
-    ${item.checked?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#00ff88;">✓ 確認済</span>':''}
+    ${item.checked?'<span class="card-chk-lbl">✓ 確認済</span>':''}
   </div>
 </div>
-<button class="btn-x" title="削除">✕</button>`;
-    // チェックボタン
+<button class="btn-x">✕</button>`;
     card.querySelector('.card-check').addEventListener('click',e=>{
       e.stopPropagation(); toggleBcChecked(item.id);
     });
-    // カード本体クリック→モーダル
     card.querySelector('.card-info').addEventListener('click',()=>openBcModal(item));
-    // 削除ボタン
     card.querySelector('.btn-x').addEventListener('click',e=>{ e.stopPropagation(); deleteBc(item.id); });
-    // サムネ描画
     const cv=card.querySelector('canvas');
     setTimeout(()=>{
       if (!renderBC(cv,item.value,item.format,24,false)){
@@ -1140,10 +1181,9 @@ function renderBcList(){
   });
 }
 $('search-box').addEventListener('input',renderBcList);
-// フィルタボタン
-document.querySelectorAll('.hist-filter-btn').forEach(btn=>{
+document.querySelectorAll('.flt-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    document.querySelectorAll('.hist-filter-btn').forEach(b=>b.classList.remove('on'));
+    document.querySelectorAll('.flt-btn').forEach(b=>b.classList.remove('on'));
     btn.classList.add('on'); histFilter=btn.dataset.filter; renderBcList();
   });
 });
@@ -1155,11 +1195,10 @@ function deleteBc(id){
 $('btn-bc-clear').addEventListener('click',()=>{
   bcHistory=[]; localStorage.setItem(BC_KEY,'[]'); updateCounts(); renderBcList();
 });
-// CSV出力
 $('btn-bc-csv').addEventListener('click',()=>{
   if (!bcHistory.length) return;
   const rows=['\uFEFF値,フォーマット,日時,確認済み'];
-  bcHistory.forEach(x=>rows.push(`"${x.value}","${(x.format||'').replace('_',' ')}","${fmtTime(x.timestamp)}","${x.checked?'済':''}" `));
+  bcHistory.forEach(x=>rows.push(`"${x.value}","${(x.format||'').replace('_',' ')}","${fmtTime(x.timestamp)}","${x.checked?'済':''}"`));
   const blob=new Blob([rows.join('\n')],{type:'text/csv'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download='barcodes_'+Date.now()+'.csv'; a.click();
@@ -1203,19 +1242,29 @@ function renderPhotoGrid(){
   const grid=$('photo-grid'), empty=$('photo-empty');
   if (!photos.length){ grid.style.display='none'; empty.style.display=''; return; }
   empty.style.display='none'; grid.style.display='';
+  grid.className='photo-grid'+(mergeMode?' merge-mode':'');
   grid.innerHTML='';
   photos.forEach(p=>{
-    const item=document.createElement('div'); item.className='photo-item';
+    const item=document.createElement('div');
+    item.className='photo-item'+(mergeSelected.includes(p.id)?' selected':'');
     const img=document.createElement('img'); img.src=p.dataUrl; img.loading='lazy';
     const trash=document.createElement('button'); trash.className='photo-trash'; trash.title='削除';
     trash.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
-    trash.addEventListener('click',e=>{ e.stopPropagation(); deletePhoto(p.id); });
+    trash.addEventListener('click',e=>{ e.stopPropagation(); if(!mergeMode)deletePhoto(p.id); });
     const save=document.createElement('button'); save.className='photo-save'; save.title='本体に保存';
     save.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
-    save.addEventListener('click',e=>{ e.stopPropagation(); savePhotoToDevice(p); });
+    save.addEventListener('click',e=>{ e.stopPropagation(); if(!mergeMode)savePhotoToDevice(p); });
     const badge=document.createElement('div'); badge.className='photo-badge'; badge.textContent=fmtShort(p.timestamp);
-    item.appendChild(img); item.appendChild(save); item.appendChild(trash); item.appendChild(badge);
-    item.addEventListener('click',()=>openLightbox(p));
+    // 結合モード選択オーバーレイ
+    const selOv=document.createElement('div'); selOv.className='photo-select-overlay';
+    const chk=document.createElement('div'); chk.className='photo-select-check'; chk.textContent='✓';
+    selOv.appendChild(chk);
+    item.appendChild(img); item.appendChild(save); item.appendChild(trash);
+    item.appendChild(badge); item.appendChild(selOv);
+    item.addEventListener('click',()=>{
+      if (mergeMode){ toggleMergeSelect(p.id,item); }
+      else { openLightbox(p); }
+    });
     grid.appendChild(item);
   });
 }
@@ -1231,13 +1280,14 @@ async function savePhotoToDevice(photo){
   const name=`photo_${ts}.jpg`;
   if (navigator.share&&navigator.canShare){
     try {
-      const res=await fetch(photo.dataUrl); const blob=await res.blob();
-      const file=new File([blob],name,{type:'image/jpeg'});
-      if (navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'写真を保存'}); return; }
+      const blob=dataUrlToBlob(photo.dataUrl);
+      if (blob){
+        const file=new File([blob],name,{type:'image/jpeg'});
+        if (navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'写真を保存'}); return; }
+      }
     } catch(e){ if(e.name==='AbortError')return; }
   }
-  const a=document.createElement('a'); a.href=photo.dataUrl; a.download=name;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  fallbackDownload(photo.dataUrl,name);
 }
 function openLightbox(p){
   currentLightbox=p;
@@ -1253,8 +1303,7 @@ async function rotateLightboxPhoto(){
   const c=document.createElement('canvas');
   c.width=img.height; c.height=img.width;
   const ctx=c.getContext('2d');
-  ctx.translate(c.width/2,c.height/2);
-  ctx.rotate(90*Math.PI/180);
+  ctx.translate(c.width/2,c.height/2); ctx.rotate(90*Math.PI/180);
   ctx.drawImage(img,-img.width/2,-img.height/2);
   const newDataUrl=c.toDataURL('image/jpeg',0.9);
   currentLightbox={...currentLightbox,dataUrl:newDataUrl,rotation:0};
@@ -1273,6 +1322,118 @@ $('btn-photo-clear').addEventListener('click',()=>{
   dbClear().then(()=>{ photos=[]; updateCounts(); renderPhotoGrid(); updateThumbStrip(); });
 });
 
+/* ════════════════════════════════════
+   IMAGE MERGE
+════════════════════════════════════ */
+function enterMergeMode(){
+  mergeMode=true; mergeSelected=[];
+  $('merge-bar').classList.add('on');
+  $('merge-bar-txt').textContent='写真をタップして選択（2枚以上）';
+  $('btn-merge-exec').disabled=true;
+  renderPhotoGrid();
+}
+function exitMergeMode(){
+  mergeMode=false; mergeSelected=[];
+  $('merge-bar').classList.remove('on');
+  renderPhotoGrid();
+}
+function toggleMergeSelect(id,itemEl){
+  const idx=mergeSelected.indexOf(id);
+  if (idx>=0){ mergeSelected.splice(idx,1); itemEl.classList.remove('selected'); }
+  else { mergeSelected.push(id); itemEl.classList.add('selected'); }
+  const n=mergeSelected.length;
+  $('merge-bar-txt').textContent=n===0?'写真をタップして選択（2枚以上）':n+'枚 選択中';
+  $('btn-merge-exec').disabled=n<2;
+}
+$('btn-merge-mode').addEventListener('click',()=>{
+  if (photos.length<2){ showToast('2枚以上の写真が必要です','warn'); return; }
+  enterMergeMode();
+});
+$('btn-merge-cancel').addEventListener('click',exitMergeMode);
+$('btn-merge-exec').addEventListener('click',()=>{
+  if (mergeSelected.length<2) return;
+  $('merge-modal').style.display='';
+});
+$('merge-modal-cancel').addEventListener('click',()=>{ $('merge-modal').style.display='none'; });
+document.querySelectorAll('.merge-layout-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    $('merge-modal').style.display='none';
+    const layout=btn.dataset.layout;
+    const selectedPhotos=mergeSelected.map(id=>photos.find(p=>p.id===id)).filter(Boolean);
+    mergeImages(selectedPhotos,layout);
+  });
+});
+
+async function mergeImages(selectedPhotos,layout){
+  showToast('結合中...','',5000);
+  try {
+    const imgs=await Promise.all(selectedPhotos.map(p=>new Promise((res,rej)=>{
+      const img=new Image(); img.onload=()=>res(img); img.onerror=rej; img.src=p.dataUrl;
+    })));
+    const canvas=document.createElement('canvas');
+    const ctx=canvas.getContext('2d');
+    const n=imgs.length;
+
+    if (layout==='h'){
+      // 横並び：同じ高さに揃える
+      const H=Math.max(...imgs.map(i=>i.height));
+      const totalW=imgs.reduce((s,i)=>s+Math.round(i.width*(H/i.height)),0);
+      canvas.width=totalW; canvas.height=H;
+      let x=0;
+      imgs.forEach(img=>{
+        const w=Math.round(img.width*(H/img.height));
+        ctx.drawImage(img,x,0,w,H); x+=w;
+      });
+    } else if (layout==='v'){
+      // 縦並び：同じ幅に揃える
+      const W=Math.max(...imgs.map(i=>i.width));
+      const totalH=imgs.reduce((s,i)=>s+Math.round(i.height*(W/i.width)),0);
+      canvas.width=W; canvas.height=totalH;
+      let y=0;
+      imgs.forEach(img=>{
+        const h=Math.round(img.height*(W/img.width));
+        ctx.drawImage(img,0,y,W,h); y+=h;
+      });
+    } else if (layout==='grid'){
+      // グリッド：2列
+      const cols=2, rows=Math.ceil(n/cols);
+      const cellW=Math.max(...imgs.map(i=>i.width));
+      const cellH=Math.max(...imgs.map(i=>i.height));
+      canvas.width=cellW*cols; canvas.height=cellH*rows;
+      ctx.fillStyle='#111'; ctx.fillRect(0,0,canvas.width,canvas.height);
+      imgs.forEach((img,i)=>{
+        const col=i%cols, row=Math.floor(i/cols);
+        const scale=Math.min(cellW/img.width,cellH/img.height);
+        const dw=img.width*scale, dh=img.height*scale;
+        const dx=col*cellW+(cellW-dw)/2, dy=row*cellH+(cellH-dh)/2;
+        ctx.drawImage(img,dx,dy,dw,dh);
+      });
+    } else {
+      // strip（横ストリップ・等高・コンパクト）
+      const H=320;
+      const totalW=imgs.reduce((s,i)=>s+Math.round(i.width*(H/i.height)),0);
+      canvas.width=totalW; canvas.height=H;
+      let x=0;
+      imgs.forEach(img=>{
+        const w=Math.round(img.width*(H/img.height));
+        ctx.drawImage(img,x,0,w,H); x+=w;
+      });
+    }
+
+    const dataUrl=canvas.toDataURL('image/jpeg',0.88);
+    const merged={id:Date.now()+Math.random(),dataUrl,timestamp:Date.now(),facingMode:'merged',rotation:0,merged:true};
+    await dbPut(merged);
+    await dbPrune(MAX_PH);
+    photos=(await dbAll()).reverse();
+    updateCounts(); exitMergeMode(); renderPhotoGrid(); updateThumbStrip();
+    showToast('✓ '+n+'枚を結合しました','ok');
+    // 自動でライトボックスに表示
+    openLightbox(merged);
+  } catch(e){
+    showToast('[E020] 結合失敗: '+e.message,'err',4000);
+  }
+}
+
 /* ── iOS popup ── */
 $('ios-popup-close').addEventListener('click',()=>{ $('ios-popup').style.display='none'; });
 $('ios-popup').addEventListener('click',e=>{ if(e.target===$('ios-popup'))$('ios-popup').style.display='none'; });
@@ -1282,13 +1443,10 @@ $('ios-popup').addEventListener('click',e=>{ if(e.target===$('ios-popup'))$('ios
 ════════════════════════════════════ */
 async function init(){
   try { bcHistory=JSON.parse(localStorage.getItem(BC_KEY)||'[]'); } catch{ bcHistory=[]; }
-  // checked フィールドがない古いデータに対応
   bcHistory=bcHistory.map(x=>({checked:false,...x}));
   try { photos=(await dbAll()).reverse(); } catch(e){ photos=[]; }
   updateCounts();
   restoreFolderHandle();
-  // サムネ初期状態
-  updateThumbStrip();
 }
 init();
 </script>
