@@ -6,131 +6,311 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
-<meta name="apple-mobile-web-app-title" content="Scanner"/>
 <meta name="theme-color" content="#0d1117"/>
-<title>Scanner + Camera (Improved)</title>
+<title>Scanner Pro (Optimized)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden;background:#0a0c0f}
-body{color:#e0e8f0;font-family:'Rajdhani',sans-serif}
-#app{height:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:#0a0c0f}
+html,body{height:100%;overflow:hidden;background:#0a0c0f;color:#e0e8f0;font-family:'Rajdhani',sans-serif}
+#app{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
 
-.hdr{display:flex;align-items:center;gap:10px;padding:9px 14px;padding-top:max(9px,env(safe-area-inset-top));background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0}
-.hdr-icon{width:26px;height:26px;background:#00d4ff;flex-shrink:0;display:flex;align-items:center;justify-content:center;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
-.hdr-title{font-size:15px;font-weight:700;letter-spacing:3px;text-transform:uppercase}
-.hdr-sub{font-family:'Share Tech Mono',monospace;font-size:8px;color:#4a6a8a;letter-spacing:2px}
-.hdr-count{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:9px;color:#00d4ff;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);padding:3px 7px;white-space:nowrap}
-
+/* HEADER & TABS */
+.hdr{display:flex;align-items:center;gap:10px;padding:8px 14px;background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0}
+.hdr-title{font-size:15px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#00d4ff}
+.hdr-count{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:10px;color:#00d4ff;background:rgba(0,212,255,.1);padding:2px 8px;border:1px solid rgba(0,212,255,.2)}
 .tabs{display:flex;background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0}
-.tab{flex:1;padding:9px 1px;text-align:center;font-size:8.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;color:#4a6a8a;border:none;background:none;border-bottom:2px solid transparent;font-family:'Rajdhani',sans-serif;transition:color .2s,border-color .2s}
-.tab.on{color:#00d4ff;border-bottom-color:#00d4ff;background:rgba(0,212,255,.04)}
-.page{flex:1;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;-webkit-overflow-scrolling:touch;min-height:0}
+.tab{flex:1;padding:12px 2px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer;color:#4a6a8a;border:none;background:none;border-bottom:2px solid transparent;transition:all .2s}
+.tab.on{color:#00d4ff;border-bottom-color:#00d4ff;background:rgba(0,212,255,.05)}
+
+.page{flex:1;display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
 .page.on{display:flex}
 
-/* ═══ SCAN ═══ */
-.scan-pg{padding:0;gap:0;overflow:hidden}
-.scan-top{display:flex;flex-direction:column;align-items:center;padding:6px 10px;gap:5px;flex:1;min-height:0;overflow:hidden}
-.mode-row{width:100%;max-width:420px;display:flex;border:1px solid #1e2a38;overflow:hidden;flex-shrink:0}
-.mode-btn{flex:1;padding:6px 4px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;background:#0d1117;color:#4a6a8a;transition:all .2s;font-family:'Rajdhani',sans-serif}
-.mode-btn+.mode-btn{border-left:1px solid #1e2a38}
-.mode-btn.on{background:rgba(0,212,255,.1);color:#00d4ff}
-.badge{display:inline-block;font-size:7px;font-family:'Share Tech Mono',monospace;background:rgba(255,170,0,.15);color:#ffaa00;border:1px solid rgba(255,170,0,.3);padding:1px 4px;margin-left:4px;vertical-align:middle}
-/* finder flex:1 → カメラ最大化 */
-.finder{position:relative;width:100%;max-width:420px;flex:1;min-height:0;background:#060809;border:1px solid #1e2a38;overflow:hidden}
+/* SCAN PAGE */
+.scan-pg{overflow:hidden}
+.scan-top{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px;gap:8px;min-height:0}
+.finder{position:relative;width:100%;max-width:420px;flex:1;background:#000;border:1px solid #1e2a38;overflow:hidden}
 .finder video{width:100%;height:100%;object-fit:cover;display:block}
-.corner{position:absolute;width:22px;height:22px;border-color:#00d4ff;border-style:solid;z-index:2;pointer-events:none}
-.corner.tl{top:10px;left:10px;border-width:2px 0 0 2px}.corner.tr{top:10px;right:10px;border-width:2px 2px 0 0}
-.corner.bl{bottom:10px;left:10px;border-width:0 0 2px 2px}.corner.br{bottom:10px;right:10px;border-width:0 2px 2px 0}
-.scan-line{position:absolute;left:10px;right:10px;height:1px;background:linear-gradient(90deg,transparent,#00d4ff,transparent);animation:scanMove 2s ease-in-out infinite;z-index:2;box-shadow:0 0 6px #00d4ff;pointer-events:none}
-@keyframes scanMove{0%{top:15%}50%{top:82%}100%{top:15%}}
-.ean-guide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;pointer-events:none}
-.ean-box{border:2px dashed rgba(255,170,0,.55);width:88%;height:28%;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
-.ean-line{position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,transparent,#ffaa00,transparent);box-shadow:0 0 6px #ffaa00;animation:eanP 1.1s ease-in-out infinite}
-@keyframes eanP{0%,100%{opacity:.3}50%{opacity:1}}
-.ean-txt{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,170,0,.75);letter-spacing:1px}
-.finder-ov{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(0,212,255,.7);z-index:2;pointer-events:none}
-.finder-ov.ean{color:rgba(255,170,0,.7)}
-/* 検出フラッシュオーバーレイ（短い点滅のみ） */
-.finder-flash{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;background:rgba(0,255,136,.18);transition:opacity .08s}
-.finder-flash.show{opacity:1}
-.ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
-.ph p{font-family:'Share Tech Mono',monospace;font-size:10px;text-align:center;max-width:200px;line-height:1.8;color:#3a5a7a}
-.sbar{width:100%;max-width:420px;padding:6px 12px;background:#0d1117;border:1px solid #1e2a38;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:#4a6a8a;display:flex;align-items:center;gap:8px;flex-shrink:0}
-.sdot{width:6px;height:6px;border-radius:50%;background:#2a3a4a;flex-shrink:0;transition:background .3s,box-shadow .3s}
-.sdot.go{background:#00d4ff;box-shadow:0 0 6px #00d4ff;animation:pulse 1.2s ease-in-out infinite}
-.sdot.go.ean{background:#ffaa00;box-shadow:0 0 6px #ffaa00}
-.sdot.ok{background:#00ff88;box-shadow:0 0 6px #00ff88}
-.sdot.err{background:#ff4466;box-shadow:0 0 6px #ff4466}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.btn-main{width:100%;max-width:420px;padding:11px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));transition:background .2s,transform .1s;flex-shrink:0}
-.btn-main:active{transform:scale(.98)}.btn-main.stop{background:#ff4466}
+.scan-line{position:absolute;left:5%;right:5%;top:20%;height:2px;background:#00d4ff;box-shadow:0 0 8px #00d4ff;animation:scan 2s infinite ease-in-out;z-index:2;pointer-events:none}
+@keyframes scan{0%,100%{top:20%}50%{top:80%}}
+.btn-main{width:100%;max-width:420px;padding:14px;background:#00d4ff;color:#0a0c0f;border:none;font-weight:700;letter-spacing:2px;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px))}
+.btn-main.stop{background:#ff4466}
 
-/* ─ 大型バーコード表示エリア ─ */
-.scan-bc-section{flex-shrink:0;height:calc(100% - 380px);min-height:220px;border-top:2px solid #1e2a38;background:#080b0f;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative}
-.scan-bc-placeholder{font-family:'Share Tech Mono',monospace;font-size:11px;color:#2a3a4a;letter-spacing:2px;text-align:center}
-.scan-bc-display{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 8px}
-/* バーコード画像 */
-.scan-bc-canvas-wrap{width:100%;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden}
-.scan-bc-canvas-wrap canvas{width:100% !important;height:auto !important;max-height:100% !important;display:block}
-/* バーコード数値 大きく */
-.scan-bc-val{font-family:'Share Tech Mono',monospace;font-size:clamp(24px,8vw,42px);color:#e0e8f0;font-weight:700;letter-spacing:4px;text-align:center;line-height:1.2;margin:4px 0}
-.scan-bc-footer{display:flex;align-items:center;gap:10px;flex-shrink:0;margin-bottom:4px}
-.scan-bc-meta{font-family:'Share Tech Mono',monospace;font-size:10px;color:#4a6a8a;letter-spacing:1px}
-.scan-bc-copy{padding:6px 16px;background:transparent;border:1px solid rgba(0,212,255,.3);color:#00d4ff;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;cursor:pointer}
-.scan-bc-dup{position:absolute;top:6px;right:8px;font-family:'Share Tech Mono',monospace;font-size:9px;color:#ffaa00;letter-spacing:1px;display:none}
-.scan-bc-dup.show{display:block}
+/* BARCODE DISPLAY (SCAN PAGE) */
+.scan-bc-section{height:240px;background:#080b0f;border-top:2px solid #1e2a38;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;position:relative}
+.bc-display-wrap{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.bc-canvas-container{width:100%;flex:1;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:4px}
+.bc-canvas-container canvas{max-width:95%;max-height:90%}
+.bc-val-text{font-family:'Share Tech Mono',monospace;font-size:32px;font-weight:700;color:#e0e8f0;letter-spacing:3px}
 
-/* ═══ HISTORY ═══ */
-.hist-pg{overflow:hidden}
-.toolbar{display:flex;align-items:center;gap:7px;padding:7px 12px;border-bottom:1px solid #1e2a38;background:#0d1117;flex-shrink:0}
-.sbox{flex:1;background:#0a0c0f;border:1px solid #1e2a38;padding:7px 10px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#e0e8f0;outline:none;transition:border-color .2s}
-.sbox::placeholder{color:#2a3a4a}.sbox:focus{border-color:#00d4ff}
-.btn-sm{padding:5px 10px;background:transparent;border:1px solid #2a3a4a;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap}
-.btn-sm.danger{color:#ff4466}.btn-sm.accent{color:#00d4ff;border-color:#1e2a38}
-.hist-filter-row{display:flex;align-items:center;gap:5px;padding:5px 12px;background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0}
-.hist-filter-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;flex-shrink:0}
-.flt-btn{padding:3px 9px;background:transparent;border:1px solid #1e2a38;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s}
-.flt-btn.on{border-color:#00d4ff;color:#00d4ff;background:rgba(0,212,255,.07)}
-.flt-btn.grn.on{border-color:#00ff88;color:#00ff88;background:rgba(0,255,136,.07)}
-.list{flex:1;overflow-y:auto;padding:6px 12px;display:flex;flex-direction:column;gap:4px;-webkit-overflow-scrolling:touch}
-.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#2a3a4a;padding:40px;text-align:center}
-.empty p{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px;line-height:1.9}
-.bc-card{background:#0d1117;border:1px solid #1e2a38;padding:6px 8px;display:flex;align-items:center;gap:7px;position:relative;overflow:hidden;transition:border-color .2s,background .2s}
-.bc-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#00d4ff}
-.bc-card.ean::before{background:#ffaa00}
-.bc-card.checked{background:rgba(0,255,136,.06);border-color:rgba(0,255,136,.28)}
-.bc-card.checked::before{background:#00ff88}
-.card-check{width:30px;height:30px;border-radius:50%;border:1.5px solid #2a3a4a;background:transparent;color:#2a3a4a;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;font-size:13px;-webkit-tap-highlight-color:transparent}
-.bc-card.checked .card-check{border-color:#00ff88;background:rgba(0,255,136,.15);color:#00ff88}
-.bc-thumb{background:#fff;width:62px;height:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.bc-thumb canvas{width:62px !important;height:28px !important}
-.bc-thumb-txt{font-family:monospace;font-size:7px;color:#aaa;text-align:center;line-height:1.3;padding:2px}
-.card-info{flex:1;min-width:0;cursor:pointer}
-.card-val{font-family:'Share Tech Mono',monospace;font-size:11px;color:#e0e8f0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:2px}
-.card-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.card-fmt{font-size:8px;font-weight:700;letter-spacing:2px;color:#00d4ff;text-transform:uppercase}
-.card-fmt.ean{color:#ffaa00}
-.card-time{font-family:'Share Tech Mono',monospace;font-size:8px;color:#2a3a4a}
-.card-num{font-family:'Share Tech Mono',monospace;font-size:8px;color:#2a3a4a}
-.card-chk-lbl{font-family:'Share Tech Mono',monospace;font-size:8px;color:#00ff88}
-.btn-x{background:none;border:none;color:#2a3a4a;cursor:pointer;padding:5px;font-size:14px;line-height:1;flex-shrink:0}
-.btn-x:active{color:#ff4466}
+/* HISTORY LIST */
+.list{padding:10px;display:flex;flex-direction:column;gap:12px}
+.hist-item{background:#0d1117;border:1px solid #1e2a38;padding:10px;display:flex;flex-direction:column;gap:8px}
+.hist-info{display:flex;justify-content:space-between;font-size:12px;color:#4a6a8a;font-family:'Share Tech Mono',monospace}
+.hist-bc-wrap{background:#fff;padding:10px;display:flex;align-items:center;justify-content:center;border-radius:2px;min-height:80px}
+.hist-bc-wrap canvas{max-width:100%;height:auto}
+.hist-val{font-size:18px;font-weight:700;text-align:center;letter-spacing:2px;color:#00d4ff;word-break:break-all}
 
-/* ═══ CAMERA ═══ */
-.cam-pg{align-items:center;padding:0 10px 6px;gap:4px;overflow:hidden;padding-bottom:max(6px,env(safe-area-inset-bottom))}
-.vf{position:relative;width:100%;max-width:440px;border:1px solid #1e2a38;overflow:hidden;background:#000;flex:1;min-height:0}
-.vf video{width:100%;height:100%;display:block;object-fit:cover}
-.flash{position:absolute;inset:0;background:#fff;z-index:10;pointer-events:none;opacity:0;transition:opacity .05s}
-.flash.on{opacity:1}
-.focus-ring{position:absolute;width:64px;height:64px;border:2px solid #ffdd00;border-radius:4px;pointer-events:none;z-index:5;transform:translate(-50%,-50%) scale(1.2);transition:transform .15s,opacity .3s;opacity:0}
-.focus-ring.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
-.focus-ring::before,.focus-ring::after{content:'';position:absolute;background:#ffdd00}
-.focus-ring::before{left:50%;top:-6px;width:1px;height:5px;transform:translateX(-50%)}
-.focus-ring::after{top:50%;left:-6px;height:1px;width:5px;transform:translateY(-50%)}
-.err-box{width:100%;max-width:440px;padding:10px 12px;background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.35);display:flex;flex-direction:column;gap:5px;flex-shrink:0}
-.err-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;color:#ff4466;letter-spacing:1px}
+/* CAMERA PAGE */
+.cam-pg{padding:10px;gap:10px;align-items:center}
+.cam-vf{width:100%;max-width:440px;flex:1;background:#000;border:1px solid #1e2a38;position:relative;overflow:hidden}
+.cam-vf video{width:100%;height:100%;object-fit:cover}
+.shutter-btn{width:70px;height:70px;border-radius:50%;border:5px solid #fff;background:transparent;cursor:pointer;position:relative}
+.shutter-btn::after{content:'';position:absolute;inset:5px;background:#fff;border-radius:50%}
+.shutter-btn:active{transform:scale(0.9)}
+
+/* UTILS */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#00d4ff;color:#000;padding:8px 20px;font-weight:700;z-index:1000;display:none}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header class="hdr">
+    <div class="hdr-title">Scanner Pro</div>
+    <div class="hdr-count" id="hdr-count">BC: 0 / PH: 0</div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab on" data-tab="scan">SCAN</button>
+    <button class="tab" data-tab="history">HISTORY</button>
+    <button class="tab" data-tab="camera">CAMERA</button>
+    <button class="tab" data-tab="photos">PHOTOS</button>
+  </nav>
+
+  <!-- SCAN PAGE -->
+  <div class="page on" id="pg-scan">
+    <div class="scan-top">
+      <div class="finder">
+        <video id="scan-video" muted playsinline autoplay></video>
+        <div class="scan-line" id="scan-line" style="display:none"></div>
+      </div>
+      <button class="btn-main" id="btn-scan">▶ スキャン開始</button>
+    </div>
+    <div class="scan-bc-section">
+      <div id="bc-placeholder" style="color:#2a3a4a;font-size:12px;">— バーコード待機中 —</div>
+      <div class="bc-display-wrap" id="bc-display" style="display:none">
+        <div class="bc-canvas-container"><canvas id="scan-bc-canvas"></canvas></div>
+        <div class="bc-val-text" id="scan-bc-val"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY PAGE -->
+  <div class="page" id="pg-history">
+    <div class="list" id="hist-list"></div>
+  </div>
+
+  <!-- CAMERA PAGE -->
+  <div class="page cam-pg" id="pg-camera">
+    <div class="cam-vf">
+      <video id="cam-video" muted playsinline autoplay></video>
+    </div>
+    <div style="display:flex;gap:20px;align-items:center;">
+      <button id="btn-cam-toggle" style="background:none;border:1px solid #4a6a8a;color:#e0e8f0;padding:10px 20px;cursor:pointer;">ON/OFF</button>
+      <button class="shutter-btn" id="btn-shutter"></button>
+      <button id="btn-cam-flip" style="background:none;border:1px solid #4a6a8a;color:#e0e8f0;padding:10px 20px;cursor:pointer;">切替</button>
+    </div>
+  </div>
+
+  <!-- PHOTOS PAGE -->
+  <div class="page" id="pg-photos">
+    <div id="photo-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:2px;"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+let bcHistory = JSON.parse(localStorage.getItem('sc_bc_v4') || '[]');
+let photos = [];
+let scanActive = false;
+let camActive = false;
+let currentFacing = 'environment';
+let camStream = null;
+
+// Tab Switching
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+    t.classList.add('on');
+    const target = 'pg-' + t.dataset.tab;
+    $(target).classList.add('on');
+    if(t.dataset.tab !== 'scan') stopScan();
+    if(t.dataset.tab !== 'camera') stopCam();
+    if(t.dataset.tab === 'history') renderHistory();
+    if(t.dataset.tab === 'photos') renderPhotos();
+  };
+});
+
+function showToast(m){ const t=$('toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none',2000); }
+
+// Scanner Logic
+async function startScan() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280}}});
+    $('scan-video').srcObject = stream;
+    camStream = stream;
+    scanActive = true;
+    $('btn-scan').textContent = '■ スキャン停止';
+    $('btn-scan').classList.add('stop');
+    $('scan-line').style.display = 'block';
+    requestAnimationFrame(scanLoop);
+  } catch(e) { showToast('カメラを起動できません'); }
+}
+
+function stopScan() {
+  scanActive = false;
+  if(camStream) camStream.getTracks().forEach(t=>t.stop());
+  $('scan-video').srcObject = null;
+  $('btn-scan').textContent = '▶ スキャン開始';
+  $('btn-scan').classList.remove('stop');
+  $('scan-line').style.display = 'none';
+}
+
+async function scanLoop() {
+  if(!scanActive) return;
+  const v = $('scan-video');
+  if(v.readyState === v.HAVE_ENOUGH_DATA) {
+    try {
+      const detector = new window.BarcodeDetector();
+      const barcodes = await detector.detect(v);
+      if(barcodes.length > 0) {
+        handleDetected(barcodes[0].rawValue, barcodes[0].format);
+        return; // 1回検出で停止
+      }
+    } catch(e) { /* Polyfill or not supported */ }
+  }
+  requestAnimationFrame(scanLoop);
+}
+
+function handleDetected(val, fmt) {
+  const item = {val, fmt, ts: Date.now()};
+  bcHistory.unshift(item);
+  localStorage.setItem('sc_bc_v4', JSON.stringify(bcHistory));
+  renderBarcode(val, fmt, 'scan-bc-canvas', 'scan-bc-val');
+  $('bc-placeholder').style.display = 'none';
+  $('bc-display').style.display = 'flex';
+  showToast('検出しました');
+  stopScan();
+  updateCounts();
+}
+
+function renderBarcode(val, fmt, canvasId, textId) {
+  const canvas = $(canvasId);
+  if(textId) $(textId).textContent = val;
+  const jsFmt = {ean_13:'EAN13', ean_8:'EAN8', code_128:'CODE128', code_39:'CODE39', upc_a:'UPC'}[fmt] || 'CODE128';
+  try {
+    JsBarcode(canvas, val, {
+      format: jsFmt,
+      width: 3,
+      height: 100,
+      displayValue: false,
+      margin: 10
+    });
+  } catch(e) { console.error(e); }
+}
+
+// History Rendering
+function renderHistory() {
+  const container = $('hist-list');
+  container.innerHTML = bcHistory.length ? '' : '<div style="text-align:center;padding:40px;color:#4a6a8a;">履歴はありません</div>';
+  bcHistory.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'hist-item';
+    const canvasId = `hist-cv-${idx}`;
+    div.innerHTML = `
+      <div class="hist-info"><span>${item.fmt.toUpperCase()}</span><span>${new Date(item.ts).toLocaleString()}</span></div>
+      <div class="hist-bc-wrap"><canvas id="${canvasId}"></canvas></div>
+      <div class="hist-val">${item.val}</div>
+    `;
+    container.appendChild(div);
+    setTimeout(() => renderBarcode(item.val, item.fmt, canvasId), 0);
+  });
+}
+
+// Camera Logic
+async function startCam() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:currentFacing, width:{ideal:1920}}});
+    $('cam-video').srcObject = stream;
+    camStream = stream;
+    camActive = true;
+  } catch(e) { showToast('カメラエラー'); }
+}
+
+function stopCam() {
+  camActive = false;
+  if(camStream) camStream.getTracks().forEach(t=>t.stop());
+  $('cam-video').srcObject = null;
+}
+
+$('btn-cam-toggle').onclick = () => camActive ? stopCam() : startCam();
+$('btn-cam-flip').onclick = () => { currentFacing = currentFacing==='environment'?'user':'environment'; if(camActive){ stopCam(); startCam(); } };
+
+// Photo Logic with 1MB Compression
+$('btn-shutter').onclick = async () => {
+  if(!camActive) return;
+  const v = $('cam-video');
+  const canvas = document.createElement('canvas');
+  canvas.width = v.videoWidth;
+  canvas.height = v.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(v, 0, 0);
+  
+  let quality = 0.9;
+  let dataUrl = canvas.toDataURL('image/jpeg', quality);
+  
+  // 1MB Limit Loop
+  while(dataUrl.length > 1.3 * 1024 * 1024 && quality > 0.1) {
+    quality -= 0.1;
+    dataUrl = canvas.toDataURL('image/jpeg', quality);
+  }
+  
+  const photo = {id:Date.now(), url:dataUrl};
+  photos.unshift(photo);
+  renderPhotos();
+  updateCounts();
+  showToast('保存しました');
+  
+  // Auto Download
+  const link = document.createElement('a');
+  link.download = `photo_${Date.now()}.jpg`;
+  link.href = dataUrl;
+  link.click();
+};
+
+function renderPhotos() {
+  const grid = $('photo-grid');
+  grid.innerHTML = '';
+  photos.forEach(p => {
+    const img = document.createElement('img');
+    img.src = p.url;
+    img.style.width = '100%';
+    img.style.aspectRatio = '1';
+    img.style.objectFit = 'cover';
+    grid.appendChild(img);
+  });
+}
+
+function updateCounts() {
+  $('hdr-count').textContent = `BC: ${bcHistory.length} / PH: ${photos.length}`;
+}
+
+$('btn-scan').onclick = () => scanActive ? stopScan() : startScan();
+
+// Initialize
+window.onload = () => {
+  if(!window.BarcodeDetector) {
+    showToast('このブラウザは標準スキャン非対応です');
+  }
+  updateCounts();
+};
+</script>
+</body>
+</html>
 .err-code-badge{align-self:flex-start;font-family:'Share Tech Mono',monospace;font-size:9px;padding:2px 6px;background:#ff4466;color:#fff;font-weight:700}
 .err-body{font-size:10px;color:#e0e8f0;line-height:1.5}
 .err-retry{margin-top:4px;padding:8px;background:#ff4466;color:#fff;border:none;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;cursor:pointer}
