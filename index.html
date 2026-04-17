@@ -17,72 +17,78 @@ html,body{height:100%;overflow:hidden;background:#0a0c0f}
 body{color:#e0e8f0;font-family:'Rajdhani',sans-serif}
 #app{height:100%;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:#0a0c0f}
 
-/* HDR */
 .hdr{display:flex;align-items:center;gap:10px;padding:9px 14px;padding-top:max(9px,env(safe-area-inset-top));background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0}
 .hdr-icon{width:26px;height:26px;background:#00d4ff;flex-shrink:0;display:flex;align-items:center;justify-content:center;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px))}
 .hdr-title{font-size:15px;font-weight:700;letter-spacing:3px;text-transform:uppercase}
 .hdr-sub{font-family:'Share Tech Mono',monospace;font-size:8px;color:#4a6a8a;letter-spacing:2px}
 .hdr-count{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:9px;color:#00d4ff;background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.2);padding:3px 7px;white-space:nowrap}
 
-/* TABS */
 .tabs{display:flex;background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0}
-.tab{flex:1;padding:9px 2px;text-align:center;font-size:9.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;color:#4a6a8a;border:none;background:none;border-bottom:2px solid transparent;font-family:'Rajdhani',sans-serif;transition:color .2s,border-color .2s}
+.tab{flex:1;padding:9px 1px;text-align:center;font-size:8.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;color:#4a6a8a;border:none;background:none;border-bottom:2px solid transparent;font-family:'Rajdhani',sans-serif;transition:color .2s,border-color .2s}
 .tab.on{color:#00d4ff;border-bottom-color:#00d4ff;background:rgba(0,212,255,.04)}
 .page{flex:1;overflow-y:auto;overflow-x:hidden;display:none;flex-direction:column;-webkit-overflow-scrolling:touch;min-height:0}
 .page.on{display:flex}
 
-/* ─── SCAN ─── */
-.scan-pg{align-items:center;padding:6px 10px;gap:6px;overflow:hidden}
+/* ═══ SCAN ═══ */
+.scan-pg{padding:0;gap:0;overflow:hidden}
+.scan-top{display:flex;flex-direction:column;align-items:center;padding:6px 10px;gap:5px;flex:1;min-height:0;overflow:hidden}
 .mode-row{width:100%;max-width:420px;display:flex;border:1px solid #1e2a38;overflow:hidden;flex-shrink:0}
-.mode-btn{flex:1;padding:7px 4px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;background:#0d1117;color:#4a6a8a;transition:all .2s;font-family:'Rajdhani',sans-serif}
+.mode-btn{flex:1;padding:6px 4px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border:none;background:#0d1117;color:#4a6a8a;transition:all .2s;font-family:'Rajdhani',sans-serif}
 .mode-btn+.mode-btn{border-left:1px solid #1e2a38}
 .mode-btn.on{background:rgba(0,212,255,.1);color:#00d4ff}
 .badge{display:inline-block;font-size:7px;font-family:'Share Tech Mono',monospace;background:rgba(255,170,0,.15);color:#ffaa00;border:1px solid rgba(255,170,0,.3);padding:1px 4px;margin-left:4px;vertical-align:middle}
-/* ファインダー：flex:1 で画面を全部使う */
+/* finder flex:1 → カメラ最大化 */
 .finder{position:relative;width:100%;max-width:420px;flex:1;min-height:0;background:#060809;border:1px solid #1e2a38;overflow:hidden}
 .finder video{width:100%;height:100%;object-fit:cover;display:block}
 .corner{position:absolute;width:22px;height:22px;border-color:#00d4ff;border-style:solid;z-index:2;pointer-events:none}
-.corner.tl{top:10px;left:10px;border-width:2px 0 0 2px}
-.corner.tr{top:10px;right:10px;border-width:2px 2px 0 0}
-.corner.bl{bottom:10px;left:10px;border-width:0 0 2px 2px}
-.corner.br{bottom:10px;right:10px;border-width:0 2px 2px 0}
+.corner.tl{top:10px;left:10px;border-width:2px 0 0 2px}.corner.tr{top:10px;right:10px;border-width:2px 2px 0 0}
+.corner.bl{bottom:10px;left:10px;border-width:0 0 2px 2px}.corner.br{bottom:10px;right:10px;border-width:0 2px 2px 0}
 .scan-line{position:absolute;left:10px;right:10px;height:1px;background:linear-gradient(90deg,transparent,#00d4ff,transparent);animation:scanMove 2s ease-in-out infinite;z-index:2;box-shadow:0 0 6px #00d4ff;pointer-events:none}
 @keyframes scanMove{0%{top:15%}50%{top:82%}100%{top:15%}}
 .ean-guide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;pointer-events:none}
 .ean-box{border:2px dashed rgba(255,170,0,.55);width:88%;height:28%;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .ean-line{position:absolute;left:0;right:0;top:50%;height:1px;background:linear-gradient(90deg,transparent,#ffaa00,transparent);box-shadow:0 0 6px #ffaa00;animation:eanP 1.1s ease-in-out infinite}
 @keyframes eanP{0%,100%{opacity:.3}50%{opacity:1}}
-.ean-txt{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,170,0,.75);letter-spacing:1px;text-align:center}
+.ean-txt{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,170,0,.75);letter-spacing:1px}
 .finder-ov{position:absolute;bottom:10px;left:0;right:0;text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:2px;color:rgba(0,212,255,.7);z-index:2;pointer-events:none}
 .finder-ov.ean{color:rgba(255,170,0,.7)}
-/* 検出オーバーレイ（中央に大きく） */
-.finder-detect{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:4;pointer-events:none;opacity:0;transition:opacity .1s;background:rgba(0,0,0,.45)}
-.finder-detect.show{opacity:1}
-.finder-detect-val{font-family:'Share Tech Mono',monospace;font-size:clamp(20px,6vw,32px);color:#00ff88;font-weight:700;letter-spacing:2px;text-shadow:0 0 24px rgba(0,255,136,.9);text-align:center;padding:0 14px;word-break:break-all;max-width:100%}
-.finder-detect-fmt{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(0,255,136,.65);letter-spacing:3px;margin-top:5px}
-.finder-detect-dup{font-family:'Share Tech Mono',monospace;font-size:10px;color:#ffaa00;letter-spacing:2px;margin-top:3px}
+/* 検出フラッシュオーバーレイ（短い点滅のみ） */
+.finder-flash{position:absolute;inset:0;z-index:4;pointer-events:none;opacity:0;background:rgba(0,255,136,.18);transition:opacity .08s}
+.finder-flash.show{opacity:1}
 .ph{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
 .ph p{font-family:'Share Tech Mono',monospace;font-size:10px;text-align:center;max-width:200px;line-height:1.8;color:#3a5a7a}
-.sbar{width:100%;max-width:420px;padding:7px 12px;background:#0d1117;border:1px solid #1e2a38;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:#4a6a8a;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.sbar{width:100%;max-width:420px;padding:6px 12px;background:#0d1117;border:1px solid #1e2a38;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:#4a6a8a;display:flex;align-items:center;gap:8px;flex-shrink:0}
 .sdot{width:6px;height:6px;border-radius:50%;background:#2a3a4a;flex-shrink:0;transition:background .3s,box-shadow .3s}
 .sdot.go{background:#00d4ff;box-shadow:0 0 6px #00d4ff;animation:pulse 1.2s ease-in-out infinite}
 .sdot.go.ean{background:#ffaa00;box-shadow:0 0 6px #ffaa00}
 .sdot.ok{background:#00ff88;box-shadow:0 0 6px #00ff88}
 .sdot.err{background:#ff4466;box-shadow:0 0 6px #ff4466}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.btn-main{width:100%;max-width:420px;padding:12px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));transition:background .2s,transform .1s;flex-shrink:0}
-.btn-main:active{transform:scale(.98)}
-.btn-main.stop{background:#ff4466}
+.btn-main{width:100%;max-width:420px;padding:11px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,10px 100%,0 calc(100% - 10px));transition:background .2s,transform .1s;flex-shrink:0}
+.btn-main:active{transform:scale(.98)}.btn-main.stop{background:#ff4466}
 
-/* ─── HISTORY ─── */
+/* ─ 大型バーコード表示エリア ─ */
+.scan-bc-section{flex-shrink:0;height:200px;border-top:2px solid #1e2a38;background:#080b0f;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.scan-bc-placeholder{font-family:'Share Tech Mono',monospace;font-size:11px;color:#2a3a4a;letter-spacing:2px;text-align:center}
+.scan-bc-display{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 8px}
+/* バーコード画像 */
+.scan-bc-canvas-wrap{width:100%;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#fff;overflow:hidden}
+.scan-bc-canvas-wrap canvas{width:100% !important;height:auto !important;max-height:140px;display:block}
+/* バーコード数値 大きく */
+.scan-bc-val{font-family:'Share Tech Mono',monospace;font-size:clamp(18px,5.5vw,28px);color:#e0e8f0;font-weight:700;letter-spacing:3px;text-align:center;line-height:1}
+.scan-bc-footer{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.scan-bc-meta{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;letter-spacing:1px}
+.scan-bc-copy{padding:4px 12px;background:transparent;border:1px solid rgba(0,212,255,.3);color:#00d4ff;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;cursor:pointer}
+.scan-bc-dup{position:absolute;top:6px;right:8px;font-family:'Share Tech Mono',monospace;font-size:9px;color:#ffaa00;letter-spacing:1px;display:none}
+.scan-bc-dup.show{display:block}
+
+/* ═══ HISTORY ═══ */
 .hist-pg{overflow:hidden}
 .toolbar{display:flex;align-items:center;gap:7px;padding:7px 12px;border-bottom:1px solid #1e2a38;background:#0d1117;flex-shrink:0}
 .sbox{flex:1;background:#0a0c0f;border:1px solid #1e2a38;padding:7px 10px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#e0e8f0;outline:none;transition:border-color .2s}
-.sbox::placeholder{color:#2a3a4a}
-.sbox:focus{border-color:#00d4ff}
-.btn-sm{padding:6px 10px;background:transparent;border:1px solid #2a3a4a;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap}
-.btn-sm.danger{color:#ff4466;border-color:#2a3a4a}
-.btn-sm.accent{color:#00d4ff;border-color:#1e2a38}
+.sbox::placeholder{color:#2a3a4a}.sbox:focus{border-color:#00d4ff}
+.btn-sm{padding:5px 10px;background:transparent;border:1px solid #2a3a4a;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.btn-sm.danger{color:#ff4466}.btn-sm.accent{color:#00d4ff;border-color:#1e2a38}
 .hist-filter-row{display:flex;align-items:center;gap:5px;padding:5px 12px;background:#0d1117;border-bottom:1px solid #1e2a38;flex-shrink:0}
 .hist-filter-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;flex-shrink:0}
 .flt-btn{padding:3px 9px;background:transparent;border:1px solid #1e2a38;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s}
@@ -112,7 +118,7 @@ body{color:#e0e8f0;font-family:'Rajdhani',sans-serif}
 .btn-x{background:none;border:none;color:#2a3a4a;cursor:pointer;padding:5px;font-size:14px;line-height:1;flex-shrink:0}
 .btn-x:active{color:#ff4466}
 
-/* ─── CAMERA ─── */
+/* ═══ CAMERA ═══ */
 .cam-pg{align-items:center;padding:0 10px 6px;gap:4px;overflow:hidden;padding-bottom:max(6px,env(safe-area-inset-bottom))}
 .vf{position:relative;width:100%;max-width:440px;border:1px solid #1e2a38;overflow:hidden;background:#000;flex:1;min-height:0}
 .vf video{width:100%;height:100%;display:block;object-fit:cover}
@@ -123,34 +129,31 @@ body{color:#e0e8f0;font-family:'Rajdhani',sans-serif}
 .focus-ring::before,.focus-ring::after{content:'';position:absolute;background:#ffdd00}
 .focus-ring::before{left:50%;top:-6px;width:1px;height:5px;transform:translateX(-50%)}
 .focus-ring::after{top:50%;left:-6px;height:1px;width:5px;transform:translateY(-50%)}
-.err-box{width:100%;max-width:440px;padding:10px 12px;background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.35);display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.err-box{width:100%;max-width:440px;padding:10px 12px;background:rgba(255,68,102,.07);border:1px solid rgba(255,68,102,.35);display:flex;flex-direction:column;gap:5px;flex-shrink:0}
 .err-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:2px;color:#ff4466;text-transform:uppercase}
-.err-body{font-family:'Share Tech Mono',monospace;font-size:9px;color:#cc8888;line-height:1.8}
-.err-code{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:8px;color:#ff8888;background:rgba(255,68,102,.15);border:1px solid rgba(255,68,102,.3);padding:1px 6px;margin-bottom:4px;letter-spacing:2px}
+.err-code-badge{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;color:#ff8888;background:rgba(255,68,102,.15);border:1px solid rgba(255,68,102,.3);padding:1px 6px;letter-spacing:2px}
+.err-body{font-family:'Share Tech Mono',monospace;font-size:9px;color:#cc8888;line-height:1.7}
 .err-retry{padding:6px 12px;background:transparent;border:1px solid rgba(255,68,102,.4);color:#ff8899;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;align-self:flex-start}
-/* ズーム */
-.zoom-row{width:100%;max-width:440px;display:flex;align-items:center;gap:8px;flex-shrink:0;margin-top:2px}
+.zoom-row{width:100%;max-width:440px;display:flex;align-items:center;gap:8px;flex-shrink:0}
 .zoom-lbl{font-family:'Share Tech Mono',monospace;font-size:11px;color:#00d4ff;width:36px;text-align:right;white-space:nowrap;flex-shrink:0}
 input[type=range]{flex:1;-webkit-appearance:none;height:2px;background:#1e2a38;outline:none;cursor:pointer;border-radius:1px}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#00d4ff;cursor:pointer}
-/* 画質 */
 .quality-row{width:100%;max-width:440px;display:flex;align-items:center;gap:5px;flex-shrink:0}
 .quality-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;white-space:nowrap;flex-shrink:0}
 .quality-btn{flex:1;padding:4px 2px;text-align:center;font-size:9px;font-weight:700;letter-spacing:1px;cursor:pointer;border:1px solid #1e2a38;background:#0d1117;color:#4a6a8a;font-family:'Rajdhani',sans-serif;transition:all .2s}
 .quality-btn.on{border-color:#00d4ff;color:#00d4ff;background:rgba(0,212,255,.08)}
-/* カメラコントロール */
 .cam-ctrl{width:100%;max-width:440px;display:flex;align-items:center;justify-content:space-around;padding:0 4px;flex-shrink:0}
 .ctrl-btn{width:50px;height:50px;border-radius:50%;border:1px solid #1e2a38;background:#0d1117;color:#8ab4cc;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:all .2s;flex-shrink:0;-webkit-tap-highlight-color:transparent}
 .ctrl-btn:active{border-color:#00d4ff;color:#00d4ff}
 .ctrl-btn.red{border-color:#ff4466;color:#ff4466}
 .ctrl-btn.torch-on{border-color:#ffdd00 !important;color:#ffdd00 !important;box-shadow:0 0 10px rgba(255,221,0,.35)}
+.ctrl-btn.hilite{border-color:#00d4ff;color:#00d4ff}
 .shutter{width:68px;height:68px;border-radius:50%;border:3px solid #e0e8f0;background:transparent;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;flex-shrink:0}
 .shutter::after{content:'';width:52px;height:52px;border-radius:50%;background:#e0e8f0;display:block;transition:transform .1s}
-.shutter:active::after{transform:scale(.85)}
-.shutter:disabled{opacity:.3;cursor:default}
-/* サムネストリップ（下に配置） */
+.shutter:active::after{transform:scale(.85)}.shutter:disabled{opacity:.3;cursor:default}
+/* サムネ・向きバー（下に配置） */
 .thumb-strip-wrap{width:100%;max-width:440px;flex-shrink:0}
-.thumb-strip-hdr{display:flex;align-items:center;justify-content:space-between;padding:2px 0;margin-bottom:2px}
+.thumb-strip-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
 .thumb-strip-lbl{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;letter-spacing:1px}
 .thumb-toggle-btn{background:none;border:1px solid #1e2a38;color:#4a6a8a;font-family:'Share Tech Mono',monospace;font-size:9px;padding:2px 8px;cursor:pointer;letter-spacing:1px}
 .thumb-toggle-btn.on{border-color:#00d4ff;color:#00d4ff}
@@ -159,16 +162,11 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .mini-thumb{width:52px;height:52px;flex-shrink:0;overflow:hidden;cursor:pointer;border:1px solid #1e2a38}
 .mini-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .more-btn{width:52px;height:52px;flex-shrink:0;background:#0d1117;border:1px solid #1e2a38;color:#4a6a8a;cursor:pointer;font-family:'Share Tech Mono',monospace;font-size:10px;display:flex;align-items:center;justify-content:center}
-/* 向きバー（下に配置） */
 .cam-bottom-row{width:100%;max-width:440px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;padding:2px 0}
 .orient-bar{display:flex;align-items:center;gap:7px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:1px}
 .orient-dot{width:8px;height:8px;border-radius:50%;background:#2a3a4a;flex-shrink:0;transition:background .3s,box-shadow .3s}
-.orient-dot.ok{background:#00ff88;box-shadow:0 0 5px rgba(0,255,136,.5)}
-.orient-dot.warn{background:#ffaa00;box-shadow:0 0 5px rgba(255,170,0,.5)}
-.orient-label{color:#4a6a8a}
-.orient-label.ok{color:#00ff88}
-.orient-label.warn{color:#ffaa00}
-/* 保存先 */
+.orient-dot.ok{background:#00ff88;box-shadow:0 0 5px rgba(0,255,136,.5)}.orient-dot.warn{background:#ffaa00;box-shadow:0 0 5px rgba(255,170,0,.5)}
+.orient-label{color:#4a6a8a}.orient-label.ok{color:#00ff88}.orient-label.warn{color:#ffaa00}
 .save-folder-row{width:100%;max-width:440px;background:#0d1117;border:1px solid #1e2a38;padding:8px 10px;display:flex;flex-direction:column;gap:4px;flex-shrink:0}
 .save-folder-hdr{display:flex;align-items:center;justify-content:space-between}
 .save-folder-label{font-size:10px;font-weight:700;letter-spacing:2px;color:#4a6a8a;text-transform:uppercase;font-family:'Rajdhani',sans-serif}
@@ -179,17 +177,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .btn-folder-clear{padding:4px 8px;background:transparent;border:1px solid #2a3a4a;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;cursor:pointer}
 .save-folder-note{font-family:'Share Tech Mono',monospace;font-size:7px;color:#2a3a4a;line-height:1.5}
 
-/* ─── PHOTOS ─── */
+/* ═══ PHOTOS ═══ */
 .photo-pg{overflow:hidden}
 .photo-toolbar{display:flex;align-items:center;gap:6px;padding:7px 12px;border-bottom:1px solid #1e2a38;background:#0d1117;flex-shrink:0}
 .photo-count{font-family:'Share Tech Mono',monospace;font-size:10px;color:#4a6a8a;flex:1}
-/* 結合モード */
 .merge-bar{display:none;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid rgba(0,212,255,.2);background:rgba(0,212,255,.04);flex-shrink:0}
 .merge-bar.on{display:flex}
 .merge-bar-txt{font-family:'Share Tech Mono',monospace;font-size:10px;color:#00d4ff;flex:1}
 .btn-merge-exec{padding:7px 14px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))}
 .btn-merge-exec:disabled{opacity:.4;cursor:default}
-.btn-merge-cancel{padding:7px 12px;background:transparent;border:1px solid #2a3a4a;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;cursor:pointer}
+.btn-merge-cancel{padding:7px 10px;background:transparent;border:1px solid #2a3a4a;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;cursor:pointer}
 .photo-grid{flex:1;overflow-y:auto;padding:3px;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;-webkit-overflow-scrolling:touch}
 .photo-item{aspect-ratio:1;overflow:hidden;cursor:pointer;position:relative;background:#0d1117}
 .photo-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .15s}
@@ -199,23 +196,46 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .photo-trash:active{background:rgba(255,68,102,.3)}
 .photo-save{position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.72);border:1px solid rgba(0,212,255,.4);color:#00d4ff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:3;-webkit-tap-highlight-color:transparent}
 .photo-save:active{background:rgba(0,212,255,.2)}
-/* 結合選択チェック */
 .photo-select-overlay{position:absolute;inset:0;z-index:4;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.3);pointer-events:none}
 .merge-mode .photo-select-overlay{display:flex}
 .photo-select-check{width:28px;height:28px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:16px;color:transparent}
 .photo-item.selected .photo-select-check{background:#00d4ff;color:#fff;border-color:#00d4ff}
 .photo-item.selected img{transform:scale(.92);outline:2px solid #00d4ff}
-/* 結合レイアウトモーダル */
 .merge-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px}
 .merge-modal{background:#0d1117;border:1px solid #1e2a38;width:100%;max-width:340px;padding:18px;display:flex;flex-direction:column;gap:12px}
 .merge-modal-title{font-size:12px;font-weight:700;letter-spacing:2px;color:#00d4ff;text-transform:uppercase;font-family:'Rajdhani',sans-serif}
 .merge-layout-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .merge-layout-btn{padding:14px 8px;border:1px solid #1e2a38;background:#0a0c0f;color:#8ab4cc;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;text-align:center;transition:all .2s}
 .merge-layout-btn:active{border-color:#00d4ff;color:#00d4ff}
-.merge-layout-icon{font-size:22px;display:block;margin-bottom:4px}
+.merge-layout-icon{font-size:18px;display:block;margin-bottom:4px}
 .merge-cancel-btn{padding:10px;background:transparent;border:1px solid #2a3a4a;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;cursor:pointer;text-align:center}
 
-/* ─── LIGHTBOX ─── */
+/* ═══ SETTINGS ═══ */
+.settings-pg{overflow-y:auto;padding:0}
+.settings-section{padding:14px 14px 0}
+.settings-title{font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:3px;color:#4a6a8a;text-transform:uppercase;border-bottom:1px solid #1e2a38;padding-bottom:6px;margin-bottom:10px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(30,42,56,.6)}
+.settings-row:last-child{border-bottom:none}
+.settings-lbl{font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:600;color:#8ab4cc;letter-spacing:1px}
+.settings-sub{font-family:'Share Tech Mono',monospace;font-size:8px;color:#4a6a8a;margin-top:1px}
+.settings-ctrl{display:flex;gap:4px;flex-shrink:0}
+.seg-btn{padding:4px 10px;background:#0a0c0f;border:1px solid #1e2a38;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .2s}
+.seg-btn.on{border-color:#00d4ff;color:#00d4ff;background:rgba(0,212,255,.1)}
+.toggle-sw{position:relative;width:46px;height:26px;flex-shrink:0}
+.toggle-sw input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:#1e2a38;border-radius:13px;transition:.3s}
+.toggle-slider:before{position:absolute;content:'';height:18px;width:18px;left:4px;bottom:4px;background:#4a6a8a;border-radius:50%;transition:.3s}
+input:checked+.toggle-slider{background:rgba(0,212,255,.3);border:1px solid rgba(0,212,255,.5)}
+input:checked+.toggle-slider:before{transform:translateX(20px);background:#00d4ff}
+.settings-btn-row{padding:10px 14px}
+.settings-btn{width:100%;padding:11px;background:transparent;border:1px solid #1e2a38;color:#8ab4cc;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;text-align:center;transition:all .2s;display:block;margin-bottom:8px}
+.settings-btn:active{border-color:#00d4ff;color:#00d4ff}
+.settings-btn.danger{border-color:rgba(255,68,102,.3);color:#ff6688}
+.settings-btn.danger:active{border-color:#ff4466}
+.settings-divider{height:1px;background:#1e2a38;margin:8px 14px}
+.settings-ver{text-align:center;font-family:'Share Tech Mono',monospace;font-size:8px;color:#2a3a4a;letter-spacing:2px;padding:12px}
+
+/* ═══ LIGHTBOX ═══ */
 .lb{position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:200;display:flex;flex-direction:column}
 .lb-hdr{padding:9px 14px;padding-top:max(9px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e2a38;flex-shrink:0}
 .lb-ttl{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4a6a8a;letter-spacing:1px}
@@ -224,14 +244,14 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .lb-ftr{padding:9px 14px;padding-bottom:max(9px,env(safe-area-inset-bottom));display:flex;gap:8px;border-top:1px solid #1e2a38;flex-shrink:0}
 .btn-dl{flex:1;padding:11px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px))}
 .btn-dl:active{background:#33deff}
-.lb-rotate-btn{padding:11px 14px;background:transparent;border:1px solid #2a3a4a;color:#8ab4cc;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
+.lb-rotate-btn{padding:11px 12px;background:transparent;border:1px solid #2a3a4a;color:#8ab4cc;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
 .lb-rotate-btn:active{color:#00d4ff;border-color:#00d4ff}
-.btn-del{padding:11px 14px;background:transparent;border:1px solid #2a3a4a;color:#ff4466;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
+.btn-del{padding:11px 12px;background:transparent;border:1px solid #2a3a4a;color:#ff4466;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
 .btn-del:active{background:rgba(255,68,102,.1)}
 .btn-close{background:none;border:none;color:#4a6a8a;cursor:pointer;font-size:24px;line-height:1;padding:4px}
 .btn-close:active{color:#e0e8f0}
 
-/* ─── BC MODAL ─── */
+/* ═══ BC MODAL ═══ */
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:100;display:flex;align-items:flex-end;justify-content:center}
 .modal{background:#0d1117;border:1px solid #1e2a38;border-bottom:none;width:100%;max-width:480px;padding:15px 14px;padding-bottom:max(20px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:9px}
 .modal-hdr{display:flex;align-items:center;justify-content:space-between}
@@ -246,7 +266,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .btn-copy{padding:11px 14px;background:transparent;border:1px solid #1e2a38;color:#8ab4cc;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
 .copied{font-family:'Share Tech Mono',monospace;font-size:9px;color:#00ff88;text-align:center}
 
-/* ─── TOAST / POPUP ─── */
+/* ═══ TOAST / POPUP ═══ */
 .toast{position:fixed;bottom:max(80px,calc(env(safe-area-inset-bottom)+70px));left:50%;transform:translateX(-50%) translateY(20px);background:#1a2a3a;border:1px solid #2a4a6a;color:#e0e8f0;font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:1px;padding:10px 18px;white-space:nowrap;z-index:500;pointer-events:none;opacity:0;transition:opacity .25s,transform .25s;border-radius:2px;max-width:92vw;text-align:center}
 .toast.ok{border-color:rgba(0,255,136,.4);color:#00ff88}
 .toast.warn{border-color:rgba(255,170,0,.4);color:#ffcc66}
@@ -264,53 +284,60 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 </head>
 <body>
 <div id="app">
-  <!-- HEADER -->
   <div class="hdr">
-    <div class="hdr-icon">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="#0a0c0f"><rect x="2" y="2" width="3" height="20"/><rect x="6" y="2" width="1" height="20"/><rect x="8" y="2" width="2" height="20"/><rect x="11" y="2" width="1" height="20"/><rect x="13" y="2" width="3" height="20"/><rect x="17" y="2" width="1" height="20"/><rect x="19" y="2" width="3" height="20"/></svg>
-    </div>
+    <div class="hdr-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="#0a0c0f"><rect x="2" y="2" width="3" height="20"/><rect x="6" y="2" width="1" height="20"/><rect x="8" y="2" width="2" height="20"/><rect x="11" y="2" width="1" height="20"/><rect x="13" y="2" width="3" height="20"/><rect x="17" y="2" width="1" height="20"/><rect x="19" y="2" width="3" height="20"/></svg></div>
     <div><div class="hdr-title">Scanner + Camera</div><div class="hdr-sub">SCAN · PHOTO · STORE</div></div>
     <div class="hdr-count" id="hdr-count">0BC / 0📷</div>
   </div>
-
-  <!-- TABS -->
   <div class="tabs">
     <button class="tab on" data-tab="scan">▶ スキャン</button>
     <button class="tab" data-tab="history">≡ BC(<span id="bc-count">0</span>)</button>
     <button class="tab" data-tab="camera">📷 カメラ</button>
     <button class="tab" data-tab="photos">🖼 写真(<span id="ph-count">0</span>)</button>
+    <button class="tab" data-tab="settings">⚙ 設定</button>
   </div>
 
   <!-- SCAN PAGE -->
   <div class="page on scan-pg" id="pg-scan">
-    <div class="mode-row">
-      <button class="mode-btn" data-mode="all">全フォーマット</button>
-      <button class="mode-btn on" data-mode="ean13">EAN-13のみ <span class="badge">EAN</span></button>
+    <!-- 上部：カメラ -->
+    <div class="scan-top">
+      <div class="mode-row">
+        <button class="mode-btn" data-mode="all">全フォーマット</button>
+        <button class="mode-btn on" data-mode="ean13">EAN-13のみ <span class="badge">EAN</span></button>
+      </div>
+      <div class="finder" id="scan-finder">
+        <video id="scan-video" muted playsinline autoplay></video>
+        <div class="corner tl"></div><div class="corner tr"></div>
+        <div class="corner bl"></div><div class="corner br"></div>
+        <div class="scan-line" id="scan-line" style="display:none"></div>
+        <div class="ean-guide" id="ean-guide" style="display:none">
+          <div class="ean-box"><div class="ean-line"></div><div class="ean-txt">EAN-13バーコードを枠内に合わせる</div></div>
+        </div>
+        <div class="finder-ov" id="scan-ov" style="display:none">SCANNING...</div>
+        <div class="finder-flash" id="finder-flash"></div>
+        <div class="ph" id="scan-ph">
+          <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#4a6a8a" stroke-width="1.2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <p id="scan-ph-txt">スキャン開始を押してください</p>
+        </div>
+      </div>
+      <div class="sbar"><div class="sdot" id="sdot"></div><span id="stxt">待機中</span></div>
+      <button class="btn-main" id="btn-scan">▶ スキャン開始</button>
     </div>
-    <!-- ファインダー flex:1 で最大化 -->
-    <div class="finder" id="scan-finder">
-      <video id="scan-video" muted playsinline autoplay></video>
-      <div class="corner tl"></div><div class="corner tr"></div>
-      <div class="corner bl"></div><div class="corner br"></div>
-      <div class="scan-line" id="scan-line" style="display:none"></div>
-      <div class="ean-guide" id="ean-guide" style="display:none">
-        <div class="ean-box"><div class="ean-line"></div><div class="ean-txt">EAN-13バーコードを枠内に合わせる</div></div>
+    <!-- 下部：大型バーコード表示 -->
+    <div class="scan-bc-section" id="scan-bc-section">
+      <div class="scan-bc-placeholder" id="scan-bc-placeholder">— バーコード表示エリア —</div>
+      <div class="scan-bc-display" id="scan-bc-display" style="display:none">
+        <div class="scan-bc-canvas-wrap" id="scan-bc-canvas-wrap">
+          <canvas id="scan-bc-canvas"></canvas>
+        </div>
+        <div class="scan-bc-val" id="scan-bc-val"></div>
+        <div class="scan-bc-footer">
+          <div class="scan-bc-meta" id="scan-bc-meta"></div>
+          <button class="scan-bc-copy" id="scan-bc-copy">📋 コピー</button>
+        </div>
       </div>
-      <div class="finder-ov" id="scan-ov" style="display:none">SCANNING...</div>
-      <!-- 検出オーバーレイ (大きく表示) -->
-      <div class="finder-detect" id="finder-detect">
-        <div class="finder-detect-val" id="finder-detect-val"></div>
-        <div class="finder-detect-fmt" id="finder-detect-fmt"></div>
-        <div class="finder-detect-dup" id="finder-detect-dup" style="display:none">⊘ 登録済み</div>
-      </div>
-      <!-- プレースホルダー -->
-      <div class="ph" id="scan-ph">
-        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#4a6a8a" stroke-width="1.2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        <p id="scan-ph-txt">スキャン開始を押してください</p>
-      </div>
+      <div class="scan-bc-dup" id="scan-bc-dup">⊘ 登録済み</div>
     </div>
-    <div class="sbar"><div class="sdot" id="sdot"></div><span id="stxt">待機中</span></div>
-    <button class="btn-main" id="btn-scan">▶ スキャン開始</button>
   </div>
 
   <!-- HISTORY PAGE -->
@@ -326,16 +353,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
       <button class="flt-btn grn" data-filter="checked">✓ 済み</button>
       <button class="flt-btn" data-filter="unchecked">未確認</button>
     </div>
-    <div class="empty" id="bc-empty">
-      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#2a3a4a" stroke-width="1.5"><rect x="2" y="2" width="4" height="16"/><rect x="7" y="2" width="2" height="16"/><rect x="10" y="2" width="4" height="16"/><rect x="15" y="2" width="2" height="16"/><rect x="18" y="2" width="4" height="16"/></svg>
-      <p>スキャン履歴がありません<br/>バーコードを読み取ると<br/>ここに表示されます</p>
-    </div>
+    <div class="empty" id="bc-empty"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#2a3a4a" stroke-width="1.5"><rect x="2" y="2" width="4" height="16"/><rect x="7" y="2" width="2" height="16"/><rect x="10" y="2" width="4" height="16"/><rect x="15" y="2" width="2" height="16"/><rect x="18" y="2" width="4" height="16"/></svg><p>スキャン履歴がありません<br/>バーコードを読み取ると<br/>ここに表示されます</p></div>
     <div class="list" id="bc-list" style="display:none"></div>
   </div>
 
   <!-- CAMERA PAGE -->
   <div class="page cam-pg" id="pg-camera">
-    <!-- ビューファインダー (flex:1 で上部最大化) -->
     <div class="vf" id="cam-vf">
       <video id="cam-video" muted playsinline autoplay></video>
       <div class="flash" id="flash"></div>
@@ -345,19 +368,16 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
         <p id="cam-ph-txt" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#3a5a7a;text-align:center;max-width:180px;line-height:1.7;">カメラを起動中...</p>
       </div>
     </div>
-    <!-- エラー -->
     <div class="err-box" id="cam-err" style="display:none;">
       <div class="err-title">🚫 カメラエラー</div>
-      <span class="err-code" id="cam-err-code">E000</span>
+      <span class="err-code-badge" id="cam-err-code">E000</span>
       <div class="err-body" id="cam-err-body"></div>
       <button class="err-retry" id="cam-retry">↺ 再試行</button>
     </div>
-    <!-- ズーム -->
     <div id="zoom-row" style="display:none;" class="zoom-row">
       <span id="zoom-lbl" class="zoom-lbl">1.0×</span>
       <input type="range" id="zoom-slider" min="0.1" max="5" step="0.1" value="1"/>
     </div>
-    <!-- 画質 -->
     <div class="quality-row" id="quality-row" style="display:none;">
       <span class="quality-lbl">画質:</span>
       <button class="quality-btn" data-q="low">低</button>
@@ -365,7 +385,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
       <button class="quality-btn" data-q="high">高</button>
       <button class="quality-btn" data-q="max">最高</button>
     </div>
-    <!-- コントロール -->
     <div class="cam-ctrl">
       <button class="ctrl-btn" id="btn-flip" title="カメラ切替">⟳</button>
       <button class="ctrl-btn" id="btn-torch" title="懐中電灯" style="font-size:18px;">🔦</button>
@@ -373,7 +392,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
       <button class="ctrl-btn" id="btn-cam-toggle">▶</button>
       <button class="ctrl-btn" id="btn-folder-toggle" title="保存先設定" style="font-size:16px;">📁</button>
     </div>
-    <!-- サムネストリップ (下に配置) -->
+    <!-- サムネ・向きバー（下部） -->
     <div class="thumb-strip-wrap" id="thumb-strip-wrap" style="display:none;">
       <div class="thumb-strip-hdr">
         <span class="thumb-strip-lbl">最近の写真</span>
@@ -381,20 +400,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
       </div>
       <div class="thumb-strip" id="thumb-strip"></div>
     </div>
-    <!-- 向きインジケーター + サムネON/OFFボタン (最下部) -->
     <div class="cam-bottom-row">
-      <div class="orient-bar">
-        <div class="orient-dot" id="orient-dot"></div>
-        <span class="orient-label" id="orient-label">センサー待機中</span>
-      </div>
-      <button class="thumb-toggle-btn" id="btn-thumb-toggle" title="サムネON/OFF">🖼 サムネ</button>
+      <div class="orient-bar"><div class="orient-dot" id="orient-dot"></div><span class="orient-label" id="orient-label">センサー待機中</span></div>
+      <button class="thumb-toggle-btn" id="btn-thumb-toggle">🖼 サムネ</button>
     </div>
-    <!-- 保存先フォルダ (📁で開閉) -->
     <div class="save-folder-row" id="save-folder-row" style="display:none;">
-      <div class="save-folder-hdr">
-        <span class="save-folder-label">📁 自動保存先</span>
-        <span class="save-folder-android">Android Chrome 限定</span>
-      </div>
+      <div class="save-folder-hdr"><span class="save-folder-label">📁 自動保存先</span><span class="save-folder-android">Android Chrome 限定</span></div>
       <div class="save-folder-path none" id="folder-path-txt">未設定（Downloadsに保存）</div>
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
         <button class="btn-folder-pick" id="btn-folder-pick">📂 フォルダを選択</button>
@@ -408,29 +419,100 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
   <div class="page photo-pg" id="pg-photos">
     <div class="photo-toolbar">
       <span class="photo-count" id="photo-count-txt">0 / 200 枚</span>
-      <button class="btn-sm accent" id="btn-merge-mode">📐 結合</button>
+      <button class="btn-sm accent" id="btn-merge-mode" style="display:none">📐 結合</button>
       <button class="btn-sm danger" id="btn-photo-clear" style="display:none">全削除</button>
     </div>
-    <!-- 結合モードバー -->
     <div class="merge-bar" id="merge-bar">
-      <span class="merge-bar-txt" id="merge-bar-txt">写真をタップして選択</span>
+      <span class="merge-bar-txt" id="merge-bar-txt">写真をタップして選択（2枚以上）</span>
       <button class="btn-merge-exec" id="btn-merge-exec" disabled>結合する</button>
       <button class="btn-merge-cancel" id="btn-merge-cancel">✕</button>
     </div>
-    <div class="empty" id="photo-empty">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2a3a4a" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-      <p>写真がありません<br/>カメラタブから撮影してください</p>
-    </div>
+    <div class="empty" id="photo-empty"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2a3a4a" stroke-width="1.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg><p>写真がありません<br/>カメラタブから撮影してください</p></div>
     <div class="photo-grid" id="photo-grid" style="display:none"></div>
+  </div>
+
+  <!-- SETTINGS PAGE -->
+  <div class="page settings-pg" id="pg-settings">
+    <!-- スキャン設定 -->
+    <div class="settings-section">
+      <div class="settings-title">▶ スキャン設定</div>
+      <div class="settings-row">
+        <div><div class="settings-lbl">スキャン自動開始</div><div class="settings-sub">タブを開くと自動でスキャン開始</div></div>
+        <label class="toggle-sw"><input type="checkbox" id="set-auto-scan" checked/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-lbl">デフォルトフォーマット</div><div class="settings-sub">スキャン対象コードの種類</div></div>
+        <div class="settings-ctrl">
+          <button class="seg-btn on" data-sf="ean13">EAN-13</button>
+          <button class="seg-btn" data-sf="all">全て</button>
+        </div>
+      </div>
+    </div>
+    <div class="settings-divider"></div>
+    <!-- カメラ設定 -->
+    <div class="settings-section">
+      <div class="settings-title">📷 カメラ設定</div>
+      <div class="settings-row">
+        <div><div class="settings-lbl">デフォルト画質</div><div class="settings-sub">高いほどファイルサイズが増加</div></div>
+        <div class="settings-ctrl">
+          <button class="seg-btn" data-cq="low">低</button>
+          <button class="seg-btn on" data-cq="mid">標</button>
+          <button class="seg-btn" data-cq="high">高</button>
+          <button class="seg-btn" data-cq="max">最</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-lbl">デフォルトカメラ</div><div class="settings-sub">アプリ起動時の初期カメラ</div></div>
+        <div class="settings-ctrl">
+          <button class="seg-btn on" data-cf="environment">背面</button>
+          <button class="seg-btn" data-cf="user">前面</button>
+        </div>
+      </div>
+    </div>
+    <div class="settings-divider"></div>
+    <!-- 写真設定 -->
+    <div class="settings-section">
+      <div class="settings-title">🖼 写真設定</div>
+      <div class="settings-row">
+        <div><div class="settings-lbl">最大保存枚数</div><div class="settings-sub">超えると古いものから削除</div></div>
+        <div class="settings-ctrl">
+          <button class="seg-btn" data-mp="50">50</button>
+          <button class="seg-btn" data-mp="100">100</button>
+          <button class="seg-btn on" data-mp="200">200</button>
+          <button class="seg-btn" data-mp="500">500</button>
+        </div>
+      </div>
+    </div>
+    <div class="settings-divider"></div>
+    <!-- 保存先 -->
+    <div class="settings-section">
+      <div class="settings-title">📁 保存先フォルダ</div>
+      <div class="settings-row">
+        <div><div class="settings-lbl" id="set-folder-name">未設定</div><div class="settings-sub" id="set-folder-note">Downloadsフォルダに保存</div></div>
+        <div class="settings-ctrl">
+          <button class="seg-btn" id="set-folder-pick-btn">選択</button>
+          <button class="seg-btn danger" id="set-folder-clear-btn" style="display:none;color:#ff6688">解除</button>
+        </div>
+      </div>
+    </div>
+    <div class="settings-divider"></div>
+    <!-- データ管理 -->
+    <div class="settings-section">
+      <div class="settings-title">🗄 データ管理</div>
+    </div>
+    <div class="settings-btn-row">
+      <button class="settings-btn" id="set-export-csv">📄 バーコード履歴をCSV出力</button>
+      <button class="settings-btn danger" id="set-clear-bc">BC履歴を全削除</button>
+      <button class="settings-btn danger" id="set-clear-photos">写真を全削除</button>
+    </div>
+    <div class="settings-divider"></div>
+    <div class="settings-ver">SCANNER + CAMERA · v3.0</div>
   </div>
 </div>
 
 <!-- LIGHTBOX -->
 <div class="lb" id="lightbox" style="display:none">
-  <div class="lb-hdr">
-    <span class="lb-ttl" id="lb-ttl"></span>
-    <button class="btn-close" id="lb-close">×</button>
-  </div>
+  <div class="lb-hdr"><span class="lb-ttl" id="lb-ttl"></span><button class="btn-close" id="lb-close">×</button></div>
   <div class="lb-img"><img id="lb-img" src="" alt=""/></div>
   <div class="lb-ftr">
     <button class="btn-dl" id="lb-dl">↓ 本体に保存</button>
@@ -460,296 +542,242 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
   <div class="merge-modal">
     <div class="merge-modal-title">結合レイアウトを選択</div>
     <div class="merge-layout-grid">
-      <button class="merge-layout-btn" data-layout="h">
-        <span class="merge-layout-icon">⬛⬛</span>横並び
-      </button>
-      <button class="merge-layout-btn" data-layout="v">
-        <span class="merge-layout-icon">⬛<br>⬛</span>縦並び
-      </button>
-      <button class="merge-layout-btn" data-layout="grid">
-        <span class="merge-layout-icon">⬛⬛<br>⬛⬛</span>グリッド
-      </button>
-      <button class="merge-layout-btn" data-layout="strip">
-        <span class="merge-layout-icon">⬛⬛⬛</span>ストリップ
-      </button>
+      <button class="merge-layout-btn" data-layout="h"><span class="merge-layout-icon">⬛⬛</span>横並び</button>
+      <button class="merge-layout-btn" data-layout="v"><span class="merge-layout-icon">⬛<br>⬛</span>縦並び</button>
+      <button class="merge-layout-btn" data-layout="grid"><span class="merge-layout-icon">⬛⬛<br>⬛⬛</span>グリッド</button>
+      <button class="merge-layout-btn" data-layout="strip"><span class="merge-layout-icon">⬛⬛⬛</span>ストリップ</button>
     </div>
     <button class="merge-cancel-btn" id="merge-modal-cancel">キャンセル</button>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
-
-<!-- iOS SAVE POPUP -->
 <div class="popup-bg" id="ios-popup" style="display:none">
   <div class="popup">
     <div class="popup-title">📷 写真を保存する</div>
-    <div class="popup-body">
-      iOSではブラウザのセキュリティ制限のため<br/>
-      <b>自動保存ができません。</b><br/><br/>
-      写真グリッドの左上 <b>↓ ボタン</b> をタップすると<br/>
-      共有シートが開き「<b>写真に保存</b>」または<br/>
-      「<b>"ファイル"に保存</b>」が選べます。
-    </div>
+    <div class="popup-body">iOSではブラウザのセキュリティ制限のため<br/><b>自動保存ができません。</b><br/><br/>写真グリッドの左上 <b>↓ ボタン</b> をタップすると<br/>共有シートが開き「<b>写真に保存</b>」または<br/>「<b>"ファイル"に保存</b>」が選べます。</div>
     <button class="popup-btn" id="ios-popup-close">わかりました</button>
   </div>
 </div>
 
 <script>
 'use strict';
-/* ════════════════════════════════════
-   UTILS
-════════════════════════════════════ */
-const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent)||
-  (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+/* ════ UTILS ════ */
+const isIOS=/iP(hone|od|ad)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 let iosPopupShown=false, toastTimer=null;
-
-function showToast(msg,type='',duration=2600){
+function showToast(msg,type='',dur=2600){
   const el=document.getElementById('toast');
-  if (toastTimer) clearTimeout(toastTimer);
+  if(toastTimer)clearTimeout(toastTimer);
   el.textContent=msg; el.className='toast'+(type?' '+type:'');
   requestAnimationFrame(()=>el.classList.add('show'));
-  toastTimer=setTimeout(()=>el.classList.remove('show'),duration);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),dur);
 }
-function $(id){ return document.getElementById(id); }
-function fmtTime(ts){
-  return new Date(ts).toLocaleString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+function $(id){return document.getElementById(id);}
+function fmtTime(ts){return new Date(ts).toLocaleString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function fmtShort(ts){return new Date(ts).toLocaleString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});}
+
+/* ════ SETTINGS ════ */
+const SETTINGS_KEY='sc-settings-v1';
+let cfg={
+  autoStartScan:true,
+  scanFormat:'ean13',
+  camQuality:'mid',
+  camFacing:'environment',
+  maxPhotos:200,
+};
+function loadCfg(){
+  try{const s=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');Object.assign(cfg,s);}catch{}
 }
-function fmtShort(ts){
-  return new Date(ts).toLocaleString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+function saveCfg(){localStorage.setItem(SETTINGS_KEY,JSON.stringify(cfg));}
+function applyCfgToUI(){
+  // auto scan toggle
+  const as=$('set-auto-scan'); if(as)as.checked=cfg.autoStartScan;
+  // scan format
+  document.querySelectorAll('[data-sf]').forEach(b=>b.classList.toggle('on',b.dataset.sf===cfg.scanFormat));
+  // cam quality
+  document.querySelectorAll('[data-cq]').forEach(b=>b.classList.toggle('on',b.dataset.cq===cfg.camQuality));
+  document.querySelectorAll('.quality-btn').forEach(b=>b.classList.toggle('on',b.dataset.q===cfg.camQuality));
+  // cam facing
+  document.querySelectorAll('[data-cf]').forEach(b=>b.classList.toggle('on',b.dataset.cf===cfg.camFacing));
+  // max photos
+  document.querySelectorAll('[data-mp]').forEach(b=>b.classList.toggle('on',b.dataset.mp===String(cfg.maxPhotos)));
+  // scan mode buttons on scan page
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('on',b.dataset.mode===cfg.scanFormat));
+  scanMode=cfg.scanFormat;
+  camQuality=cfg.camQuality;
+  facingMode=cfg.camFacing;
 }
 
-/* ─── dataUrl → Blob (0Bバグの根本修正) ─── */
-function dataUrlToBlob(dataUrl){
-  try {
-    const arr=dataUrl.split(',');
-    if (arr.length<2) throw new Error('E010: Invalid dataUrl format');
-    const mimeMatch=arr[0].match(/:(.*?);/);
-    const mime=mimeMatch?mimeMatch[1]:'image/jpeg';
-    const bstr=atob(arr[1]);
-    const u8=new Uint8Array(bstr.length);
-    for (let i=0;i<bstr.length;i++) u8[i]=bstr.charCodeAt(i);
-    const blob=new Blob([u8],{type:mime});
-    if (blob.size===0) throw new Error('E011: Converted blob is empty');
-    return blob;
-  } catch(e){ console.error('dataUrlToBlob:',e.message); return null; }
-}
-
-/* ════════════════════════════════════
-   SENSOR ORIENTATION
-════════════════════════════════════ */
-let sensorAngle=0, sensorGranted=false;
+/* ════ SENSOR ════ */
+let sensorAngle=0,sensorGranted=false;
 function startOrientSensor(){
-  if (typeof DeviceOrientationEvent==='undefined') return;
-  if (typeof DeviceOrientationEvent.requestPermission==='function'){
-    DeviceOrientationEvent.requestPermission().then(s=>{
-      if (s==='granted') listenOrientation();
-    }).catch(()=>{});
-  } else { listenOrientation(); }
+  if(typeof DeviceOrientationEvent==='undefined')return;
+  if(typeof DeviceOrientationEvent.requestPermission==='function'){
+    DeviceOrientationEvent.requestPermission().then(s=>{if(s==='granted')listenOrientation();}).catch(()=>{});
+  }else listenOrientation();
 }
-function listenOrientation(){
-  sensorGranted=true;
-  window.addEventListener('deviceorientation',onDeviceOrientation,{passive:true});
-}
-let _lastAngle=-1;
-function onDeviceOrientation(e){
-  const gamma=e.gamma||0, beta=e.beta||0;
-  let angle=0;
-  if (gamma>45) angle=90; else if (gamma<-45) angle=270;
-  else if (beta<-45) angle=180;
-  if (angle!==_lastAngle){ _lastAngle=angle; sensorAngle=angle; updateOrientUI(); }
+function listenOrientation(){sensorGranted=true;window.addEventListener('deviceorientation',onDevOri,{passive:true});}
+let _la=-1;
+function onDevOri(e){
+  const g=e.gamma||0,b=e.beta||0;
+  let a=0;if(g>45)a=90;else if(g<-45)a=270;else if(b<-45)a=180;
+  if(a!==_la){_la=a;sensorAngle=a;updateOrientUI();}
 }
 window.addEventListener('orientationchange',()=>setTimeout(updateOrientUI,400),{passive:true});
 function updateOrientUI(){
-  const dot=$('orient-dot'),label=$('orient-label');
-  if (!dot) return;
-  const ok=(sensorAngle===0);
+  const dot=$('orient-dot'),lbl=$('orient-label');if(!dot)return;
+  const ok=sensorAngle===0;
   dot.className='orient-dot '+(sensorGranted?(ok?'ok':'warn'):'');
-  label.className='orient-label '+(sensorGranted?(ok?'ok':'warn'):'');
-  if (!sensorGranted){ label.textContent='センサー待機中'; return; }
-  const labels={0:'↑ 正面',90:'→',180:'↓ 逆さ',270:'←'};
-  label.textContent=labels[sensorAngle]||'調整中';
+  lbl.className='orient-label '+(sensorGranted?(ok?'ok':'warn'):'');
+  if(!sensorGranted){lbl.textContent='センサー待機中';return;}
+  lbl.textContent={0:'↑ 正面',90:'→',180:'↓ 逆さ',270:'←'}[sensorAngle]||'調整中';
 }
 
-/* ════════════════════════════════════
-   FOLDER HANDLE IDB
-════════════════════════════════════ */
-let folderHandle=null, _pendingFolderHandle=null, _folderDB=null;
+/* ════ BLOB UTILS ════ */
+function blobToDataUrl(blob){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=()=>rej(new Error('FileReader failed'));fr.readAsDataURL(blob);
+  });
+}
+function dataUrlToBlob(dataUrl){
+  try{
+    const arr=dataUrl.split(',');if(arr.length<2)throw new Error('E010: invalid dataUrl');
+    const m=arr[0].match(/:(.*?);/);const mime=m?m[1]:'image/jpeg';
+    const bstr=atob(arr[1]);const u8=new Uint8Array(bstr.length);
+    for(let i=0;i<bstr.length;i++)u8[i]=bstr.charCodeAt(i);
+    const b=new Blob([u8],{type:mime});
+    if(b.size===0)throw new Error('E011: empty blob');
+    return b;
+  }catch(e){console.error('dataUrlToBlob:',e.message);return null;}
+}
+
+/* ════ FOLDER IDB ════ */
+let folderHandle=null,_pendingFH=null,_folderDB=null;
 async function openFolderDB(){
-  if (_folderDB) return _folderDB;
+  if(_folderDB)return _folderDB;
   return new Promise((res,rej)=>{
     const r=indexedDB.open('scanner-folder-v1',1);
     r.onupgradeneeded=e=>e.target.result.createObjectStore('handles',{keyPath:'id'});
-    r.onsuccess=e=>{ _folderDB=e.target.result; res(_folderDB); };
+    r.onsuccess=e=>{_folderDB=e.target.result;res(_folderDB);};
     r.onerror=e=>rej(e.target.error);
   });
 }
-async function saveFolderHandleToIDB(handle){
-  try {
+async function saveFHtoIDB(h){
+  try{
     const db=await openFolderDB();
-    await new Promise((res,rej)=>{
-      const tx=db.transaction('handles','readwrite');
-      tx.objectStore('handles').put({id:'folder',handle});
-      tx.oncomplete=res; tx.onerror=e=>rej(e.target.error);
-    });
-    localStorage.setItem('sc-folder-name',handle.name);
-  } catch(e){ localStorage.setItem('sc-folder-name',handle.name); }
+    await new Promise((res,rej)=>{const tx=db.transaction('handles','readwrite');tx.objectStore('handles').put({id:'folder',handle:h});tx.oncomplete=res;tx.onerror=e=>rej(e.target.error);});
+    localStorage.setItem('sc-folder-name',h.name);
+  }catch{localStorage.setItem('sc-folder-name',h.name);}
 }
 async function restoreFolderHandle(){
-  try {
+  try{
     const db=await openFolderDB();
-    const record=await new Promise((res,rej)=>{
-      const tx=db.transaction('handles','readonly');
-      const req=tx.objectStore('handles').get('folder');
-      req.onsuccess=e=>res(e.target.result);
-      tx.onerror=e=>rej(e.target.error);
-    });
-    if (record?.handle){
-      const h=record.handle;
-      const perm=await h.queryPermission({mode:'readwrite'});
-      if (perm==='granted'){ folderHandle=h; updateFolderUI(h,h.name,false); return; }
-      else { _pendingFolderHandle=h; updateFolderUI(null,h.name,true); return; }
+    const rec=await new Promise((res,rej)=>{const tx=db.transaction('handles','readonly');const r=tx.objectStore('handles').get('folder');r.onsuccess=e=>res(e.target.result);tx.onerror=e=>rej(e.target.error);});
+    if(rec?.handle){
+      const h=rec.handle;const p=await h.queryPermission({mode:'readwrite'});
+      if(p==='granted'){folderHandle=h;updateFolderUI(h,h.name,false);updateSetFolderUI();return;}
+      else{_pendingFH=h;updateFolderUI(null,h.name,true);updateSetFolderUI();return;}
     }
-  } catch(e){}
+  }catch{}
   const name=localStorage.getItem('sc-folder-name');
-  if (name) updateFolderUI(null,name,true);
+  if(name){updateFolderUI(null,name,true);updateSetFolderUI();}
 }
 async function pickSaveFolder(){
-  if (!window.showDirectoryPicker){ showToast('[E003] フォルダ選択非対応（Android Chromeをお使いください）','err',4000); return; }
-  if (_pendingFolderHandle){
-    try {
-      const perm=await _pendingFolderHandle.requestPermission({mode:'readwrite'});
-      if (perm==='granted'){
-        folderHandle=_pendingFolderHandle; _pendingFolderHandle=null;
-        updateFolderUI(folderHandle,folderHandle.name,false);
-        showToast('✓ 保存先を復元: '+folderHandle.name,'ok'); return;
-      }
-    } catch(e){}
-    _pendingFolderHandle=null;
+  if(!window.showDirectoryPicker){showToast('[E003] フォルダ選択非対応（Android Chromeをお使いください）','err',4000);return;}
+  if(_pendingFH){
+    try{const p=await _pendingFH.requestPermission({mode:'readwrite'});if(p==='granted'){folderHandle=_pendingFH;_pendingFH=null;updateFolderUI(folderHandle,folderHandle.name,false);updateSetFolderUI();showToast('✓ 保存先を復元: '+folderHandle.name,'ok');return;}}catch{}
+    _pendingFH=null;
   }
-  try {
+  try{
     const h=await window.showDirectoryPicker({mode:'readwrite',startIn:'pictures'});
-    folderHandle=h; await saveFolderHandleToIDB(h);
-    updateFolderUI(h,h.name,false);
+    folderHandle=h;await saveFHtoIDB(h);updateFolderUI(h,h.name,false);updateSetFolderUI();
     showToast('✓ 保存先を固定: '+h.name,'ok');
-  } catch(e){
-    if (e.name!=='AbortError') showToast('[E004] フォルダ選択エラー: '+e.message,'err');
+  }catch(e){if(e.name!=='AbortError')showToast('[E004] フォルダ選択エラー: '+e.message,'err');}
+}
+function updateFolderUI(h,name,needReselect){
+  const pe=$('folder-path-txt'),ce=$('btn-folder-clear'),pk=$('btn-folder-pick');
+  if(!name){
+    pe.textContent='未設定（Downloadsフォルダに保存）';pe.className='save-folder-path none';
+    if(ce)ce.style.display='none';if(pk)pk.textContent='📂 フォルダを選択';
+  }else if(needReselect){
+    pe.innerHTML='📂 '+name+' <span style="color:#ffaa00;font-size:8px;">※ 再起動後は再選択が必要</span>';pe.className='save-folder-path';
+    if(ce)ce.style.display='';if(pk)pk.textContent='🔄 再選択（固定済み）';
+  }else{
+    pe.textContent='📂 '+name+' ✓ 固定済み';pe.className='save-folder-path';
+    if(ce)ce.style.display='';if(pk)pk.textContent='📂 変更する';
   }
 }
-function updateFolderUI(handle,name,needReselect){
-  const pe=$('folder-path-txt'),ce=$('btn-folder-clear'),pk=$('btn-folder-pick');
-  if (!name){
-    pe.textContent='未設定（Downloadsフォルダに保存）'; pe.className='save-folder-path none';
-    if(ce)ce.style.display='none'; if(pk)pk.textContent='📂 フォルダを選択';
-  } else if (needReselect){
-    pe.innerHTML='📂 '+name+' <span style="color:#ffaa00;font-size:8px;">※ 再起動後は再選択が必要</span>';
-    pe.className='save-folder-path';
-    if(ce)ce.style.display=''; if(pk)pk.textContent='🔄 再選択（固定済み）';
-  } else {
-    pe.textContent='📂 '+name+' ✓ 固定済み'; pe.className='save-folder-path';
-    if(ce)ce.style.display=''; if(pk)pk.textContent='📂 変更する';
-  }
+function updateSetFolderUI(){
+  const n=$('set-folder-name'),note=$('set-folder-note'),cb=$('set-folder-clear-btn');
+  const name=folderHandle?folderHandle.name:localStorage.getItem('sc-folder-name')||'';
+  if(name){n.textContent='📂 '+name;note.textContent=folderHandle?'✓ 固定済み':'※ 再選択が必要';if(cb)cb.style.display='';}
+  else{n.textContent='未設定';note.textContent='Downloadsフォルダに保存';if(cb)cb.style.display='none';}
 }
 function clearSaveFolder(){
-  folderHandle=null; _pendingFolderHandle=null; localStorage.removeItem('sc-folder-name');
-  openFolderDB().then(db=>{ const tx=db.transaction('handles','readwrite'); tx.objectStore('handles').delete('folder'); }).catch(()=>{});
-  updateFolderUI(null,'',false); showToast('保存先をリセットしました');
+  folderHandle=null;_pendingFH=null;localStorage.removeItem('sc-folder-name');
+  openFolderDB().then(db=>{const tx=db.transaction('handles','readwrite');tx.objectStore('handles').delete('folder');}).catch(()=>{});
+  updateFolderUI(null,'',false);updateSetFolderUI();showToast('保存先をリセットしました');
 }
 $('btn-folder-pick').addEventListener('click',pickSaveFolder);
 $('btn-folder-clear').addEventListener('click',clearSaveFolder);
 $('btn-folder-toggle').addEventListener('click',()=>{
-  const row=$('save-folder-row');
-  const vis=row.style.display!=='none';
-  row.style.display=vis?'none':'';
-  $('btn-folder-toggle').classList.toggle('torch-on',!vis);
+  const row=$('save-folder-row');const vis=row.style.display!=='none';
+  row.style.display=vis?'none':'';$('btn-folder-toggle').classList.toggle('hilite',!vis);
 });
 
-/* 保存先フォルダへ書き込み (0Bバグ修正版) */
-async function saveToFolderHandle(dataUrl,filename){
-  try {
+/* ★ 写真保存 → Blob直接書き込み (0B・黒画像を根本修正) */
+async function saveToFolderHandle(blob,filename){
+  try{
+    if(!blob||blob.size===0)return{ok:false,code:'E011',msg:'Blobが空です。撮影に失敗した可能性があります'};
     const perm=await folderHandle.queryPermission({mode:'readwrite'});
-    if (perm!=='granted'){
-      const req=await folderHandle.requestPermission({mode:'readwrite'});
-      if (req!=='granted') return {ok:false,code:'E006',msg:'フォルダへのアクセス権限がありません'};
-    }
-    /* ★ fetch()ではなく手動変換でBlob生成 → 0Bバグを根本修正 */
-    const blob=dataUrlToBlob(dataUrl);
-    if (!blob||blob.size===0) return {ok:false,code:'E011',msg:'画像データの変換に失敗（dataUrl→Blob）'};
+    if(perm!=='granted'){const r=await folderHandle.requestPermission({mode:'readwrite'});if(r!=='granted')return{ok:false,code:'E006',msg:'フォルダへのアクセス権限がありません'};}
     const fh=await folderHandle.getFileHandle(filename,{create:true});
     const writable=await fh.createWritable();
     await writable.write(blob);
     await writable.close();
-    // 書き込み後に検証
     const verFh=await folderHandle.getFileHandle(filename);
     const verFile=await verFh.getFile();
-    if (verFile.size===0) return {ok:false,code:'E012',msg:'ファイルが0Bで保存されました。デバイスの空き容量を確認してください'};
-    return {ok:true};
-  } catch(e){
-    console.error('saveToFolderHandle:',e);
-    return {ok:false,code:'E007',msg:e.message};
-  }
+    if(verFile.size===0)return{ok:false,code:'E012',msg:'ファイルが0Bです。端末のストレージ空き容量を確認してください'};
+    return{ok:true};
+  }catch(e){return{ok:false,code:'E007',msg:e.message};}
 }
-
-/* ════════════════════════════════════
-   PHOTO SAVE
-════════════════════════════════════ */
-function autoSaveToDevice(photo){
-  if (isIOS){
-    if (!iosPopupShown){ iosPopupShown=true; $('ios-popup').style.display=''; }
-    return;
-  }
+async function autoSaveToDevice(photo,originalBlob=null){
+  if(isIOS){if(!iosPopupShown){iosPopupShown=true;$('ios-popup').style.display='';}return;}
   const ts=fmtTime(photo.timestamp).replace(/[/:\s]/g,'-');
   const name='photo_'+ts+'.jpg';
-  if (folderHandle){
-    saveToFolderHandle(photo.dataUrl,name).then(result=>{
-      if (result.ok){
-        showToast('✓ '+folderHandle.name+' に保存しました','ok');
-      } else {
-        showToast('['+result.code+'] 保存失敗→Downloadsへ: '+result.msg,'err',4000);
-        fallbackDownload(photo.dataUrl,name);
-      }
-    });
-  } else {
+  if(folderHandle){
+    let blob=originalBlob;
+    if(!blob||blob.size===0){blob=dataUrlToBlob(photo.dataUrl);}
+    if(!blob||blob.size===0){showToast('[E010] 画像データ変換失敗','err',4000);fallbackDownload(photo.dataUrl,name);return;}
+    const r=await saveToFolderHandle(blob,name);
+    if(r.ok)showToast('✓ '+folderHandle.name+' に保存しました','ok');
+    else{showToast('['+r.code+'] 保存失敗→Downloads: '+r.msg,'err',5000);fallbackDownload(photo.dataUrl,name);}
+  }else{
     fallbackDownload(photo.dataUrl,name);
     showToast('✓ Downloadsに保存しました','ok');
   }
 }
-function fallbackDownload(dataUrl,name){
-  const a=document.createElement('a'); a.href=dataUrl; a.download=name;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-}
+function fallbackDownload(dataUrl,name){const a=document.createElement('a');a.href=dataUrl;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);}
 
-/* ════════════════════════════════════
-   INDEXEDDB (PHOTOS)
-════════════════════════════════════ */
+/* ════ INDEXEDDB (PHOTOS) ════ */
 const BC_KEY='sc-bc-v3';
-const MAX_PH=200;
 const JS_FMT={ean_13:'EAN13',ean_8:'EAN8',code_128:'CODE128',code_39:'CODE39',code_93:'CODE93',upc_a:'UPC',upc_e:'UPC',itf:'ITF14'};
 const ALL_FMTS=['qr_code','ean_13','ean_8','code_128','code_39','code_93','itf','upc_a','upc_e','aztec','data_matrix','pdf417'];
 let _db=null;
 function openDB(){
-  if (_db) return Promise.resolve(_db);
+  if(_db)return Promise.resolve(_db);
   return new Promise((res,rej)=>{
     const r=indexedDB.open('scanner-v1',1);
-    r.onupgradeneeded=e=>{
-      const db=e.target.result;
-      if (!db.objectStoreNames.contains('photos')){
-        const s=db.createObjectStore('photos',{keyPath:'id'});
-        s.createIndex('ts','timestamp');
-      }
-    };
-    r.onsuccess=e=>{ _db=e.target.result; res(_db); };
-    r.onerror=e=>rej(e.target.error);
+    r.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains('photos')){const s=db.createObjectStore('photos',{keyPath:'id'});s.createIndex('ts','timestamp');}};
+    r.onsuccess=e=>{_db=e.target.result;res(_db);};r.onerror=e=>rej(e.target.error);
   });
 }
 async function dbTx(mode,fn){
   const db=await openDB();
   return new Promise((res,rej)=>{
-    const tx=db.transaction('photos',mode);
-    const st=tx.objectStore('photos');
-    const req=fn(st);
-    if (req) req.onsuccess=e=>res(e.target.result);
-    tx.oncomplete=()=>{ if(!req)res(); };
-    tx.onerror=e=>rej(e.target.error);
+    const tx=db.transaction('photos',mode);const st=tx.objectStore('photos');
+    const req=fn(st);if(req)req.onsuccess=e=>res(e.target.result);
+    tx.oncomplete=()=>{if(!req)res();};tx.onerror=e=>rej(e.target.error);
   });
 }
 const dbPut=p=>dbTx('readwrite',s=>s.put(p));
@@ -757,71 +785,54 @@ const dbDel=id=>dbTx('readwrite',s=>s.delete(id));
 const dbClear=()=>dbTx('readwrite',s=>s.clear());
 const dbAll=()=>dbTx('readonly',s=>s.index('ts').getAll());
 async function dbPrune(max){
-  const all=await dbAll(); if(all.length<=max) return;
+  const all=await dbAll();if(all.length<=max)return;
   const db=await openDB();
-  await new Promise((res,rej)=>{
-    const tx=db.transaction('photos','readwrite'); const st=tx.objectStore('photos');
-    all.slice(0,all.length-max).forEach(p=>st.delete(p.id));
-    tx.oncomplete=res; tx.onerror=e=>rej(e.target.error);
-  });
+  await new Promise((res,rej)=>{const tx=db.transaction('photos','readwrite');const st=tx.objectStore('photos');all.slice(0,all.length-max).forEach(p=>st.delete(p.id));tx.oncomplete=res;tx.onerror=e=>rej(e.target.error);});
 }
 
-/* ════════════════════════════════════
-   STATE
-════════════════════════════════════ */
-let bcHistory=[], photos=[];
-let scanning=false, scanMode='ean13';
-let camActive=false, facingMode='environment', camQuality='mid';
-let scanStream=null, camStream=null, detector=null, raf=null;
-let lastCode=null, lastCodeTime=0, camTrack=null;
-let activeTab='scan', currentDetail=null, currentLightbox=null;
-let histFilter='all';
-let thumbStripVisible=localStorage.getItem('sc-thumb-vis')!=='0';
-let mergeMode=false, mergeSelected=[];
+/* ════ STATE ════ */
+let bcHistory=[],photos=[];
+let scanning=false,scanMode='ean13';
+let camActive=false,facingMode='environment',camQuality='mid';
+let scanStream=null,camStream=null,detector=null,raf=null;
+let lastCode=null,lastCodeTime=0,camTrack=null;
+let activeTab='scan',currentDetail=null,currentLightbox=null;
+let histFilter='all',thumbStripVisible=localStorage.getItem('sc-thumb-vis')!=='0';
+let mergeMode=false,mergeSelected=[];
+let MAX_PH=200;
 
-/* ════════════════════════════════════
-   BC RENDER
-════════════════════════════════════ */
 function renderBC(canvas,value,format,height,showVal){
-  const jf=JS_FMT[format];
-  if (!jf||!window.JsBarcode) return false;
-  try {
-    JsBarcode(canvas,value,{format:jf,width:2,height:height||65,displayValue:!!showVal,fontSize:10,background:'#fff',lineColor:'#111',margin:7});
-    return true;
-  } catch(e){ return false; }
+  const jf=JS_FMT[format];if(!jf||!window.JsBarcode)return false;
+  try{JsBarcode(canvas,value,{format:jf,width:2,height:height||65,displayValue:!!showVal,fontSize:10,background:'#fff',lineColor:'#111',margin:7});return true;}
+  catch(e){return false;}
 }
 
-/* ════════════════════════════════════
-   COUNTS / TABS
-════════════════════════════════════ */
 function updateCounts(){
   $('hdr-count').textContent=`${bcHistory.length}BC / ${photos.length}📷`;
-  $('bc-count').textContent=bcHistory.length;
-  $('ph-count').textContent=photos.length;
+  $('bc-count').textContent=bcHistory.length;$('ph-count').textContent=photos.length;
   $('photo-count-txt').textContent=`${photos.length} / ${MAX_PH} 枚`;
   $('btn-bc-clear').style.display=bcHistory.length?'':'none';
   $('btn-bc-csv').style.display=bcHistory.length?'':'none';
   $('btn-photo-clear').style.display=photos.length?'':'none';
   $('btn-merge-mode').style.display=photos.length>=2?'':'none';
 }
+
 document.querySelectorAll('.tab').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    const t=btn.dataset.tab;
-    if (t===activeTab) return;
+    const t=btn.dataset.tab;if(t===activeTab)return;
     document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-    btn.classList.add('on'); $('pg-'+t).classList.add('on'); activeTab=t;
-    if (t!=='scan') stopScan();
-    if (t!=='camera') stopCam();
-    if (t==='camera') setTimeout(startCam,80);
-    if (t==='history') renderBcList();
-    if (t==='photos'){ exitMergeMode(); renderPhotoGrid(); }
+    btn.classList.add('on');$('pg-'+t).classList.add('on');activeTab=t;
+    if(t!=='scan')stopScan();
+    if(t!=='camera')stopCam();
+    if(t==='scan'&&cfg.autoStartScan)setTimeout(startScan,100);
+    if(t==='camera')setTimeout(startCam,80);
+    if(t==='history')renderBcList();
+    if(t==='photos'){exitMergeMode();renderPhotoGrid();}
   });
 });
 
-/* ════════════════════════════════════
-   SCAN
-════════════════════════════════════ */
+/* ════ SCAN ════ */
 function setScanUI(active){
   $('scan-line').style.display=(!active||scanMode!=='all')?'none':'';
   $('ean-guide').style.display=(active&&scanMode==='ean13')?'':'none';
@@ -835,618 +846,445 @@ function setStatus(dot,txt){
   $('stxt').textContent=txt;
 }
 function stopScan(){
-  if (raf){ cancelAnimationFrame(raf); raf=null; }
-  if (scanStream){ scanStream.getTracks().forEach(t=>t.stop()); scanStream=null; }
-  const v=$('scan-video'); if(v) v.srcObject=null;
-  scanning=false; setScanUI(false); setStatus('','待機中');
-  $('btn-scan').textContent='▶ スキャン開始';
-  $('btn-scan').classList.remove('stop');
+  if(raf){cancelAnimationFrame(raf);raf=null;}
+  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
+  const v=$('scan-video');if(v)v.srcObject=null;
+  scanning=false;setScanUI(false);setStatus('','待機中');
+  $('btn-scan').textContent='▶ スキャン開始';$('btn-scan').classList.remove('stop');
 }
 async function startScan(){
-  if (!('BarcodeDetector' in window)){
-    setStatus('err','[E001] BarcodeDetector 非対応 (Chrome/Edgeが必要)'); return;
-  }
-  try {
+  if(scanning)return;
+  if(!('BarcodeDetector' in window)){setStatus('err','[E001] BarcodeDetector 非対応 (Chrome/Edgeが必要)');return;}
+  try{
     scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-    const v=$('scan-video');
-    v.srcObject=scanStream; v.setAttribute('playsinline',''); v.setAttribute('muted','');
+    const v=$('scan-video');v.srcObject=scanStream;v.setAttribute('playsinline','');v.setAttribute('muted','');
     await v.play();
     detector=new BarcodeDetector({formats:scanMode==='ean13'?['ean_13']:ALL_FMTS});
-    scanning=true; setScanUI(true);
+    scanning=true;setScanUI(true);
     setStatus('go',scanMode==='ean13'?'EAN-13 スキャン中...':'スキャン中...');
-    $('btn-scan').textContent='■ スキャン停止';
-    $('btn-scan').classList.add('stop');
+    $('btn-scan').textContent='■ スキャン停止';$('btn-scan').classList.add('stop');
     detect();
-  } catch(e){
+  }catch(e){
     const code=e.name==='NotAllowedError'?'E002':'E005';
     setStatus('err',`[${code}] `+(e.name==='NotAllowedError'?'カメラの許可が必要です':'カメラエラー: '+e.message));
   }
 }
 async function detect(){
   const v=$('scan-video');
-  if (!v||!scanning||v.readyState<2){ raf=requestAnimationFrame(detect); return; }
-  try {
+  if(!v||!scanning||v.readyState<2){raf=requestAnimationFrame(detect);return;}
+  try{
     const codes=await detector.detect(v);
-    if (codes.length){
-      const c=codes[0], now=Date.now();
-      // 13桁以外は破棄
-      if (c.rawValue.length!==13){
-        /* skip */
-      } else if (c.rawValue!==lastCode||now-lastCodeTime>3000){
-        lastCode=c.rawValue; lastCodeTime=now;
-        onDetected(c.rawValue,c.format);
+    if(codes.length){
+      const c=codes[0],now=Date.now();
+      if(c.rawValue.length!==13){/* 13桁以外破棄 */}
+      else if(c.rawValue!==lastCode||now-lastCodeTime>3000){
+        lastCode=c.rawValue;lastCodeTime=now;onDetected(c.rawValue,c.format);
       }
     }
-  } catch(e){}
-  if (scanning) raf=requestAnimationFrame(detect);
+  }catch(e){}
+  if(scanning)raf=requestAnimationFrame(detect);
 }
 
-let detectOverlayTimer=null;
-function showDetectOverlay(value,format,isDup){
-  $('finder-detect-val').textContent=value;
-  $('finder-detect-fmt').textContent=(format||'').toUpperCase().replace('_',' ');
-  $('finder-detect-dup').style.display=isDup?'':'none';
-  const ov=$('finder-detect');
-  ov.style.background=isDup?'rgba(0,0,0,.55)':'rgba(0,0,0,.45)';
-  ov.classList.add('show');
-  if (detectOverlayTimer) clearTimeout(detectOverlayTimer);
-  detectOverlayTimer=setTimeout(()=>ov.classList.remove('show'),2200);
+/* ファインダーフラッシュ */
+let flashTimer=null;
+function flashFinder(){
+  const fl=$('finder-flash');fl.classList.add('show');
+  if(flashTimer)clearTimeout(flashTimer);
+  flashTimer=setTimeout(()=>fl.classList.remove('show'),220);
+}
+
+/* ★ 大型バーコード表示 (タップ不要・常時表示) */
+function showLargeBarcode(value,format,isDup){
+  $('scan-bc-placeholder').style.display='none';
+  $('scan-bc-display').style.display='';
+  $('scan-bc-val').textContent=value;
+  $('scan-bc-meta').textContent=(format||'').toUpperCase().replace('_',' ');
+  $('scan-bc-dup').className='scan-bc-dup'+(isDup?' show':'');
+  // バーコード画像をフルサイズで描画
+  const cv=$('scan-bc-canvas');
+  const jf=JS_FMT[format];
+  if(jf&&window.JsBarcode){
+    try{
+      // ラッパー幅に合わせてcanvasサイズを決定
+      const wrap=$('scan-bc-canvas-wrap');
+      const maxW=Math.min(wrap.clientWidth||window.innerWidth-20,600);
+      JsBarcode(cv,value,{
+        format:jf,
+        width:Math.max(2,Math.floor(maxW/80)),  // barWidth
+        height:110,
+        displayValue:true,
+        fontSize:18,
+        background:'#ffffff',
+        lineColor:'#111111',
+        margin:10
+      });
+    }catch(e){cv.width=0;}  // QR等非対応フォーマット
+  }
 }
 
 function onDetected(value,format){
-  // 重複チェック
-  if (bcHistory.some(x=>x.value===value)){
-    showDetectOverlay(value,format,true);
+  const isDup=bcHistory.some(x=>x.value===value);
+  // ファインダーフラッシュ
+  flashFinder();
+  // 大型バーコード表示（即時・タップ不要）
+  showLargeBarcode(value,format,isDup);
+  if(isDup){
     showToast('⊘ 登録済み: '+value,'dup',1800);
     setStatus('ok','登録済み: '+value.slice(0,20));
-    setTimeout(()=>{ if(scanning)setStatus('go',scanMode==='ean13'?'EAN-13 スキャン中...':'スキャン中...'); },1500);
+    setTimeout(()=>{if(scanning)setStatus('go',scanMode==='ean13'?'EAN-13 スキャン中...':'スキャン中...');},1500);
     return;
   }
   const entry={id:Date.now()+Math.random(),value,format,timestamp:Date.now(),checked:false};
   bcHistory=[entry,...bcHistory];
   localStorage.setItem(BC_KEY,JSON.stringify(bcHistory));
   updateCounts();
-  showDetectOverlay(value,format,false);
   setStatus('ok','検出！ '+value.slice(0,22));
-  setTimeout(()=>{ if(scanning)setStatus('go',scanMode==='ean13'?'EAN-13 スキャン中...':'スキャン中...'); },1500);
+  setTimeout(()=>{if(scanning)setStatus('go',scanMode==='ean13'?'EAN-13 スキャン中...':'スキャン中...');},1500);
 }
-$('btn-scan').addEventListener('click',()=>{ scanning?stopScan():startScan(); });
+$('btn-scan').addEventListener('click',()=>{scanning?stopScan():startScan();});
+$('scan-bc-copy').addEventListener('click',()=>{
+  const val=$('scan-bc-val').textContent;if(!val)return;
+  navigator.clipboard?.writeText(val).catch(()=>{});
+  showToast('✓ コピーしました','ok',1500);
+});
 document.querySelectorAll('.mode-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    const m=btn.dataset.mode; if(m===scanMode)return;
+    const m=btn.dataset.mode;if(m===scanMode)return;
     document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('on'));
-    btn.classList.add('on'); scanMode=m;
+    btn.classList.add('on');scanMode=m;cfg.scanFormat=m;saveCfg();
+    applyCfgToUI();
     $('scan-ph-txt').textContent=m==='ean13'?'EAN-13専用モード':'スキャン開始を押してください';
-    if (scanning){ stopScan(); setTimeout(startScan,200); }
+    if(scanning){stopScan();setTimeout(startScan,200);}
   });
 });
 
-/* ════════════════════════════════════
-   CAMERA
-════════════════════════════════════ */
-const CAM_QUALITY={
-  low: {width:{ideal:640},height:{ideal:480}},
-  mid: {width:{ideal:1280},height:{ideal:720}},
-  high:{width:{ideal:1920},height:{ideal:1080}},
-  max: {width:{ideal:3840},height:{ideal:2160}},
-};
+/* ════ CAMERA ════ */
+const CAM_QUALITY={low:{width:{ideal:640},height:{ideal:480}},mid:{width:{ideal:1280},height:{ideal:720}},high:{width:{ideal:1920},height:{ideal:1080}},max:{width:{ideal:3840},height:{ideal:2160}}};
+
 document.querySelectorAll('.quality-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    const q=btn.dataset.q; if(q===camQuality)return;
+    const q=btn.dataset.q;if(q===camQuality)return;
     document.querySelectorAll('.quality-btn').forEach(b=>b.classList.remove('on'));
-    btn.classList.add('on'); camQuality=q;
-    localStorage.setItem('sc-cam-quality',q);
-    if (camActive){ stopCam(); setTimeout(()=>startCam(facingMode),150); }
+    btn.classList.add('on');camQuality=q;cfg.camQuality=q;saveCfg();applyCfgToUI();
+    if(camActive){stopCam();setTimeout(()=>startCam(facingMode),150);}
     showToast('画質: '+{low:'低',mid:'標準',high:'高',max:'最高'}[q],'ok');
   });
 });
-(()=>{
-  const saved=localStorage.getItem('sc-cam-quality');
-  if (saved&&CAM_QUALITY[saved]){
-    camQuality=saved;
-    document.querySelectorAll('.quality-btn').forEach(b=>b.classList.toggle('on',b.dataset.q===saved));
-  }
-})();
 
-function showCamError(code,msg){
-  $('cam-err').style.display='';
-  $('cam-err-code').textContent=code;
-  $('cam-err-body').textContent=msg;
-}
-function hideCamError(){ $('cam-err').style.display='none'; }
-
+function showCamError(code,msg){$('cam-err').style.display='';$('cam-err-code').textContent=code;$('cam-err-body').textContent=msg;}
+function hideCamError(){$('cam-err').style.display='none';}
 function setCamActive(active){
-  camActive=active;
-  $('cam-ph').style.display=active?'none':'';
-  $('zoom-row').style.display=active?'flex':'none';
-  $('quality-row').style.display=active?'flex':'none';
-  $('btn-shutter').disabled=!active;
-  $('btn-cam-toggle').textContent=active?'■':'▶';
+  camActive=active;$('cam-ph').style.display=active?'none':'';
+  $('zoom-row').style.display=active?'flex':'none';$('quality-row').style.display=active?'flex':'none';
+  $('btn-shutter').disabled=!active;$('btn-cam-toggle').textContent=active?'■':'▶';
   $('btn-cam-toggle').classList.toggle('red',active);
-  if (active){ hideCamError(); startOrientSensor(); setTimeout(updateOrientUI,300); }
+  if(active){hideCamError();startOrientSensor();setTimeout(updateOrientUI,300);}
 }
-
 let torchOn=false;
 async function toggleTorch(){
-  if (!camTrack){ showToast('カメラを起動してください','warn'); return; }
-  try {
+  if(!camTrack){showToast('カメラを起動してください','warn');return;}
+  try{
     const caps=camTrack.getCapabilities?camTrack.getCapabilities():{};
-    if (!caps.torch){ showToast('[E008] このデバイスはフラッシュ非対応です','warn'); return; }
+    if(!caps.torch){showToast('[E008] このデバイスはフラッシュ非対応です','warn');return;}
     torchOn=!torchOn;
     await camTrack.applyConstraints({advanced:[{torch:torchOn}]});
     $('btn-torch').classList.toggle('torch-on',torchOn);
     showToast(torchOn?'🔦 懐中電灯 ON':'懐中電灯 OFF',torchOn?'ok':'');
-  } catch(e){ showToast('[E008] '+e.message,'warn'); }
+  }catch(e){showToast('[E008] '+e.message,'warn');}
 }
 $('btn-torch').addEventListener('click',toggleTorch);
 
-/* フォーカスは常時ON（ボタン廃止・VFタップで常に適用） */
+/* フォーカスは常時ON - タップで即時フォーカス */
 let focusTimer=null;
 $('cam-vf').addEventListener('click',async(e)=>{
-  if (!camActive||!camTrack) return;
-  const vf=$('cam-vf'), rect=vf.getBoundingClientRect();
-  const x=(e.clientX-rect.left)/rect.width, y=(e.clientY-rect.top)/rect.height;
-  const ring=$('focus-ring');
-  ring.style.left=(x*100)+'%'; ring.style.top=(y*100)+'%';
-  ring.classList.add('show');
-  if (focusTimer) clearTimeout(focusTimer);
+  if(!camActive||!camTrack)return;
+  const vf=$('cam-vf'),rect=vf.getBoundingClientRect();
+  const x=(e.clientX-rect.left)/rect.width,y=(e.clientY-rect.top)/rect.height;
+  const ring=$('focus-ring');ring.style.left=(x*100)+'%';ring.style.top=(y*100)+'%';
+  ring.classList.add('show');if(focusTimer)clearTimeout(focusTimer);
   focusTimer=setTimeout(()=>ring.classList.remove('show'),1000);
-  try {
+  try{
     const caps=camTrack.getCapabilities?camTrack.getCapabilities():{};
-    if (caps.focusMode&&caps.focusMode.includes('manual')){
+    if(caps.focusMode?.includes('manual'))
       await camTrack.applyConstraints({advanced:[{focusMode:'single-shot',pointsOfInterest:[{x,y}]}]});
-    } else if (caps.focusMode&&caps.focusMode.includes('continuous')){
+    else if(caps.focusMode?.includes('continuous'))
       await camTrack.applyConstraints({advanced:[{focusMode:'continuous',pointsOfInterest:[{x,y}]}]});
-    }
-  } catch(e){}
+  }catch(e){}
 });
 
 function stopCam(){
-  if (camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
-  const v=$('cam-video'); if(v){ v.srcObject=null; v.style.transform=''; }
-  camTrack=null; torchOn=false;
-  $('btn-torch').classList.remove('torch-on');
-  $('focus-ring').classList.remove('show');
-  setCamActive(false);
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  const v=$('cam-video');if(v){v.srcObject=null;v.style.transform='';}
+  camTrack=null;torchOn=false;$('btn-torch').classList.remove('torch-on');
+  $('focus-ring').classList.remove('show');setCamActive(false);
 }
 async function startCam(facing){
-  const fm=facing||facingMode;
-  hideCamError(); $('cam-ph-txt').textContent='カメラを起動中...';
+  const fm=facing||facingMode;hideCamError();$('cam-ph-txt').textContent='カメラを起動中...';
   const qc=CAM_QUALITY[camQuality]||CAM_QUALITY.mid;
-  const constraints=[
-    {video:{facingMode:{ideal:fm},...qc}},
-    {video:{facingMode:{ideal:fm}}},
-    {video:{facingMode:fm}},
-    {video:true},
-  ];
+  const constraints=[{video:{facingMode:{ideal:fm},...qc}},{video:{facingMode:{ideal:fm}}},{video:{facingMode:fm}},{video:true}];
   let stream=null;
-  for (const c of constraints){
-    try {
-      if (camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream=null; }
-      stream=await navigator.mediaDevices.getUserMedia(c); break;
-    } catch(e){
-      if (e.name==='NotAllowedError'||e.name==='PermissionDeniedError'){
-        showCamError('E002','カメラの許可が必要です。ブラウザのアドレスバー左端 🔒 → カメラ → 許可 → ページを再読み込み'); return;
-      }
-      if (e.name==='NotFoundError') continue;
-      showCamError('E005',e.message);
+  for(const c of constraints){
+    try{if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}stream=await navigator.mediaDevices.getUserMedia(c);break;}
+    catch(e){
+      if(e.name==='NotAllowedError'||e.name==='PermissionDeniedError'){showCamError('E002','カメラの許可が必要です。ブラウザのアドレスバー左端 🔒 → カメラ → 許可 → ページを再読み込み');return;}
     }
   }
-  if (!stream){ showCamError('E001','カメラが見つかりません。デバイスにカメラがあるか確認してください。'); return; }
-  camStream=stream; camTrack=stream.getVideoTracks()[0];
-  const v=$('cam-video');
-  v.setAttribute('playsinline',''); v.setAttribute('muted',''); v.setAttribute('autoplay','');
-  v.muted=true; v.srcObject=stream;
-  try {
-    await new Promise((res,rej)=>{ v.onloadedmetadata=res; v.onerror=rej; setTimeout(res,4000); });
-    await v.play();
-    setCamActive(true);
-    $('zoom-slider').value=1; applyZoom(1);
-    updateThumbStrip();
-  } catch(e){ showCamError('E005','カメラの再生に失敗: '+e.message); }
+  if(!stream){showCamError('E001','カメラが見つかりません。');return;}
+  camStream=stream;camTrack=stream.getVideoTracks()[0];
+  const v=$('cam-video');v.setAttribute('playsinline','');v.setAttribute('muted','');v.setAttribute('autoplay','');
+  v.muted=true;v.srcObject=stream;
+  try{
+    await new Promise((res,rej)=>{v.onloadedmetadata=res;v.onerror=rej;setTimeout(res,4000);});
+    await v.play();setCamActive(true);$('zoom-slider').value=1;applyZoom(1);updateThumbStrip();
+  }catch(e){showCamError('E005','カメラの再生に失敗: '+e.message);}
 }
 function applyZoom(z){
-  const v=$('cam-video');
-  $('zoom-lbl').textContent=z.toFixed(1)+'×';
-  if (!v) return;
-  if (z<1){
-    v.style.transform=`scale(${z})`; v.style.transformOrigin='center center';
-    if (camTrack) try{ camTrack.applyConstraints({advanced:[{zoom:1}]}).catch(()=>{}); }catch(e){}
-    return;
-  }
-  v.style.transform='';
-  if (!camTrack) return;
-  try {
-    const caps=camTrack.getCapabilities?.();
-    if (caps?.zoom){
-      const zc=Math.min(Math.max(z,caps.zoom.min||1),caps.zoom.max||8);
-      camTrack.applyConstraints({advanced:[{zoom:zc}]}).catch(()=>{});
-    }
-  } catch(e){}
+  const v=$('cam-video');$('zoom-lbl').textContent=z.toFixed(1)+'×';if(!v)return;
+  if(z<1){v.style.transform=`scale(${z})`;v.style.transformOrigin='center center';if(camTrack)try{camTrack.applyConstraints({advanced:[{zoom:1}]}).catch(()=>{});}catch(e){}return;}
+  v.style.transform='';if(!camTrack)return;
+  try{const caps=camTrack.getCapabilities?.();if(caps?.zoom){const zc=Math.min(Math.max(z,caps.zoom.min||1),caps.zoom.max||8);camTrack.applyConstraints({advanced:[{zoom:zc}]}).catch(()=>{});}}catch(e){}
 }
 $('zoom-slider').addEventListener('input',e=>applyZoom(parseFloat(e.target.value)));
 $('btn-flip').addEventListener('click',async()=>{
-  facingMode=facingMode==='environment'?'user':'environment';
-  if (camActive){ stopCam(); await new Promise(r=>setTimeout(r,150)); await startCam(facingMode); }
+  facingMode=facingMode==='environment'?'user':'environment';cfg.camFacing=facingMode;saveCfg();applyCfgToUI();
+  if(camActive){stopCam();await new Promise(r=>setTimeout(r,150));await startCam(facingMode);}
 });
-$('btn-cam-toggle').addEventListener('click',()=>{ camActive?stopCam():startCam(); });
+$('btn-cam-toggle').addEventListener('click',()=>{camActive?stopCam():startCam();});
 $('cam-retry').addEventListener('click',startCam);
 $('btn-shutter').addEventListener('click',takePhoto);
 
-function takePhoto(){
-  const v=$('cam-video'); if(!v||!camActive)return;
-  const vw=v.videoWidth, vh=v.videoHeight;
-  if (!vw||!vh){ $('cam-ph-txt').textContent='映像準備中...'; return; }
-  const corrAngle=(360-sensorAngle)%360;
-  const swap=(corrAngle===90||corrAngle===270);
-  const c=document.createElement('canvas');
-  c.width=swap?vh:vw; c.height=swap?vw:vh;
-  const ctx=c.getContext('2d');
+/* ★ 撮影：ImageCapture API優先 → canvas fallback (黒画像・0B修正) */
+async function capturePhotoBlob(){
+  // Method 1: ImageCapture API（ハードウェア直接取得・canvasタント問題なし）
+  if('ImageCapture' in window&&camTrack){
+    try{
+      const ic=new ImageCapture(camTrack);
+      const blob=await ic.takePhoto();
+      if(blob&&blob.size>0){console.log('[ImageCapture] OK:',blob.size,'bytes');return blob;}
+    }catch(e){console.warn('[ImageCapture] failed, using canvas:',e.message);}
+  }
+  // Method 2: Canvas fallback（向き補正付き）
+  const v=$('cam-video');if(!v||!camActive)return null;
+  const vw=v.videoWidth,vh=v.videoHeight;if(!vw||!vh)return null;
+  const corrAngle=(360-sensorAngle)%360,swap=corrAngle===90||corrAngle===270;
+  const c=document.createElement('canvas');c.width=swap?vh:vw;c.height=swap?vw:vh;
+  const ctx=c.getContext('2d',{willReadFrequently:true});
   ctx.translate(c.width/2,c.height/2);
-  if (corrAngle) ctx.rotate(corrAngle*Math.PI/180);
-  if (facingMode==='user') ctx.scale(-1,1);
+  if(corrAngle)ctx.rotate(corrAngle*Math.PI/180);
+  if(facingMode==='user')ctx.scale(-1,1);
   ctx.drawImage(v,-vw/2,-vh/2,vw,vh);
   const quality={low:0.62,mid:0.82,high:0.92,max:0.98}[camQuality]||0.82;
-  const dataUrl=c.toDataURL('image/jpeg',quality);
-  if (!dataUrl||dataUrl==='data:,') return;
-  const photo={id:Date.now()+Math.random(),dataUrl,timestamp:Date.now(),facingMode,rotation:0};
-  const fl=$('flash'); fl.classList.add('on'); setTimeout(()=>fl.classList.remove('on'),200);
-  autoSaveToDevice(photo);
-  dbPut(photo).then(()=>dbPrune(MAX_PH)).then(async()=>{
-    photos=(await dbAll()).reverse();
-    updateCounts(); updateThumbStrip();
-  }).catch(()=>{});
+  return new Promise(res=>c.toBlob(b=>{res(b&&b.size>0?b:null);},'image/jpeg',quality));
+}
+async function takePhoto(){
+  if(!camActive)return;
+  $('btn-shutter').disabled=true;
+  const fl=$('flash');fl.classList.add('on');setTimeout(()=>fl.classList.remove('on'),200);
+  try{
+    const blob=await capturePhotoBlob();
+    if(!blob||blob.size===0){showToast('[E013] 撮影失敗：画像データが空です','err',4000);return;}
+    const dataUrl=await blobToDataUrl(blob);
+    const photo={id:Date.now()+Math.random(),dataUrl,timestamp:Date.now(),facingMode,rotation:0};
+    autoSaveToDevice(photo,blob);  // ★ originalBlob を渡して0B問題を回避
+    dbPut(photo).then(()=>dbPrune(MAX_PH)).then(async()=>{photos=(await dbAll()).reverse();updateCounts();updateThumbStrip();}).catch(()=>{});
+  }finally{$('btn-shutter').disabled=false;}
 }
 
 /* サムネストリップ */
 function updateThumbStrip(){
   const wrap=$('thumb-strip-wrap');
-  if (!thumbStripVisible||!photos.length){ wrap.style.display='none'; return; }
-  wrap.style.display='';
-  const strip=$('thumb-strip');
-  strip.innerHTML='';
+  if(!thumbStripVisible||!photos.length){wrap.style.display='none';return;}
+  wrap.style.display='';const strip=$('thumb-strip');strip.innerHTML='';
   photos.slice(0,10).forEach(p=>{
-    const d=document.createElement('div'); d.className='mini-thumb';
-    const img=document.createElement('img'); img.src=p.dataUrl;
-    d.appendChild(img); d.onclick=()=>openLightbox(p);
-    strip.appendChild(d);
+    const d=document.createElement('div');d.className='mini-thumb';
+    const img=document.createElement('img');img.src=p.dataUrl;d.appendChild(img);d.onclick=()=>openLightbox(p);strip.appendChild(d);
   });
-  if (photos.length>10){
-    const m=document.createElement('button'); m.className='more-btn';
-    m.textContent='+'+(photos.length-10);
-    m.onclick=()=>document.querySelector('[data-tab="photos"]').click();
-    strip.appendChild(m);
-  }
+  if(photos.length>10){const m=document.createElement('button');m.className='more-btn';m.textContent='+'+(photos.length-10);m.onclick=()=>document.querySelector('[data-tab="photos"]').click();strip.appendChild(m);}
 }
 function setThumbVisible(v){
-  thumbStripVisible=v;
-  localStorage.setItem('sc-thumb-vis',v?'1':'0');
-  $('btn-thumb-toggle').classList.toggle('on',v);
-  $('btn-thumb-toggle').textContent=v?'🖼 サムネ ON':'🖼 サムネ OFF';
-  $('btn-thumb-toggle2').textContent=v?'非表示':'表示';
-  $('btn-thumb-toggle2').classList.toggle('on',v);
+  thumbStripVisible=v;localStorage.setItem('sc-thumb-vis',v?'1':'0');
+  $('btn-thumb-toggle').classList.toggle('on',v);$('btn-thumb-toggle').textContent=v?'🖼 ON':'🖼 OFF';
+  $('btn-thumb-toggle2').textContent=v?'非表示':'表示';$('btn-thumb-toggle2').classList.toggle('on',v);
   updateThumbStrip();
 }
 $('btn-thumb-toggle').addEventListener('click',()=>setThumbVisible(!thumbStripVisible));
 $('btn-thumb-toggle2').addEventListener('click',()=>setThumbVisible(!thumbStripVisible));
-// 初期化
-setThumbVisible(thumbStripVisible);
 
-/* ════════════════════════════════════
-   BC HISTORY
-════════════════════════════════════ */
+/* ════ BC HISTORY ════ */
 function toggleBcChecked(id){
-  const item=bcHistory.find(x=>x.id===id); if(!item)return;
-  item.checked=!item.checked;
-  localStorage.setItem(BC_KEY,JSON.stringify(bcHistory));
-  renderBcList();
+  const item=bcHistory.find(x=>x.id===id);if(!item)return;
+  item.checked=!item.checked;localStorage.setItem(BC_KEY,JSON.stringify(bcHistory));renderBcList();
 }
 function renderBcList(){
   const q=$('search-box').value.toLowerCase();
   let filtered=q?bcHistory.filter(x=>x.value.toLowerCase().includes(q)):bcHistory;
-  if (histFilter==='checked') filtered=filtered.filter(x=>x.checked);
-  else if (histFilter==='unchecked') filtered=filtered.filter(x=>!x.checked);
-  const list=$('bc-list'), empty=$('bc-empty');
-  if (!filtered.length){ list.style.display='none'; empty.style.display=''; return; }
-  empty.style.display='none'; list.style.display='';
-  list.innerHTML='';
+  if(histFilter==='checked')filtered=filtered.filter(x=>x.checked);
+  else if(histFilter==='unchecked')filtered=filtered.filter(x=>!x.checked);
+  const list=$('bc-list'),empty=$('bc-empty');
+  if(!filtered.length){list.style.display='none';empty.style.display='';return;}
+  empty.style.display='none';list.style.display='';list.innerHTML='';
   filtered.forEach((item,i)=>{
     const card=document.createElement('div');
     card.className='bc-card'+(item.format==='ean_13'?' ean':'')+(item.checked?' checked':'');
-    card.innerHTML=`
-<button class="card-check">✓</button>
-<div class="bc-thumb"><canvas></canvas></div>
-<div class="card-info">
-  <div class="card-val">${item.value}</div>
-  <div class="card-meta">
-    <span class="card-fmt ${item.format==='ean_13'?'ean':''}">${(item.format||'').replace('_',' ')}</span>
-    <span class="card-time">${fmtTime(item.timestamp)}</span>
-    <span class="card-num">#${String(filtered.length-i).padStart(3,'0')}</span>
-    ${item.checked?'<span class="card-chk-lbl">✓ 確認済</span>':''}
-  </div>
-</div>
-<button class="btn-x">✕</button>`;
-    card.querySelector('.card-check').addEventListener('click',e=>{
-      e.stopPropagation(); toggleBcChecked(item.id);
-    });
+    card.innerHTML=`<button class="card-check">✓</button><div class="bc-thumb"><canvas></canvas></div><div class="card-info"><div class="card-val">${item.value}</div><div class="card-meta"><span class="card-fmt ${item.format==='ean_13'?'ean':''}">${(item.format||'').replace('_',' ')}</span><span class="card-time">${fmtTime(item.timestamp)}</span><span class="card-num">#${String(filtered.length-i).padStart(3,'0')}</span>${item.checked?'<span class="card-chk-lbl">✓ 確認済</span>':''}</div></div><button class="btn-x">✕</button>`;
+    card.querySelector('.card-check').addEventListener('click',e=>{e.stopPropagation();toggleBcChecked(item.id);});
     card.querySelector('.card-info').addEventListener('click',()=>openBcModal(item));
-    card.querySelector('.btn-x').addEventListener('click',e=>{ e.stopPropagation(); deleteBc(item.id); });
+    card.querySelector('.btn-x').addEventListener('click',e=>{e.stopPropagation();deleteBc(item.id);});
     const cv=card.querySelector('canvas');
-    setTimeout(()=>{
-      if (!renderBC(cv,item.value,item.format,24,false)){
-        cv.replaceWith(Object.assign(document.createElement('div'),{className:'bc-thumb-txt',textContent:(item.format||'').toUpperCase().replace('_',' ')}));
-      }
-    },10);
+    setTimeout(()=>{if(!renderBC(cv,item.value,item.format,24,false))cv.replaceWith(Object.assign(document.createElement('div'),{className:'bc-thumb-txt',textContent:(item.format||'').toUpperCase().replace('_',' ')}));},10);
     list.appendChild(card);
   });
 }
 $('search-box').addEventListener('input',renderBcList);
-document.querySelectorAll('.flt-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.flt-btn').forEach(b=>b.classList.remove('on'));
-    btn.classList.add('on'); histFilter=btn.dataset.filter; renderBcList();
-  });
-});
-function deleteBc(id){
-  bcHistory=bcHistory.filter(x=>x.id!==id);
-  localStorage.setItem(BC_KEY,JSON.stringify(bcHistory));
-  updateCounts(); renderBcList();
-}
-$('btn-bc-clear').addEventListener('click',()=>{
-  bcHistory=[]; localStorage.setItem(BC_KEY,'[]'); updateCounts(); renderBcList();
-});
-$('btn-bc-csv').addEventListener('click',()=>{
-  if (!bcHistory.length) return;
+document.querySelectorAll('.flt-btn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.flt-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');histFilter=btn.dataset.filter;renderBcList();}));
+function deleteBc(id){bcHistory=bcHistory.filter(x=>x.id!==id);localStorage.setItem(BC_KEY,JSON.stringify(bcHistory));updateCounts();renderBcList();}
+$('btn-bc-clear').addEventListener('click',()=>{bcHistory=[];localStorage.setItem(BC_KEY,'[]');updateCounts();renderBcList();});
+$('btn-bc-csv').addEventListener('click',exportCSV);
+function exportCSV(){
+  if(!bcHistory.length)return;
   const rows=['\uFEFF値,フォーマット,日時,確認済み'];
   bcHistory.forEach(x=>rows.push(`"${x.value}","${(x.format||'').replace('_',' ')}","${fmtTime(x.timestamp)}","${x.checked?'済':''}"`));
   const blob=new Blob([rows.join('\n')],{type:'text/csv'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='barcodes_'+Date.now()+'.csv'; a.click();
-});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='barcodes_'+Date.now()+'.csv';a.click();
+}
 
-/* ════════════════════════════════════
-   BC MODAL
-════════════════════════════════════ */
+/* ════ BC MODAL ════ */
 function openBcModal(item){
-  currentDetail=item;
-  $('modal-val').textContent=item.value;
-  $('modal-meta').textContent=(item.format||'').toUpperCase().replace('_',' ')+' · '+fmtTime(item.timestamp);
-  $('copied-msg').style.display='none';
-  const hasFmt=!!JS_FMT[item.format];
-  $('modal-bc').style.display=hasFmt?'':'none';
-  $('modal-2d').style.display=hasFmt?'none':'';
-  $('btn-png').style.display=hasFmt?'':'none';
-  if (hasFmt) setTimeout(()=>renderBC($('modal-canvas'),item.value,item.format,68,true),10);
+  currentDetail=item;$('modal-val').textContent=item.value;$('modal-meta').textContent=(item.format||'').toUpperCase().replace('_',' ')+' · '+fmtTime(item.timestamp);
+  $('copied-msg').style.display='none';const hasFmt=!!JS_FMT[item.format];
+  $('modal-bc').style.display=hasFmt?'':'none';$('modal-2d').style.display=hasFmt?'none':'';$('btn-png').style.display=hasFmt?'':'none';
+  if(hasFmt)setTimeout(()=>renderBC($('modal-canvas'),item.value,item.format,68,true),10);
   $('bc-modal').style.display='';
 }
-function closeBcModal(){ $('bc-modal').style.display='none'; currentDetail=null; }
+function closeBcModal(){$('bc-modal').style.display='none';currentDetail=null;}
 $('modal-close').addEventListener('click',closeBcModal);
-$('bc-modal').addEventListener('click',e=>{ if(e.target===$('bc-modal'))closeBcModal(); });
-$('btn-copy').addEventListener('click',()=>{
-  if (!currentDetail)return;
-  navigator.clipboard?.writeText(currentDetail.value).catch(()=>{});
-  $('copied-msg').style.display='';
-  setTimeout(()=>$('copied-msg').style.display='none',2000);
-});
-$('btn-png').addEventListener('click',()=>{
-  const cv=$('modal-canvas'); if(!cv)return;
-  const a=document.createElement('a');
-  a.href=cv.toDataURL('image/png');
-  a.download=`barcode_${currentDetail?.value||'code'}.png`; a.click();
-});
+$('bc-modal').addEventListener('click',e=>{if(e.target===$('bc-modal'))closeBcModal();});
+$('btn-copy').addEventListener('click',()=>{if(!currentDetail)return;navigator.clipboard?.writeText(currentDetail.value).catch(()=>{});$('copied-msg').style.display='';setTimeout(()=>$('copied-msg').style.display='none',2000);});
+$('btn-png').addEventListener('click',()=>{const cv=$('modal-canvas');if(!cv)return;const a=document.createElement('a');a.href=cv.toDataURL('image/png');a.download=`barcode_${currentDetail?.value||'code'}.png`;a.click();});
 
-/* ════════════════════════════════════
-   PHOTO GRID & LIGHTBOX
-════════════════════════════════════ */
+/* ════ PHOTO GRID & LIGHTBOX ════ */
 function renderPhotoGrid(){
-  const grid=$('photo-grid'), empty=$('photo-empty');
-  if (!photos.length){ grid.style.display='none'; empty.style.display=''; return; }
-  empty.style.display='none'; grid.style.display='';
-  grid.className='photo-grid'+(mergeMode?' merge-mode':'');
-  grid.innerHTML='';
+  const grid=$('photo-grid'),empty=$('photo-empty');
+  if(!photos.length){grid.style.display='none';empty.style.display='';return;}
+  empty.style.display='none';grid.style.display='';grid.className='photo-grid'+(mergeMode?' merge-mode':'');grid.innerHTML='';
   photos.forEach(p=>{
-    const item=document.createElement('div');
-    item.className='photo-item'+(mergeSelected.includes(p.id)?' selected':'');
-    const img=document.createElement('img'); img.src=p.dataUrl; img.loading='lazy';
-    const trash=document.createElement('button'); trash.className='photo-trash'; trash.title='削除';
+    const item=document.createElement('div');item.className='photo-item'+(mergeSelected.includes(p.id)?' selected':'');
+    const img=document.createElement('img');img.src=p.dataUrl;img.loading='lazy';
+    const trash=document.createElement('button');trash.className='photo-trash';trash.title='削除';
     trash.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
-    trash.addEventListener('click',e=>{ e.stopPropagation(); if(!mergeMode)deletePhoto(p.id); });
-    const save=document.createElement('button'); save.className='photo-save'; save.title='本体に保存';
+    trash.addEventListener('click',e=>{e.stopPropagation();if(!mergeMode)deletePhoto(p.id);});
+    const save=document.createElement('button');save.className='photo-save';save.title='本体に保存';
     save.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
-    save.addEventListener('click',e=>{ e.stopPropagation(); if(!mergeMode)savePhotoToDevice(p); });
-    const badge=document.createElement('div'); badge.className='photo-badge'; badge.textContent=fmtShort(p.timestamp);
-    // 結合モード選択オーバーレイ
-    const selOv=document.createElement('div'); selOv.className='photo-select-overlay';
-    const chk=document.createElement('div'); chk.className='photo-select-check'; chk.textContent='✓';
-    selOv.appendChild(chk);
-    item.appendChild(img); item.appendChild(save); item.appendChild(trash);
-    item.appendChild(badge); item.appendChild(selOv);
-    item.addEventListener('click',()=>{
-      if (mergeMode){ toggleMergeSelect(p.id,item); }
-      else { openLightbox(p); }
-    });
+    save.addEventListener('click',e=>{e.stopPropagation();if(!mergeMode)savePhotoToDevice(p);});
+    const badge=document.createElement('div');badge.className='photo-badge';badge.textContent=fmtShort(p.timestamp);
+    const selOv=document.createElement('div');selOv.className='photo-select-overlay';
+    const chk=document.createElement('div');chk.className='photo-select-check';chk.textContent='✓';selOv.appendChild(chk);
+    item.appendChild(img);item.appendChild(save);item.appendChild(trash);item.appendChild(badge);item.appendChild(selOv);
+    item.addEventListener('click',()=>{if(mergeMode)toggleMergeSelect(p.id,item);else openLightbox(p);});
     grid.appendChild(item);
   });
 }
 function deletePhoto(id){
-  dbDel(id).then(async()=>{
-    photos=photos.filter(p=>p.id!==id);
-    updateCounts(); renderPhotoGrid(); updateThumbStrip();
-    if (currentLightbox&&currentLightbox.id===id) closeLightbox();
-  });
+  dbDel(id).then(async()=>{photos=photos.filter(p=>p.id!==id);updateCounts();renderPhotoGrid();updateThumbStrip();if(currentLightbox?.id===id)closeLightbox();});
 }
 async function savePhotoToDevice(photo){
-  const ts=fmtTime(photo.timestamp).replace(/[/:\s]/g,'-');
-  const name=`photo_${ts}.jpg`;
-  if (navigator.share&&navigator.canShare){
-    try {
+  const ts=fmtTime(photo.timestamp).replace(/[/:\s]/g,'-');const name=`photo_${ts}.jpg`;
+  if(navigator.share&&navigator.canShare){
+    try{
       const blob=dataUrlToBlob(photo.dataUrl);
-      if (blob){
-        const file=new File([blob],name,{type:'image/jpeg'});
-        if (navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:'写真を保存'}); return; }
-      }
-    } catch(e){ if(e.name==='AbortError')return; }
+      if(blob){const file=new File([blob],name,{type:'image/jpeg'});if(navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'写真を保存'});return;}}
+    }catch(e){if(e.name==='AbortError')return;}
   }
   fallbackDownload(photo.dataUrl,name);
 }
 function openLightbox(p){
-  currentLightbox=p;
-  $('lb-img').src=p.dataUrl;
-  $('lb-img').style.transform=`rotate(${p.rotation||0}deg)`;
-  $('lb-ttl').textContent=fmtTime(p.timestamp)+' · '+(p.facingMode==='user'?'フロント':'リア');
-  $('lightbox').style.display='';
+  currentLightbox=p;$('lb-img').src=p.dataUrl;$('lb-img').style.transform=`rotate(${p.rotation||0}deg)`;
+  $('lb-ttl').textContent=fmtTime(p.timestamp)+' · '+(p.facingMode==='user'?'フロント':p.facingMode==='merged'?'結合':'リア');$('lightbox').style.display='';
 }
 async function rotateLightboxPhoto(){
-  if (!currentLightbox)return;
-  const img=new Image(); img.src=currentLightbox.dataUrl;
-  await new Promise(r=>{ img.onload=r; });
-  const c=document.createElement('canvas');
-  c.width=img.height; c.height=img.width;
-  const ctx=c.getContext('2d');
-  ctx.translate(c.width/2,c.height/2); ctx.rotate(90*Math.PI/180);
-  ctx.drawImage(img,-img.width/2,-img.height/2);
-  const newDataUrl=c.toDataURL('image/jpeg',0.9);
-  currentLightbox={...currentLightbox,dataUrl:newDataUrl,rotation:0};
-  await dbPut(currentLightbox);
-  photos=(await dbAll()).reverse();
-  $('lb-img').src=newDataUrl; $('lb-img').style.transform='';
-  renderPhotoGrid(); updateThumbStrip();
-  showToast('↻ 回転しました','ok');
+  if(!currentLightbox)return;
+  const img=new Image();img.src=currentLightbox.dataUrl;await new Promise(r=>{img.onload=r;});
+  const c=document.createElement('canvas');c.width=img.height;c.height=img.width;
+  const ctx=c.getContext('2d');ctx.translate(c.width/2,c.height/2);ctx.rotate(90*Math.PI/180);ctx.drawImage(img,-img.width/2,-img.height/2);
+  const newUrl=c.toDataURL('image/jpeg',0.9);currentLightbox={...currentLightbox,dataUrl:newUrl,rotation:0};
+  await dbPut(currentLightbox);photos=(await dbAll()).reverse();
+  $('lb-img').src=newUrl;$('lb-img').style.transform='';renderPhotoGrid();updateThumbStrip();showToast('↻ 回転しました','ok');
 }
-function closeLightbox(){ $('lightbox').style.display='none'; currentLightbox=null; }
+function closeLightbox(){$('lightbox').style.display='none';currentLightbox=null;}
 $('lb-close').addEventListener('click',closeLightbox);
 $('lb-rotate').addEventListener('click',rotateLightboxPhoto);
-$('lb-dl').addEventListener('click',()=>{ if(currentLightbox)savePhotoToDevice(currentLightbox); });
-$('lb-del').addEventListener('click',()=>{ if(currentLightbox)deletePhoto(currentLightbox.id); });
-$('btn-photo-clear').addEventListener('click',()=>{
-  dbClear().then(()=>{ photos=[]; updateCounts(); renderPhotoGrid(); updateThumbStrip(); });
-});
+$('lb-dl').addEventListener('click',()=>{if(currentLightbox)savePhotoToDevice(currentLightbox);});
+$('lb-del').addEventListener('click',()=>{if(currentLightbox)deletePhoto(currentLightbox.id);});
+$('btn-photo-clear').addEventListener('click',()=>{dbClear().then(()=>{photos=[];updateCounts();renderPhotoGrid();updateThumbStrip();});});
 
-/* ════════════════════════════════════
-   IMAGE MERGE
-════════════════════════════════════ */
-function enterMergeMode(){
-  mergeMode=true; mergeSelected=[];
-  $('merge-bar').classList.add('on');
-  $('merge-bar-txt').textContent='写真をタップして選択（2枚以上）';
-  $('btn-merge-exec').disabled=true;
-  renderPhotoGrid();
-}
-function exitMergeMode(){
-  mergeMode=false; mergeSelected=[];
-  $('merge-bar').classList.remove('on');
-  renderPhotoGrid();
-}
+/* ════ MERGE ════ */
+function enterMergeMode(){mergeMode=true;mergeSelected=[];$('merge-bar').classList.add('on');$('merge-bar-txt').textContent='写真をタップして選択（2枚以上）';$('btn-merge-exec').disabled=true;renderPhotoGrid();}
+function exitMergeMode(){mergeMode=false;mergeSelected=[];$('merge-bar').classList.remove('on');renderPhotoGrid();}
 function toggleMergeSelect(id,itemEl){
   const idx=mergeSelected.indexOf(id);
-  if (idx>=0){ mergeSelected.splice(idx,1); itemEl.classList.remove('selected'); }
-  else { mergeSelected.push(id); itemEl.classList.add('selected'); }
-  const n=mergeSelected.length;
-  $('merge-bar-txt').textContent=n===0?'写真をタップして選択（2枚以上）':n+'枚 選択中';
+  if(idx>=0){mergeSelected.splice(idx,1);itemEl.classList.remove('selected');}
+  else{mergeSelected.push(id);itemEl.classList.add('selected');}
+  const n=mergeSelected.length;$('merge-bar-txt').textContent=n===0?'写真をタップして選択（2枚以上）':n+'枚 選択中';
   $('btn-merge-exec').disabled=n<2;
 }
-$('btn-merge-mode').addEventListener('click',()=>{
-  if (photos.length<2){ showToast('2枚以上の写真が必要です','warn'); return; }
-  enterMergeMode();
-});
+$('btn-merge-mode').addEventListener('click',()=>{if(photos.length<2){showToast('2枚以上の写真が必要です','warn');return;}enterMergeMode();});
 $('btn-merge-cancel').addEventListener('click',exitMergeMode);
-$('btn-merge-exec').addEventListener('click',()=>{
-  if (mergeSelected.length<2) return;
-  $('merge-modal').style.display='';
-});
-$('merge-modal-cancel').addEventListener('click',()=>{ $('merge-modal').style.display='none'; });
+$('btn-merge-exec').addEventListener('click',()=>{if(mergeSelected.length>=2)$('merge-modal').style.display='';});
+$('merge-modal-cancel').addEventListener('click',()=>{$('merge-modal').style.display='none';});
 document.querySelectorAll('.merge-layout-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     $('merge-modal').style.display='none';
     const layout=btn.dataset.layout;
-    const selectedPhotos=mergeSelected.map(id=>photos.find(p=>p.id===id)).filter(Boolean);
-    mergeImages(selectedPhotos,layout);
+    const sel=mergeSelected.map(id=>photos.find(p=>p.id===id)).filter(Boolean);
+    mergeImages(sel,layout);
   });
 });
-
-async function mergeImages(selectedPhotos,layout){
+async function mergeImages(sel,layout){
   showToast('結合中...','',5000);
-  try {
-    const imgs=await Promise.all(selectedPhotos.map(p=>new Promise((res,rej)=>{
-      const img=new Image(); img.onload=()=>res(img); img.onerror=rej; img.src=p.dataUrl;
-    })));
-    const canvas=document.createElement('canvas');
-    const ctx=canvas.getContext('2d');
-    const n=imgs.length;
-
-    if (layout==='h'){
-      // 横並び：同じ高さに揃える
-      const H=Math.max(...imgs.map(i=>i.height));
-      const totalW=imgs.reduce((s,i)=>s+Math.round(i.width*(H/i.height)),0);
-      canvas.width=totalW; canvas.height=H;
-      let x=0;
-      imgs.forEach(img=>{
-        const w=Math.round(img.width*(H/img.height));
-        ctx.drawImage(img,x,0,w,H); x+=w;
-      });
-    } else if (layout==='v'){
-      // 縦並び：同じ幅に揃える
-      const W=Math.max(...imgs.map(i=>i.width));
-      const totalH=imgs.reduce((s,i)=>s+Math.round(i.height*(W/i.width)),0);
-      canvas.width=W; canvas.height=totalH;
-      let y=0;
-      imgs.forEach(img=>{
-        const h=Math.round(img.height*(W/img.width));
-        ctx.drawImage(img,0,y,W,h); y+=h;
-      });
-    } else if (layout==='grid'){
-      // グリッド：2列
-      const cols=2, rows=Math.ceil(n/cols);
-      const cellW=Math.max(...imgs.map(i=>i.width));
-      const cellH=Math.max(...imgs.map(i=>i.height));
-      canvas.width=cellW*cols; canvas.height=cellH*rows;
-      ctx.fillStyle='#111'; ctx.fillRect(0,0,canvas.width,canvas.height);
-      imgs.forEach((img,i)=>{
-        const col=i%cols, row=Math.floor(i/cols);
-        const scale=Math.min(cellW/img.width,cellH/img.height);
-        const dw=img.width*scale, dh=img.height*scale;
-        const dx=col*cellW+(cellW-dw)/2, dy=row*cellH+(cellH-dh)/2;
-        ctx.drawImage(img,dx,dy,dw,dh);
-      });
-    } else {
-      // strip（横ストリップ・等高・コンパクト）
-      const H=320;
-      const totalW=imgs.reduce((s,i)=>s+Math.round(i.width*(H/i.height)),0);
-      canvas.width=totalW; canvas.height=H;
-      let x=0;
-      imgs.forEach(img=>{
-        const w=Math.round(img.width*(H/img.height));
-        ctx.drawImage(img,x,0,w,H); x+=w;
-      });
-    }
-
-    const dataUrl=canvas.toDataURL('image/jpeg',0.88);
+  try{
+    const imgs=await Promise.all(sel.map(p=>new Promise((res,rej)=>{const img=new Image();img.onload=()=>res(img);img.onerror=rej;img.src=p.dataUrl;})));
+    const c=document.createElement('canvas');const ctx=c.getContext('2d');const n=imgs.length;
+    if(layout==='h'){const H=Math.max(...imgs.map(i=>i.height));const W=imgs.reduce((s,i)=>s+Math.round(i.width*(H/i.height)),0);c.width=W;c.height=H;let x=0;imgs.forEach(img=>{const w=Math.round(img.width*(H/img.height));ctx.drawImage(img,x,0,w,H);x+=w;});}
+    else if(layout==='v'){const W=Math.max(...imgs.map(i=>i.width));const H=imgs.reduce((s,i)=>s+Math.round(i.height*(W/i.width)),0);c.width=W;c.height=H;let y=0;imgs.forEach(img=>{const h=Math.round(img.height*(W/img.width));ctx.drawImage(img,0,y,W,h);y+=h;});}
+    else if(layout==='grid'){const cols=2,rows=Math.ceil(n/cols);const cW=Math.max(...imgs.map(i=>i.width));const cH=Math.max(...imgs.map(i=>i.height));c.width=cW*cols;c.height=cH*rows;ctx.fillStyle='#111';ctx.fillRect(0,0,c.width,c.height);imgs.forEach((img,i)=>{const col=i%cols,row=Math.floor(i/cols);const sc=Math.min(cW/img.width,cH/img.height);const dw=img.width*sc,dh=img.height*sc;ctx.drawImage(img,col*cW+(cW-dw)/2,row*cH+(cH-dh)/2,dw,dh);});}
+    else{const H=320;const W=imgs.reduce((s,i)=>s+Math.round(i.width*(H/i.height)),0);c.width=W;c.height=H;let x=0;imgs.forEach(img=>{const w=Math.round(img.width*(H/img.height));ctx.drawImage(img,x,0,w,H);x+=w;});}
+    const dataUrl=c.toDataURL('image/jpeg',0.88);
     const merged={id:Date.now()+Math.random(),dataUrl,timestamp:Date.now(),facingMode:'merged',rotation:0,merged:true};
-    await dbPut(merged);
-    await dbPrune(MAX_PH);
-    photos=(await dbAll()).reverse();
-    updateCounts(); exitMergeMode(); renderPhotoGrid(); updateThumbStrip();
-    showToast('✓ '+n+'枚を結合しました','ok');
-    // 自動でライトボックスに表示
-    openLightbox(merged);
-  } catch(e){
-    showToast('[E020] 結合失敗: '+e.message,'err',4000);
-  }
+    await dbPut(merged);await dbPrune(MAX_PH);photos=(await dbAll()).reverse();
+    updateCounts();exitMergeMode();renderPhotoGrid();updateThumbStrip();
+    showToast('✓ '+n+'枚を結合しました','ok');openLightbox(merged);
+  }catch(e){showToast('[E020] 結合失敗: '+e.message,'err',4000);}
 }
 
-/* ── iOS popup ── */
-$('ios-popup-close').addEventListener('click',()=>{ $('ios-popup').style.display='none'; });
-$('ios-popup').addEventListener('click',e=>{ if(e.target===$('ios-popup'))$('ios-popup').style.display='none'; });
+/* ════ SETTINGS UI ════ */
+$('set-auto-scan').addEventListener('change',e=>{cfg.autoStartScan=e.target.checked;saveCfg();showToast('自動スキャン: '+(cfg.autoStartScan?'ON':'OFF'),cfg.autoStartScan?'ok':'');});
+document.querySelectorAll('[data-sf]').forEach(btn=>btn.addEventListener('click',()=>{cfg.scanFormat=btn.dataset.sf;saveCfg();applyCfgToUI();if(scanning){stopScan();setTimeout(startScan,200);}showToast('フォーマット: '+(cfg.scanFormat==='ean13'?'EAN-13':'全て'),'ok');}));
+document.querySelectorAll('[data-cq]').forEach(btn=>btn.addEventListener('click',()=>{cfg.camQuality=btn.dataset.cq;saveCfg();applyCfgToUI();showToast('デフォルト画質: '+(({low:'低',mid:'標準',high:'高',max:'最高'})[cfg.camQuality]),'ok');}));
+document.querySelectorAll('[data-cf]').forEach(btn=>btn.addEventListener('click',()=>{cfg.camFacing=btn.dataset.cf;saveCfg();applyCfgToUI();showToast('デフォルトカメラ: '+(cfg.camFacing==='environment'?'背面':'前面'),'ok');}));
+document.querySelectorAll('[data-mp]').forEach(btn=>btn.addEventListener('click',()=>{MAX_PH=parseInt(btn.dataset.mp);cfg.maxPhotos=MAX_PH;saveCfg();applyCfgToUI();updateCounts();showToast('最大保存枚数: '+MAX_PH+'枚','ok');}));
+$('set-folder-pick-btn').addEventListener('click',pickSaveFolder);
+$('set-folder-clear-btn').addEventListener('click',clearSaveFolder);
+$('set-export-csv').addEventListener('click',exportCSV);
+$('set-clear-bc').addEventListener('click',()=>{if(confirm('BC履歴を全削除しますか？')){bcHistory=[];localStorage.setItem(BC_KEY,'[]');updateCounts();showToast('BC履歴を削除しました');}});
+$('set-clear-photos').addEventListener('click',()=>{if(confirm('写真を全削除しますか？')){dbClear().then(()=>{photos=[];updateCounts();renderPhotoGrid();updateThumbStrip();showToast('写真を全削除しました');});}});
 
-/* ════════════════════════════════════
-   INIT
-════════════════════════════════════ */
+/* iOS popup */
+$('ios-popup-close').addEventListener('click',()=>{$('ios-popup').style.display='none';});
+$('ios-popup').addEventListener('click',e=>{if(e.target===$('ios-popup'))$('ios-popup').style.display='none';});
+
+/* ════ INIT ════ */
 async function init(){
-  try { bcHistory=JSON.parse(localStorage.getItem(BC_KEY)||'[]'); } catch{ bcHistory=[]; }
+  loadCfg();
+  MAX_PH=cfg.maxPhotos||200;
+  try{bcHistory=JSON.parse(localStorage.getItem(BC_KEY)||'[]');}catch{bcHistory=[];}
   bcHistory=bcHistory.map(x=>({checked:false,...x}));
-  try { photos=(await dbAll()).reverse(); } catch(e){ photos=[]; }
+  try{photos=(await dbAll()).reverse();}catch{photos=[];}
+  applyCfgToUI();
+  setThumbVisible(thumbStripVisible);
   updateCounts();
   restoreFolderHandle();
+  // 自動スキャン開始
+  if(cfg.autoStartScan)setTimeout(startScan,400);
 }
 init();
 </script>
