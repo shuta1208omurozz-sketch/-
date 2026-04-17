@@ -178,7 +178,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .save-folder-note{font-family:'Share Tech Mono',monospace;font-size:7px;color:#2a3a4a;line-height:1.5}
 
 /* ═══ PHOTOS ═══ */
-.photo-pg{overflow:hidden}
+/* photo layout: see PHOTO GRID FIX */
 .photo-toolbar{display:flex;align-items:center;gap:6px;padding:7px 12px;border-bottom:1px solid #1e2a38;background:#0d1117;flex-shrink:0}
 .photo-count{font-family:'Share Tech Mono',monospace;font-size:10px;color:#4a6a8a;flex:1}
 .merge-bar{display:none;align-items:center;gap:8px;padding:7px 12px;border-bottom:1px solid rgba(0,212,255,.2);background:rgba(0,212,255,.04);flex-shrink:0}
@@ -187,7 +187,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .btn-merge-exec{padding:7px 14px;background:#00d4ff;color:#0a0c0f;border:none;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;clip-path:polygon(0 0,calc(100% - 7px) 0,100% 7px,100% 100%,7px 100%,0 calc(100% - 7px))}
 .btn-merge-exec:disabled{opacity:.4;cursor:default}
 .btn-merge-cancel{padding:7px 10px;background:transparent;border:1px solid #2a3a4a;color:#4a6a8a;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;cursor:pointer}
-.photo-grid{flex:1;overflow-y:auto;padding:3px;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;-webkit-overflow-scrolling:touch}
+/* photo-grid: see PHOTO GRID FIX block */
 .photo-item{aspect-ratio:1;overflow:hidden;cursor:pointer;position:relative;background:#0d1117}
 .photo-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .15s}
 .photo-item:active img{transform:scale(.96)}
@@ -246,8 +246,22 @@ input:checked+.toggle-slider:before{transform:translateX(20px);background:#00d4f
 .btn-dl:active{background:#33deff}
 .lb-rotate-btn{padding:11px 12px;background:transparent;border:1px solid #2a3a4a;color:#8ab4cc;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
 .lb-rotate-btn:active{color:#00d4ff;border-color:#00d4ff}
+.btn-scan-view{padding:11px 14px;background:transparent;border:1px solid rgba(0,255,136,.4);color:#00ff88;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
 .btn-del{padding:11px 12px;background:transparent;border:1px solid #2a3a4a;color:#ff4466;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer}
 .btn-del:active{background:rgba(255,68,102,.1)}
+
+/* ═══ FULLSCREEN BARCODE ═══ */
+.fullbc-bg{position:fixed;inset:0;background:#ffffff;z-index:300;display:flex;flex-direction:column}
+.fullbc-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));background:#111;border-bottom:2px solid #333;flex-shrink:0}
+.fullbc-val{font-family:'Share Tech Mono',monospace;font-size:16px;color:#00ff88;letter-spacing:2px;font-weight:700}
+.fullbc-close{background:none;border:1px solid #555;color:#ccc;cursor:pointer;font-size:22px;line-height:1;padding:4px 10px;border-radius:2px}
+.fullbc-body{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#ffffff;padding:16px;gap:16px;min-height:0;overflow:hidden}
+.fullbc-body canvas{max-width:100%;max-height:calc(100% - 50px);display:block;object-fit:contain}
+.fullbc-hint{font-family:'Share Tech Mono',monospace;font-size:11px;color:#888;letter-spacing:1px;text-align:center;flex-shrink:0}
+
+/* ═══ PHOTO GRID FIX ═══ */
+.photo-pg{overflow:hidden;display:flex;flex-direction:column}
+.photo-grid{flex:1;overflow-y:auto;padding:3px;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;-webkit-overflow-scrolling:touch;min-height:0}
 .btn-close{background:none;border:none;color:#4a6a8a;cursor:pointer;font-size:24px;line-height:1;padding:4px}
 .btn-close:active{color:#e0e8f0}
 
@@ -538,7 +552,20 @@ input:checked+.toggle-slider:before{transform:translateX(20px);background:#00d4f
     <div class="modal-acts">
       <button class="btn-png" id="btn-png" style="display:none">↓ PNG保存</button>
       <button class="btn-copy" id="btn-copy">コピー</button>
+      <button class="btn-scan-view" id="btn-scan-view">🔍 大表示</button>
     </div>
+  </div>
+</div>
+
+<!-- FULLSCREEN BARCODE VIEW -->
+<div class="fullbc-bg" id="fullbc-modal" style="display:none">
+  <div class="fullbc-header">
+    <span class="fullbc-val" id="fullbc-val"></span>
+    <button class="btn-close fullbc-close" id="fullbc-close">×</button>
+  </div>
+  <div class="fullbc-body">
+    <canvas id="fullbc-canvas"></canvas>
+    <div class="fullbc-hint">バーコードリーダーにかざしてください</div>
   </div>
 </div>
 
@@ -873,8 +900,8 @@ async function startScan(){
     $('btn-scan').textContent='■ スキャン停止';$('btn-scan').classList.add('stop');
     detect();
   }catch(e){
-    const code=e.name==='NotAllowedError'?'E002':'E005';
-    setStatus('err',`[${code}] `+(e.name==='NotAllowedError'?'カメラの許可が必要です':'カメラエラー: '+e.message));
+    const code=e.name==='NotAllowedError'?'E002':e.name==='NotFoundError'?'E003':'E005';
+    setStatus('err',`[${code}] ${e.name}: `+(e.name==='NotAllowedError'?'カメラの許可が必要です':e.message));
   }
 }
 async function detect(){
@@ -1186,6 +1213,9 @@ function toggleBcChecked(id){
   const item=bcHistory.find(x=>x.id===id);if(!item)return;
   item.checked=!item.checked;localStorage.setItem(BC_KEY,JSON.stringify(bcHistory));renderBcList();
 }
+
+/* バーコード描画を requestIdleCallback でバッチ処理 → 重さ改善 */
+let _bcRenderPending=false;
 function renderBcList(){
   const q=$('search-box').value.toLowerCase();
   let filtered=q?bcHistory.filter(x=>x.value.toLowerCase().includes(q)):bcHistory;
@@ -1193,26 +1223,60 @@ function renderBcList(){
   else if(histFilter==='unchecked')filtered=filtered.filter(x=>!x.checked);
   const list=$('bc-list'),empty=$('bc-empty');
   if(!filtered.length){list.style.display='none';empty.style.display='';return;}
-  empty.style.display='none';list.style.display='';list.innerHTML='';
+  empty.style.display='none';list.style.display='';
+
+  // DOM差分更新：同件数・同IDなら再構築しない（チェック変更時のみ差分）
+  const existingIds=Array.from(list.querySelectorAll('.bc-card')).map(c=>c.dataset.id);
+  const newIds=filtered.map(x=>String(x.id));
+  const sameLayout=existingIds.length===newIds.length&&existingIds.every((v,i)=>v===newIds[i]);
+  if(sameLayout){
+    // チェック状態だけ更新
+    filtered.forEach(item=>{
+      const card=list.querySelector(`.bc-card[data-id="${item.id}"]`);
+      if(!card)return;
+      const isEan=item.format==='ean_13';
+      card.className='bc-card'+(isEan?' ean':'')+(item.checked?' checked':'');
+      const chkLbl=card.querySelector('.card-chk-lbl');
+      const check=card.querySelector('.card-check');
+      if(item.checked){if(!chkLbl){const s=document.createElement('span');s.className='card-chk-lbl';s.textContent='✓ 確認済';card.querySelector('.card-meta').appendChild(s);}}
+      else{if(chkLbl)chkLbl.remove();}
+    });
+    return;
+  }
+
+  // 完全再構築（フィルタ変更・検索変更時）
+  list.innerHTML='';
+  const frag=document.createDocumentFragment();
+  const canvasQueue=[];
   filtered.forEach((item,i)=>{
     const card=document.createElement('div');
     card.className='bc-card'+(item.format==='ean_13'?' ean':'')+(item.checked?' checked':'');
-    card.innerHTML=`<button class="card-check">✓</button><div class="bc-thumb"><canvas></canvas></div><div class="card-info"><div class="card-val">${item.value}</div><div class="card-meta"><span class="card-fmt ${item.format==='ean_13'?'ean':''}">${(item.format||'').replace('_',' ')}</span><span class="card-time">${fmtTime(item.timestamp)}</span><span class="card-num">#${String(filtered.length-i).padStart(3,'0')}</span>${item.checked?'<span class="card-chk-lbl">✓ 確認済</span>':''}</div></div><button class="btn-x">✕</button>`;
+    card.dataset.id=String(item.id);
+    const isEan=item.format==='ean_13';
+    card.innerHTML=`<button class="card-check">✓</button><div class="bc-thumb"><canvas></canvas></div><div class="card-info"><div class="card-val">${item.value}</div><div class="card-meta"><span class="card-fmt ${isEan?'ean':''}">${(item.format||'').replace('_',' ')}</span><span class="card-time">${fmtTime(item.timestamp)}</span><span class="card-num">#${String(filtered.length-i).padStart(3,'0')}</span>${item.checked?'<span class="card-chk-lbl">✓ 確認済</span>':''}</div></div><button class="btn-x">✕</button>`;
     card.querySelector('.card-check').addEventListener('click',e=>{e.stopPropagation();toggleBcChecked(item.id);});
     card.querySelector('.card-info').addEventListener('click',()=>openBcModal(item));
     card.querySelector('.btn-x').addEventListener('click',e=>{e.stopPropagation();deleteBc(item.id);});
-    const cv=card.querySelector('canvas');
-    setTimeout(()=>{
-      // アスペクト比を維持した適切なサイズで描画
-      if(!renderBC(cv,item.value,item.format,38,false)){
-        cv.replaceWith(Object.assign(document.createElement('div'),{className:'bc-thumb-txt',textContent:(item.format||'').toUpperCase().replace('_',' ')}));
-      } else {
-        // Canvasの実寸をCSSで上書きせずアスペクト比を保つ
-        cv.style.width='86px'; cv.style.height='auto';
-      }
-    },10);
-    list.appendChild(card);
+    canvasQueue.push({cv:card.querySelector('canvas'),value:item.value,format:item.format});
+    frag.appendChild(card);
   });
+  list.appendChild(frag);
+
+  // バーコード描画を idle 時にバッチ実行（UIブロックしない）
+  let qi=0;
+  function drawBatch(){
+    const deadline=performance.now()+8; // 8ms以内に処理
+    while(qi<canvasQueue.length&&performance.now()<deadline){
+      const{cv,value,format}=canvasQueue[qi++];
+      if(!renderBC(cv,value,format,38,false)){
+        cv.replaceWith(Object.assign(document.createElement('div'),{className:'bc-thumb-txt',textContent:(format||'').toUpperCase().replace('_',' ')}));
+      }else{cv.style.width='86px';cv.style.height='auto';}
+    }
+    if(qi<canvasQueue.length){
+      ('requestIdleCallback' in window)?requestIdleCallback(drawBatch):setTimeout(drawBatch,0);
+    }
+  }
+  ('requestIdleCallback' in window)?requestIdleCallback(drawBatch):setTimeout(drawBatch,0);
 }
 $('search-box').addEventListener('input',renderBcList);
 document.querySelectorAll('.flt-btn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.flt-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');histFilter=btn.dataset.filter;renderBcList();}));
@@ -1232,9 +1296,41 @@ function openBcModal(item){
   currentDetail=item;$('modal-val').textContent=item.value;$('modal-meta').textContent=(item.format||'').toUpperCase().replace('_',' ')+' · '+fmtTime(item.timestamp);
   $('copied-msg').style.display='none';const hasFmt=!!JS_FMT[item.format];
   $('modal-bc').style.display=hasFmt?'':'none';$('modal-2d').style.display=hasFmt?'none':'';$('btn-png').style.display=hasFmt?'':'none';
+  $('btn-scan-view').style.display=hasFmt?'':'none';
   if(hasFmt)setTimeout(()=>renderBC($('modal-canvas'),item.value,item.format,68,true),10);
   $('bc-modal').style.display='';
 }
+
+/* 全画面バーコード表示 */
+function openFullBc(item){
+  if(!item||!JS_FMT[item.format])return;
+  $('fullbc-val').textContent=item.value;
+  $('fullbc-modal').style.display='';
+  // 画面サイズに合わせて最大化
+  requestAnimationFrame(()=>{
+    const cv=$('fullbc-canvas');
+    const body=cv.parentElement;
+    const maxW=body.clientWidth-32;
+    const maxH=body.clientHeight-60;
+    const barW=Math.max(2,Math.floor(maxW/80));
+    const barH=Math.min(maxH-40, Math.floor(maxW*0.35));
+    try{
+      JsBarcode(cv,item.value,{
+        format:JS_FMT[item.format],
+        width:barW,
+        height:barH,
+        displayValue:true,
+        fontSize:Math.max(14,Math.floor(barH*0.15)),
+        background:'#ffffff',
+        lineColor:'#000000',
+        margin:12
+      });
+    }catch(e){$('fullbc-hint').textContent='[E030] バーコード生成失敗: '+e.message;}
+  });
+}
+$('btn-scan-view').addEventListener('click',()=>{if(currentDetail){closeBcModal();openFullBc(currentDetail);}});
+$('fullbc-close').addEventListener('click',()=>{$('fullbc-modal').style.display='none';});
+$('fullbc-modal').addEventListener('click',e=>{if(e.target===$('fullbc-modal'))$('fullbc-modal').style.display='none';});
 function closeBcModal(){$('bc-modal').style.display='none';currentDetail=null;}
 $('modal-close').addEventListener('click',closeBcModal);
 $('bc-modal').addEventListener('click',e=>{if(e.target===$('bc-modal'))closeBcModal();});
