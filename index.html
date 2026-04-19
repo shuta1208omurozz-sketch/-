@@ -13,7 +13,7 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
 :root {
-  --card-height: 200px;
+  --card-height: 100px;
   --photo-size: 80px; 
   --accent: #00d4ff;
   --accent-10: rgba(0,212,255,.1);
@@ -23,10 +23,6 @@
   --accent-50: rgba(0,212,255,.5);
   --accent-70: rgba(0,212,255,.7);
 }
-body.theme-cyan { --accent:#00d4ff; --accent-10:rgba(0,212,255,.1); --accent-20:rgba(0,212,255,.2); --accent-30:rgba(0,212,255,.3); --accent-40:rgba(0,212,255,.4); --accent-50:rgba(0,212,255,.5); --accent-70:rgba(0,212,255,.7); }
-body.theme-green { --accent:#00ff88; --accent-10:rgba(0,255,136,.1); --accent-20:rgba(0,255,136,.2); --accent-30:rgba(0,255,136,.3); --accent-40:rgba(0,255,136,.4); --accent-50:rgba(0,255,136,.5); --accent-70:rgba(0,255,136,.7); }
-body.theme-orange { --accent:#ffaa00; --accent-10:rgba(255,170,0,.1); --accent-20:rgba(255,170,0,.2); --accent-30:rgba(255,170,0,.3); --accent-40:rgba(255,170,0,.4); --accent-50:rgba(255,170,0,.5); --accent-70:rgba(255,170,0,.7); }
-body.theme-purple { --accent:#b82aff; --accent-10:rgba(184,42,255,.1); --accent-20:rgba(184,42,255,.2); --accent-30:rgba(184,42,255,.3); --accent-40:rgba(184,42,255,.4); --accent-50:rgba(184,42,255,.5); --accent-70:rgba(184,42,255,.7); }
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden;background:#0a0c0f}
@@ -237,7 +233,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .btn-multi-all{padding:6px 10px;background:transparent;border:1px solid #8ab4cc;color:#8ab4cc;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border-radius:2px;}
 .btn-multi-cancel{padding:6px 8px;background:transparent;border:1px solid #2a3a4a;color:#8ab4cc;font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;cursor:pointer;border-radius:2px;}
 
-/* 写真一覧のグリッド化とピンチズーム対応 */
 .photo-list {flex:1; overflow-y:auto; overflow-x:hidden; padding:8px 4px; display:flex; flex-wrap:wrap; gap:2px; align-content:flex-start; -webkit-overflow-scrolling:touch; touch-action: pan-y; }
 .photo-section-header { width: 100%; font-family: 'Share Tech Mono',monospace; font-size: 11px; color: #8ab4cc; padding: 12px 6px 4px; border-bottom: 1px solid #1e2a38; margin-bottom: 4px; margin-top: 8px; }
 .photo-section-header:first-child { margin-top: 0; }
@@ -420,7 +415,6 @@ input:checked+.toggle-slider:before{transform:translateX(20px);background:var(--
       <button class="btn-sm danger" id="btn-bc-clear" style="display:none">全削除</button>
     </div>
     
-    <!-- ★ BC複数選択モード用バー -->
     <div class="multi-sel-bar" id="multi-sel-bar-bc">
       <span class="multi-sel-txt" id="multi-sel-txt-bc">0件 選択中</span>
       <button class="btn-multi-all" id="btn-multi-all-bc">全選択</button>
@@ -475,7 +469,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px);background:var(--
       <button class="quality-btn" data-q="max">最高</button>
     </div>
     <div class="cam-ctrl">
-      <button class="ctrl-btn" id="btn-flip" title="カメラ切替">⟳</button>
+      <!-- インカメラ切替ボタンを削除 -->
       <button class="ctrl-btn" id="btn-torch" title="懐中電灯" style="font-size:18px;">🔦</button>
       <button class="shutter" id="btn-shutter" disabled></button>
       <button class="ctrl-btn" id="btn-cam-toggle">▶</button>
@@ -517,14 +511,12 @@ input:checked+.toggle-slider:before{transform:translateX(20px);background:var(--
       <button class="btn-sm danger" id="btn-photo-clear" style="display:none">全削除</button>
     </div>
     
-    <!-- 結合モード用バー -->
     <div class="merge-bar" id="merge-bar">
       <span class="merge-bar-txt" id="merge-bar-txt">写真をタップして選択（2枚以上）</span>
       <button class="btn-merge-exec" id="btn-merge-exec" disabled>結合する</button>
       <button class="btn-merge-cancel" id="btn-merge-cancel">✕</button>
     </div>
 
-    <!-- ★ 写真複数選択（チェックボックス）用バー -->
     <div class="multi-sel-bar" id="multi-sel-bar">
       <span class="multi-sel-txt" id="multi-sel-txt">0枚 選択中</span>
       <button class="btn-multi-all" id="btn-multi-all">全選択</button>
@@ -543,26 +535,10 @@ input:checked+.toggle-slider:before{transform:translateX(20px);background:var(--
   <div class="page settings-pg" id="pg-settings">
     <!-- UI設定 -->
     <div class="settings-section">
-      <div class="settings-title">📱 UI / テーマ設定</div>
-      <div class="settings-row">
-        <div><div class="settings-lbl">テーマカラー</div><div class="settings-sub">アプリのアクセント色</div></div>
-        <div class="settings-ctrl">
-          <button class="seg-btn on" data-theme="cyan">水</button>
-          <button class="seg-btn" data-theme="green">緑</button>
-          <button class="seg-btn" data-theme="orange">橙</button>
-          <button class="seg-btn" data-theme="purple">紫</button>
-        </div>
-      </div>
+      <div class="settings-title">📱 UI設定</div>
       <div class="settings-row" style="flex-direction:column; align-items:flex-start;">
         <div style="display:flex; justify-content:space-between; width:100%;">
-          <div><div class="settings-lbl">バーコード表示の高さ</div><div class="settings-sub">履歴でのバーコードのサイズ</div></div>
-          <div class="settings-lbl" id="val-card-height" style="color:var(--accent);">200px</div>
-        </div>
-        <input type="range" id="set-card-height" min="100" max="500" step="10" value="200" style="width:100%; margin-top:12px;" />
-      </div>
-      <div class="settings-row" style="flex-direction:column; align-items:flex-start;">
-        <div style="display:flex; justify-content:space-between; width:100%;">
-          <div><div class="settings-lbl">写真サムネイルのサイズ</div><div class="settings-sub">履歴のタイルサイズ（ピンチ操作でも変更可）</div></div>
+          <div><div class="settings-lbl">写真サムネイルのサイズ</div><div class="settings-sub">履歴のタイルサイズ</div></div>
           <div class="settings-lbl" id="val-photo-size" style="color:var(--accent);">80px</div>
         </div>
         <input type="range" id="set-photo-size" min="50" max="300" step="10" value="80" style="width:100%; margin-top:12px;" />
@@ -586,32 +562,6 @@ input:checked+.toggle-slider:before{transform:translateX(20px);background:var(--
         <div class="settings-ctrl">
           <button class="seg-btn on" data-sf="ean13">EAN-13</button>
           <button class="seg-btn" data-sf="all">全て</button>
-        </div>
-      </div>
-    </div>
-    <div class="settings-divider"></div>
-
-    <!-- カメラ設定 -->
-    <div class="settings-section">
-      <div class="settings-title">📷 カメラ設定</div>
-      <div class="settings-row">
-        <div><div class="settings-lbl">デフォルト画質</div><div class="settings-sub">高いほどファイルサイズが増加</div></div>
-        <div class="settings-ctrl">
-          <button class="seg-btn" data-cq="low">低</button>
-          <button class="seg-btn on" data-cq="mid">標</button>
-          <button class="seg-btn" data-cq="high">高</button>
-          <button class="seg-btn" data-cq="max">最</button>
-        </div>
-      </div>
-      <div class="settings-row">
-        <div><div class="settings-lbl">手ブレ補正</div><div class="settings-sub">対応デバイスで有効（videoStabilization）</div></div>
-        <label class="toggle-sw"><input type="checkbox" id="set-stab" checked/><span class="toggle-slider"></span></label>
-      </div>
-      <div class="settings-row">
-        <div><div class="settings-lbl">デフォルトカメラ</div><div class="settings-sub">アプリ起動時の初期カメラ</div></div>
-        <div class="settings-ctrl">
-          <button class="seg-btn on" data-cf="environment">背面</button>
-          <button class="seg-btn" data-cf="user">前面</button>
         </div>
       </div>
     </div>
@@ -715,7 +665,7 @@ input:checked+.toggle-slider:before{transform:translateX(20px);background:var(--
   </div>
 </div>
 
-<!-- ★ 後付けグループ変更用ポップアップ -->
+<!-- グループ変更用ポップアップ -->
 <div class="popup-bg" id="group-move-popup" style="display:none">
   <div class="popup">
     <div class="popup-title">📁 グループに移動</div>
@@ -771,13 +721,9 @@ let cfg={
   autoStartScan:true,
   scanFormat:'ean13',
   camQuality:'mid',
-  camFacing:'environment',
   maxPhotos:200,
-  useStabilization:true,
-  historyCardHeight:200,
   photoSize:80, 
   bcCompactMode:false, 
-  theme:'cyan',
   useVibration:true,
   continuousScan:false,
   useGroup:false,
@@ -786,12 +732,13 @@ let cfg={
 };
 let sortOrderBc = 'desc'; 
 let sortOrderPh = 'desc';
+let facingMode = 'environment'; 
 
 function loadCfg(){
   try{const s=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}');Object.assign(cfg,s);}catch{}
 }
 function saveCfg(){localStorage.setItem(SETTINGS_KEY,JSON.stringify(cfg));}
-function applyTheme(){ document.body.className = 'theme-' + cfg.theme; }
+
 function vibrate(pattern) {
   if (cfg.useVibration && navigator.vibrate) {
     try { navigator.vibrate(pattern); } catch(e){}
@@ -806,7 +753,6 @@ function updateGroupUI() {
   $('hist-ph-group-sel').style.display = gOn ? 'flex' : 'none';
   $('group-mgr-area').style.display = gOn ? 'block' : 'none';
 
-  // UIに「選択」ボタンを出すかどうか（グループ移動用）
   $('btn-bc-select-mode').style.display = bcHistory.length ? '' : 'none';
   $('btn-ph-select-mode').style.display = photos.length ? '' : 'none';
 
@@ -823,7 +769,6 @@ function updateGroupUI() {
   const hbs = $('hist-bc-group-select'); if(hbs){ const v = hbs.value; hbs.innerHTML = addOpts; hbs.value = v||'all'; }
   const hps = $('hist-ph-group-select'); if(hps){ const v = hps.value; hps.innerHTML = addOpts; hps.value = v||'all'; }
 
-  // グループ移動用ポップアップのSelect要素
   const ms = $('group-move-select'); if(ms) ms.innerHTML = noneOpt + opts;
 
   renderSettingsGroupList();
@@ -849,30 +794,18 @@ function renderSettingsGroupList() {
 
 function applyCfgToUI(){
   const as=$('set-auto-scan'); if(as)as.checked=cfg.autoStartScan;
-  const st=$('set-stab'); if(st)st.checked=cfg.useStabilization!==false;
-  
   $('set-cont-scan').checked = cfg.continuousScan;
   $('set-vibration').checked = cfg.useVibration;
   $('set-use-group').checked = cfg.useGroup;
 
-  document.querySelectorAll('[data-theme]').forEach(b=>b.classList.toggle('on',b.dataset.theme===cfg.theme));
   document.querySelectorAll('[data-sf]').forEach(b=>b.classList.toggle('on',b.dataset.sf===cfg.scanFormat));
   document.querySelectorAll('[data-cq]').forEach(b=>b.classList.toggle('on',b.dataset.cq===cfg.camQuality));
   document.querySelectorAll('.quality-btn').forEach(b=>b.classList.toggle('on',b.dataset.q===cfg.camQuality));
-  document.querySelectorAll('[data-cf]').forEach(b=>b.classList.toggle('on',b.dataset.cf===cfg.camFacing));
   document.querySelectorAll('[data-mp]').forEach(b=>b.classList.toggle('on',b.dataset.mp===String(cfg.maxPhotos)));
   document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('on',b.dataset.mode===cfg.scanFormat));
   
   scanMode=cfg.scanFormat;
   camQuality=cfg.camQuality;
-  facingMode=cfg.camFacing;
-
-  const ch = $('set-card-height');
-  if(ch){
-    ch.value = cfg.historyCardHeight || 200;
-    $('val-card-height').textContent = (cfg.historyCardHeight || 200) + 'px';
-    document.documentElement.style.setProperty('--card-height', (cfg.historyCardHeight || 200) + 'px');
-  }
 
   const ps = $('set-photo-size');
   if(ps){
@@ -887,7 +820,6 @@ function applyCfgToUI(){
     else bcCompactBtn.classList.remove('on');
   }
 
-  applyTheme();
   updateGroupUI();
 }
 
@@ -1092,7 +1024,7 @@ async function dbPrune(max){
 /* ════ STATE ════ */
 let bcHistory=[],photos=[];
 let scanning=false,scanMode='ean13';
-let camActive=false,facingMode='environment',camQuality='mid';
+let camActive=false,camQuality='mid';
 let scanStream=null,camStream=null,detector=null,raf=null;
 let lastCode=null,lastCodeTime=0,camTrack=null;
 let activeTab='scan',currentDetail=null,currentLightbox=null;
@@ -1105,7 +1037,7 @@ let multiSelModePh=false, multiSelectedPh=[];
 let multiSelModeBc=false, multiSelectedBc=[];
 
 let MAX_PH=200;
-let groupMoveTarget = 'ph'; // 'ph' または 'bc'
+let groupMoveTarget = 'ph';
 
 function renderBC(canvas,value,format,height,showVal){
   const jf=JS_FMT[format];if(!jf||!window.JsBarcode)return false;
@@ -1188,7 +1120,7 @@ async function detect(){
     const codes=await detector.detect(v);
     if(codes.length){
       const c=codes[0],now=Date.now();
-      if(c.rawValue.length!==13){/* 13桁以外破棄 */}
+      if(c.rawValue.length!==13){}
       else {
         const waitTime = cfg.continuousScan ? 500 : 3000;
         if(c.rawValue!==lastCode||now-lastCodeTime>waitTime){
@@ -1283,7 +1215,7 @@ document.querySelectorAll('.quality-btn').forEach(btn=>{
     const q=btn.dataset.q;if(q===camQuality)return;
     document.querySelectorAll('.quality-btn').forEach(b=>b.classList.remove('on'));
     btn.classList.add('on');camQuality=q;cfg.camQuality=q;saveCfg();applyCfgToUI();
-    if(camActive){stopCam();setTimeout(()=>startCam(facingMode),150);}
+    if(camActive){stopCam();setTimeout(()=>startCam(),150);}
     showToast('画質: '+{low:'低',mid:'標準',high:'高',max:'最高'}[q],'ok');
   });
 });
@@ -1334,15 +1266,15 @@ function stopCam(){
   camTrack=null;torchOn=false;$('btn-torch').classList.remove('torch-on');
   $('focus-ring').classList.remove('show');setCamActive(false);
 }
-async function startCam(facing){
-  const fm=facing||facingMode;hideCamError();$('cam-ph-txt').textContent='カメラを起動中...';
+async function startCam(){
+  hideCamError();$('cam-ph-txt').textContent='カメラを起動中...';
   const qc=CAM_QUALITY[camQuality]||CAM_QUALITY.mid;
-  const stabHints = cfg.useStabilization ? { videoStabilization:true } : {};
+  const stabHints = { videoStabilization:true }; // 常に手ブレ補正ON
   const constraints=[
-    {video:{facingMode:{ideal:fm},...qc,...stabHints}},
-    {video:{facingMode:{ideal:fm},...qc}},
-    {video:{facingMode:{ideal:fm}}},
-    {video:{facingMode:fm}},
+    {video:{facingMode:{ideal:facingMode},...qc,...stabHints}},
+    {video:{facingMode:{ideal:facingMode},...qc}},
+    {video:{facingMode:{ideal:facingMode}}},
+    {video:{facingMode:facingMode}},
     {video:true},
   ];
   let stream=null;
@@ -1359,7 +1291,7 @@ async function startCam(facing){
     const adv={};
     if('videoStabilization' in caps) adv.videoStabilization=true;
     if(Object.keys(adv).length>0) await camTrack.applyConstraints({advanced:[adv]});
-  }catch(e){console.log('[Stabilization] not supported:',e.message);}
+  }catch(e){}
   const v=$('cam-video');v.setAttribute('playsinline','');v.setAttribute('muted','');v.setAttribute('autoplay','');
   v.muted=true;v.srcObject=stream;
   try{
@@ -1384,10 +1316,6 @@ function applyZoom(z){
   try{const caps=camTrack.getCapabilities?.();if(caps?.zoom){const zc=Math.min(Math.max(z,caps.zoom.min||1),caps.zoom.max||8);camTrack.applyConstraints({advanced:[{zoom:zc}]}).catch(()=>{});}}catch(e){}
 }
 $('zoom-slider').addEventListener('input',e=>applyZoom(parseFloat(e.target.value)));
-$('btn-flip').addEventListener('click',async()=>{
-  facingMode=facingMode==='environment'?'user':'environment';cfg.camFacing=facingMode;saveCfg();applyCfgToUI();
-  if(camActive){stopCam();await new Promise(r=>setTimeout(r,150));await startCam(facingMode);}
-});
 $('btn-cam-toggle').addEventListener('click',()=>{camActive?stopCam():startCam();});
 $('cam-retry').addEventListener('click',startCam);
 $('btn-shutter').addEventListener('click',takePhoto);
@@ -1421,7 +1349,7 @@ async function capturePhotoBlob(){
       }catch{}
       const blob=await ic.takePhoto(photoOpts);
       if(blob&&blob.size>0) return blob;
-    }catch(e){console.warn('[ImageCapture] failed, using canvas:',e.message);}
+    }catch(e){}
   }
   const v=$('cam-video');if(!v||!camActive)return null;
   const vw=v.videoWidth,vh=v.videoHeight;if(!vw||!vh)return null;
@@ -1430,7 +1358,6 @@ async function capturePhotoBlob(){
   const ctx=c.getContext('2d',{willReadFrequently:true});
   ctx.translate(c.width/2,c.height/2);
   if(corrAngle)ctx.rotate(corrAngle*Math.PI/180);
-  if(facingMode==='user')ctx.scale(-1,1);
   ctx.drawImage(v,-vw/2,-vh/2,vw,vh);
   const quality={low:0.62,mid:0.82,high:0.92,max:0.98}[camQuality]||0.82;
   return new Promise(res=>c.toBlob(b=>{res(b&&b.size>0?b:null);},'image/jpeg',quality));
@@ -1473,7 +1400,7 @@ function updateThumbStrip(){
 }
 function setThumbVisible(v){
   thumbStripVisible=v;localStorage.setItem('sc-thumb-vis',v?'1':'0');
-  $('btn-thumb-toggle').classList.toggle('on',v);$('btn-thumb-toggle').textContent=v?'🖼 ON':'🖼 OFF';
+$('btn-thumb-toggle').classList.toggle('on',v);$('btn-thumb-toggle').textContent=v?'🖼 ON':'🖼 OFF';
   $('btn-thumb-toggle2').textContent=v?'非表示':'表示';$('btn-thumb-toggle2').classList.toggle('on',v);
   updateThumbStrip();
 }
@@ -1601,7 +1528,7 @@ function renderBcList(){
         const containerW=Math.max(thumb.clientWidth||window.innerWidth-20, 200);
         const barW=Math.max(2, Math.floor(containerW / 105));
         try{
-          JsBarcode(cv, item.value, { format:jf, width:barW, height:120, displayValue:false, background:'#ffffff', lineColor:'#111111', margin:6 });
+          JsBarcode(cv, item.value, { format:jf, width:barW, height:60, displayValue:false, background:'#ffffff', lineColor:'#111111', margin:6 });
         }catch(e){
           cv.replaceWith(Object.assign(document.createElement('div'),{className:'bc-thumb-txt',textContent:item.value}));
         }
@@ -1782,33 +1709,8 @@ function renderPhotoGrid(){
 
     item.appendChild(imgWrap);
 
-    // 長押しイベント（以前のコードを残しつつ return で無効化）
-    let pressTimer = null;
-    let isDragging = false;
-
-    item.addEventListener('touchstart', e => {
-      isDragging = false;
-      if(true) return; // ユーザー要望により長押し選択は無効化、標準ポップアップを優先
-      if(!mergeMode && !multiSelModePh) {
-        pressTimer = setTimeout(() => { vibrate([60]); enterMultiSelModePh(p.id); }, 500);
-      }
-    }, {passive:true});
-
-    item.addEventListener('touchmove', () => { isDragging = true; clearTimeout(pressTimer); }, {passive:true});
-    item.addEventListener('touchend', () => { clearTimeout(pressTimer); });
-    item.addEventListener('touchcancel', () => { clearTimeout(pressTimer); });
-
-    item.addEventListener('mousedown', e => {
-      if(true) return; // 無効化
-      if(!mergeMode && !multiSelModePh) { pressTimer = setTimeout(() => { enterMultiSelModePh(p.id); }, 500); }
-    });
-    item.addEventListener('mousemove', () => clearTimeout(pressTimer));
-    item.addEventListener('mouseup', () => clearTimeout(pressTimer));
-    item.addEventListener('mouseleave', () => clearTimeout(pressTimer));
-
     /* タップ時の処理 */
     item.addEventListener('click',(e)=>{
-      if(isDragging) return;
       if(mergeMode) toggleMergeSelect(p.id, item);
       else if(multiSelModePh) toggleMultiSelectPh(p.id, item);
       else openLightbox(p);
@@ -1822,42 +1724,6 @@ $('btn-ph-sort').addEventListener('click', e => {
   e.target.textContent = sortOrderPh === 'desc' ? '↓ 新しい順' : '↑ 古い順';
   renderPhotoGrid();
 });
-
-/* ★ 写真 ピンチズーム機能 (2本指操作) */
-let initialPinchDist = null;
-let initialPhotoSize = null;
-const photoGridEl = $('photo-grid');
-
-photoGridEl.addEventListener('touchstart', e => {
-  if (e.touches.length === 2) {
-    initialPinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-    initialPhotoSize = cfg.photoSize || 80;
-  }
-}, {passive:true});
-
-photoGridEl.addEventListener('touchmove', e => {
-  if (e.touches.length === 2 && initialPinchDist) {
-    e.preventDefault(); 
-    const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-    const scale = dist / initialPinchDist;
-    let newSize = initialPhotoSize * scale;
-    newSize = Math.max(50, Math.min(300, newSize));
-    
-    document.documentElement.style.setProperty('--photo-size', newSize + 'px');
-    cfg.photoSize = Math.round(newSize);
-  }
-}, {passive:false});
-
-photoGridEl.addEventListener('touchend', e => {
-  if (e.touches.length < 2 && initialPinchDist) {
-    initialPinchDist = null;
-    saveCfg(); 
-    if($('set-photo-size')) {
-      $('set-photo-size').value = cfg.photoSize;
-      $('val-photo-size').textContent = cfg.photoSize + 'px';
-    }
-  }
-}, {passive:true});
 
 /* ★ 写真 一括選択モード (チェックボックス) */
 $('btn-ph-select-mode').addEventListener('click', e => {
@@ -2068,14 +1934,6 @@ $('group-move-exec').addEventListener('click', async () => {
 });
 
 /* ════ SETTINGS UI & EVENTS ════ */
-document.querySelectorAll('[data-theme]').forEach(btn => {
-  btn.addEventListener('click', () => { cfg.theme = btn.dataset.theme; saveCfg(); applyCfgToUI(); });
-});
-$('set-card-height').addEventListener('input', e => {
-  const v = e.target.value; $('val-card-height').textContent = v + 'px'; document.documentElement.style.setProperty('--card-height', v + 'px');
-});
-$('set-card-height').addEventListener('change', e => { cfg.historyCardHeight = parseInt(e.target.value, 10); saveCfg(); });
-
 $('set-photo-size').addEventListener('input', e => {
   const v = e.target.value; $('val-photo-size').textContent = v + 'px'; document.documentElement.style.setProperty('--photo-size', v + 'px');
 });
@@ -2086,8 +1944,6 @@ $('set-auto-scan').addEventListener('change',e=>{cfg.autoStartScan=e.target.chec
 document.querySelectorAll('[data-sf]').forEach(btn=>btn.addEventListener('click',()=>{cfg.scanFormat=btn.dataset.sf;saveCfg();applyCfgToUI();if(scanning){stopScan();setTimeout(startScan,200);}showToast('フォーマット: '+(cfg.scanFormat==='ean13'?'EAN-13':'全て'),'ok');}));
 
 document.querySelectorAll('[data-cq]').forEach(btn=>btn.addEventListener('click',()=>{cfg.camQuality=btn.dataset.cq;saveCfg();applyCfgToUI();showToast('デフォルト画質: '+(({low:'低',mid:'標準',high:'高',max:'最高'})[cfg.camQuality]),'ok');}));
-$('set-stab').addEventListener('change',e=>{cfg.useStabilization=e.target.checked;saveCfg();});
-document.querySelectorAll('[data-cf]').forEach(btn=>btn.addEventListener('click',()=>{cfg.camFacing=btn.dataset.cf;saveCfg();applyCfgToUI();showToast('デフォルトカメラ: '+(cfg.camFacing==='environment'?'背面':'前面'),'ok');}));
 
 $('set-use-group').addEventListener('change',e=>{cfg.useGroup=e.target.checked;saveCfg();updateGroupUI();renderBcList();renderPhotoGrid();});
 $('scan-group-select').addEventListener('change', e => { cfg.currentGroup = e.target.value; saveCfg(); const c=$('cam-group-select'); if(c) c.value = cfg.currentGroup; });
@@ -2130,4 +1986,3 @@ init();
 </script>
 </body>
 </html>
-```
