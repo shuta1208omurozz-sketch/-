@@ -4,13 +4,314 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
   <title>Scanner + Camera</title>
-  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --card-height: 100px;
+  --photo-size: 80px;
+  --accent: #00d4ff;
+  --accent-10: rgba(0,212,255,.1);
+  --accent-20: rgba(0,212,255,.2);
+  --accent-30: rgba(0,212,255,.3);
+  --accent-40: rgba(0,212,255,.4);
+  --accent-50: rgba(0,212,255,.5);
+  --accent-70: rgba(0,212,255,.7);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; background: #0a0c0f; }
+body { color: #e0e8f0; font-family: 'Rajdhani', sans-serif; }
+#app { height: 100%; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; background: #0a0c0f; }
+.hdr { display: flex; align-items: center; gap: 10px; padding: 9px 14px; padding-top: max(9px, env(safe-area-inset-top)); background: #0d1117; border-bottom: 1px solid #1e2a38; flex-shrink: 0; }
+.hdr-icon { width: 26px; height: 26px; background: var(--accent); flex-shrink: 0; display: flex; align-items: center; justify-content: center; clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px)); }
+.hdr-title { font-size: 15px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; }
+.hdr-sub { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: #4a6a8a; letter-spacing: 2px; }
+.hdr-count { margin-left: auto; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--accent); background: var(--accent-10); border: 1px solid var(--accent-20); padding: 3px 7px; white-space: nowrap; }
+.tabs { display: flex; background: #0d1117; border-bottom: 1px solid #1e2a38; flex-shrink: 0; }
+.tab { flex: 1; padding: 9px 1px; text-align: center; font-size: 8.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; color: #4a6a8a; border: none; background: none; border-bottom: 2px solid transparent; font-family: 'Rajdhani', sans-serif; transition: color .2s, border-color .2s; }
+.tab.on { color: var(--accent); border-bottom-color: var(--accent); background: var(--accent-10); }
+.page { flex: 1; overflow: hidden; display: none; flex-direction: column; min-height: 0; }
+.page.on { display: flex; }
+.group-bar { display: none; align-items: center; padding: 6px 12px; background: #0d1117; border-bottom: 1px solid #1e2a38; flex-shrink: 0; gap: 8px; width: 100%; max-width: 440px; margin: 0 auto; }
+.group-lbl { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #8ab4cc; white-space: nowrap; }
+.group-select { flex: 1; background: #0a0c0f; border: 1px solid #1e2a38; color: var(--accent); font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; padding: 4px 8px; outline: none; }
+.card-group-badge { position: absolute; top: 0; right: 0; background: var(--accent-20); color: var(--accent); font-family: 'Rajdhani', sans-serif; font-size: 9px; font-weight: 700; padding: 2px 8px; border-bottom-left-radius: 6px; z-index: 2; }
+.scan-pg { padding: 0; gap: 0; overflow: hidden; }
+.scan-top { display: flex; flex-direction: column; align-items: center; padding: 6px 10px; gap: 5px; flex: 1; min-height: 0; overflow: hidden; }
+.mode-row { width: 100%; max-width: 420px; display: flex; border: 1px solid #1e2a38; overflow: hidden; flex-shrink: 0; }
+.mode-btn { flex: 1; padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: none; background: #0d1117; color: #4a6a8a; transition: all .2s; font-family: 'Rajdhani', sans-serif; }
+.mode-btn + .mode-btn { border-left: 1px solid #1e2a38; }
+.mode-btn.on { background: var(--accent-10); color: var(--accent); }
+.badge { display: inline-block; font-size: 7px; font-family: 'Share Tech Mono', monospace; background: rgba(255,170,0,.15); color: #ffaa00; border: 1px solid rgba(255,170,0,.3); padding: 1px 4px; margin-left: 4px; vertical-align: middle; }
+.finder { position: relative; width: 100%; max-width: 420px; flex: 1; min-height: 0; background: #060809; border: 1px solid #1e2a38; overflow: hidden; }
+.finder video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.corner { position: absolute; width: 22px; height: 22px; border-color: var(--accent); border-style: solid; z-index: 2; pointer-events: none; }
+.corner.tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; }
+.corner.tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; }
+.corner.bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; }
+.corner.br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
+.scan-line { position: absolute; left: 10px; right: 10px; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); animation: scanMove 2s ease-in-out infinite; z-index: 2; box-shadow: 0 0 6px var(--accent); pointer-events: none; }
+@keyframes scanMove { 0% { top: 15%; } 50% { top: 82%; } 100% { top: 15%; } }
+.ean-guide { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2; pointer-events: none; }
+.ean-box { border: 2px dashed rgba(255,170,0,.55); width: 88%; height: 28%; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.ean-line { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: linear-gradient(90deg, transparent, #ffaa00, transparent); box-shadow: 0 0 6px #ffaa00; animation: eanP 1.1s ease-in-out infinite; }
+@keyframes eanP { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+.ean-txt { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: rgba(255,170,0,.75); letter-spacing: 1px; }
+.finder-ov { position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent-70); z-index: 2; pointer-events: none; }
+.finder-ov.ean { color: rgba(255,170,0,.7); }
+.finder-flash { position: absolute; inset: 0; z-index: 4; pointer-events: none; opacity: 0; background: rgba(0,255,136,.18); transition: opacity .08s; }
+.finder-flash.show { opacity: 1; }
+.ph { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
+.ph p { font-family: 'Share Tech Mono', monospace; font-size: 10px; text-align: center; max-width: 200px; line-height: 1.8; color: #3a5a7a; }
+.sbar { width: 100%; max-width: 420px; padding: 6px 12px; background: #0d1117; border: 1px solid #1e2a38; font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 1px; color: #4a6a8a; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.sdot { width: 6px; height: 6px; border-radius: 50%; background: #2a3a4a; flex-shrink: 0; transition: background .3s, box-shadow .3s; }
+.sdot.go { background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 1.2s ease-in-out infinite; }
+.sdot.go.ean { background: #ffaa00; box-shadow: 0 0 6px #ffaa00; }
+.sdot.ok { background: #00ff88; box-shadow: 0 0 6px #00ff88; }
+.sdot.err { background: #ff4466; box-shadow: 0 0 6px #ff4466; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+.btn-main { width: 100%; max-width: 420px; padding: 11px; background: var(--accent); color: #0a0c0f; border: none; font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); transition: background .2s, transform .1s; flex-shrink: 0; }
+.btn-main:active { transform: scale(.98); }
+.btn-main.stop { background: #ff4466; }
+.scan-bc-section { flex-shrink: 0; min-height: 220px; border-top: 2px solid #1e2a38; background: #080b0f; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+.scan-bc-placeholder { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #2a3a4a; letter-spacing: 2px; text-align: center; }
+.scan-bc-display { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px 8px; }
+.scan-bc-canvas-wrap { width: 100%; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; background: #fff; overflow: hidden; }
+.scan-bc-canvas-wrap canvas { width: 100% !important; height: auto !important; max-height: 140px; display: block; }
+.scan-bc-val { font-family: 'Share Tech Mono', monospace; font-size: clamp(18px, 5.5vw, 28px); color: #e0e8f0; font-weight: 700; letter-spacing: 3px; text-align: center; line-height: 1; margin-top: 4px; }
+.btn-goto-cam { padding: 12px; margin: 4px 0 8px; width: 100%; max-width: 320px; background: var(--accent); color: #0a0c0f; border: none; font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 2px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,212,255,0.3); transition: transform 0.1s; flex-shrink: 0; }
+.btn-goto-cam:active { transform: scale(0.97); }
+.scan-bc-footer { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-top: 4px; }
+.scan-bc-meta { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; letter-spacing: 1px; }
+.scan-bc-copy { padding: 4px 12px; background: transparent; border: 1px solid var(--accent-30); color: var(--accent); font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; cursor: pointer; }
+.scan-bc-dup { position: absolute; top: 6px; right: 8px; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #ffaa00; letter-spacing: 1px; display: none; }
+.scan-bc-dup.show { display: block; }
+.hist-pg { overflow: hidden; }
+.toolbar { display: flex; align-items: center; gap: 7px; padding: 7px 12px; border-bottom: 1px solid #1e2a38; background: #0d1117; flex-shrink: 0; flex-wrap: wrap; }
+.sbox { flex: 1; background: #0a0c0f; border: 1px solid #1e2a38; padding: 7px 10px; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #e0e8f0; outline: none; transition: border-color .2s; min-width: 120px; }
+.sbox::placeholder { color: #2a3a4a; }
+.sbox:focus { border-color: var(--accent); }
+.btn-sm { padding: 5px 10px; background: transparent; border: 1px solid #2a3a4a; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
+.btn-sm.danger { color: #ff4466; }
+.btn-sm.accent { color: var(--accent); border-color: #1e2a38; }
+.btn-sm.on { border-color: var(--accent); color: var(--accent); background: var(--accent-10); }
+.hist-filter-row { display: flex; align-items: center; gap: 5px; padding: 5px 12px; background: #0d1117; border-bottom: 1px solid #1e2a38; flex-shrink: 0; flex-wrap: wrap; }
+.hist-filter-lbl { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; flex-shrink: 0; }
+.flt-btn { padding: 3px 9px; background: transparent; border: 1px solid #1e2a38; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all .2s; }
+.flt-btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-10); }
+.flt-btn.grn.on { border-color: #00ff88; color: #00ff88; background: rgba(0,255,136,.1); }
+.list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 20px; -webkit-overflow-scrolling: touch; }
+.empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #2a3a4a; padding: 40px; text-align: center; }
+.empty p { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 1px; line-height: 1.9; }
+.bc-card { background: #0d1117; border: 1px solid #1e2a38; padding: 0; display: flex; flex-direction: column; position: relative; overflow: hidden; transition: border-color .2s, background .2s; flex-shrink: 0; }
+.bc-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); z-index: 1; }
+.bc-card.ean::before { background: #ffaa00; }
+.bc-card.checked { background: rgba(0,255,136,.04); border-color: rgba(0,255,136,.3); }
+.bc-card.checked::before { background: #00ff88; }
+.bc-card.multi-selected { border: 2px solid #00ff88; background: rgba(0,255,136,.05); }
+.bc-thumb { background: #fff; width: 100%; height: var(--card-height); padding: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; pointer-events: none; }
+.bc-thumb canvas { max-width: 100% !important; max-height: 100% !important; display: block; object-fit: contain; }
+.bc-thumb-txt { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #666; text-align: center; padding: 16px 0; width: 100%; }
+.bc-val-large { font-family: 'Share Tech Mono', monospace; font-size: clamp(15px, 4.5vw, 22px); color: #e0e8f0; letter-spacing: 3px; text-align: center; padding: 6px 10px 2px; line-height: 1.2; word-break: break-all; }
+.bc-meta-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px 7px 10px; gap: 6px; }
+.card-check { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid #2a3a4a; background: transparent; color: #2a3a4a; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .2s; font-size: 14px; -webkit-tap-highlight-color: transparent; }
+.bc-card.checked .card-check { border-color: #00ff88; background: rgba(0,255,136,.15); color: #00ff88; }
+.bc-sel-chk { display: none; width: 32px; height: 32px; border-radius: 50%; border: 2px solid #4a6a8a; background: rgba(0,0,0,.5); color: transparent; font-size: 16px; align-items: center; justify-content: center; position: absolute; top: 8px; left: 8px; z-index: 3; cursor: pointer; }
+.multi-mode-bc .bc-sel-chk { display: flex; }
+.bc-card.multi-selected .bc-sel-chk { background: #00ff88; border-color: #00ff88; color: #000; }
+.bc-meta-info { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; flex: 1; min-width: 0; }
+.card-fmt { font-size: 8px; font-weight: 700; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; flex-shrink: 0; }
+.card-fmt.ean { color: #ffaa00; }
+.card-time, .card-num { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: #2a3a4a; }
+.card-chk-lbl { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: #00ff88; font-weight: 700; }
+.btn-x { background: none; border: none; color: #2a3a4a; cursor: pointer; padding: 6px 8px; font-size: 16px; line-height: 1; flex-shrink: 0; }
+.btn-x:active { color: #ff4466; }
+.list.compact-mode { gap: 6px; padding: 10px 8px; }
+.list.compact-mode .bc-card { flex-direction: row; height: 44px; align-items: center; border-radius: 4px; padding: 0; }
+.list.compact-mode .bc-thumb { display: none; }
+.list.compact-mode .bc-val-large { font-size: 14px; text-align: left; flex: 1; padding: 0 10px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 44px; }
+.list.compact-mode .bc-meta-row { position: static; padding: 0 10px; width: auto; background: transparent; border: none; }
+.list.compact-mode .card-fmt, .list.compact-mode .card-num, .list.compact-mode .card-chk-lbl, .list.compact-mode .card-group-badge { display: none; }
+.list.compact-mode .card-time { font-size: 9px; color: #4a6a8a; }
+.list.compact-mode .card-check { width: 28px; height: 28px; font-size: 12px; margin-right: 6px; }
+.list.compact-mode .bc-sel-chk { position: static; width: 26px; height: 26px; font-size: 12px; margin-left: 8px; margin-right: 2px; }
+.cam-pg { align-items: center; padding: 0 10px 6px; gap: 4px; overflow: hidden; padding-bottom: max(6px, env(safe-area-inset-bottom)); }
+.vf { position: relative; width: 100%; max-width: 440px; border: 1px solid #1e2a38; overflow: hidden; background: #000; flex: 1; min-height: 0; }
+.vf video { width: 100%; height: 100%; display: block; object-fit: cover; }
+.flash { position: absolute; inset: 0; background: #fff; z-index: 10; pointer-events: none; opacity: 0; transition: opacity .05s; }
+.flash.on { opacity: 1; }
+.focus-ring { position: absolute; width: 64px; height: 64px; border: 2px solid #ffdd00; border-radius: 4px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%) scale(1.2); transition: transform .15s, opacity .3s; opacity: 0; }
+.focus-ring.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.focus-ring::before, .focus-ring::after { content: ''; position: absolute; background: #ffdd00; }
+.focus-ring::before { left: 50%; top: -6px; width: 1px; height: 5px; transform: translateX(-50%); }
+.focus-ring::after { top: 50%; left: -6px; height: 1px; width: 5px; transform: translateY(-50%); }
+.err-box { width: 100%; max-width: 440px; padding: 10px 12px; background: rgba(255,68,102,.07); border: 1px solid rgba(255,68,102,.35); display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+.err-title { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 2px; color: #ff4466; text-transform: uppercase; }
+.err-code-badge { display: inline-block; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #ff8888; background: rgba(255,68,102,.15); border: 1px solid rgba(255,68,102,.3); padding: 1px 6px; letter-spacing: 2px; }
+.err-body { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #cc8888; line-height: 1.7; }
+.err-retry { padding: 6px 12px; background: transparent; border: 1px solid rgba(255,68,102,.4); color: #ff8899; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; align-self: flex-start; }
+.zoom-row { width: 100%; max-width: 440px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.zoom-lbl { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--accent); width: 36px; text-align: right; white-space: nowrap; flex-shrink: 0; }
+input[type=range] { flex: 1; -webkit-appearance: none; height: 2px; background: #1e2a38; outline: none; cursor: pointer; border-radius: 1px; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+.quality-row { width: 100%; max-width: 440px; display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.quality-lbl { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; white-space: nowrap; flex-shrink: 0; }
+.quality-btn { flex: 1; padding: 4px 2px; text-align: center; font-size: 9px; font-weight: 700; letter-spacing: 1px; cursor: pointer; border: 1px solid #1e2a38; background: #0d1117; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; transition: all .2s; }
+.quality-btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-10); }
+.cam-ctrl { width: 100%; max-width: 440px; display: flex; align-items: center; justify-content: space-around; padding: 4px; flex-shrink: 0; gap: 8px; }
+.ctrl-btn { width: 50px; height: 50px; border-radius: 50%; border: 1px solid #1e2a38; background: #0d1117; color: #8ab4cc; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all .2s; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+.ctrl-btn:active { border-color: var(--accent); color: var(--accent); }
+.ctrl-btn.torch-on { border-color: #ffdd00 !important; color: #ffdd00 !important; box-shadow: 0 0 10px rgba(255,221,0,.35); }
+.shutter { width: 68px; height: 68px; border-radius: 50%; border: 3px solid #e0e8f0; background: transparent; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; flex-shrink: 0; }
+.shutter::after { content: ''; width: 52px; height: 52px; border-radius: 50%; background: #e0e8f0; display: block; transition: transform .1s; }
+.shutter:active::after { transform: scale(.85); }
+.shutter:disabled { opacity: .3; cursor: default; }
+#btn-goto-scan { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--accent); border-color: var(--accent); }
+.thumb-strip-wrap { width: 100%; max-width: 440px; flex-shrink: 0; }
+.thumb-strip-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+.thumb-strip-lbl { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; letter-spacing: 1px; }
+.thumb-toggle-btn { background: none; border: 1px solid #1e2a38; color: #4a6a8a; font-family: 'Share Tech Mono', monospace; font-size: 9px; padding: 2px 8px; cursor: pointer; letter-spacing: 1px; }
+.thumb-toggle-btn.on { border-color: var(--accent); color: var(--accent); }
+.thumb-strip { display: flex; gap: 3px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.thumb-strip::-webkit-scrollbar { display: none; }
+.mini-thumb { width: 52px; height: 52px; flex-shrink: 0; overflow: hidden; cursor: pointer; border: 1px solid #1e2a38; }
+.mini-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.more-btn { width: 52px; height: 52px; flex-shrink: 0; background: #0d1117; border: 1px solid #1e2a38; color: #4a6a8a; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+.cam-bottom-row { width: 100%; max-width: 440px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding: 2px 0; }
+.orient-bar { display: flex; align-items: center; gap: 7px; font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 1px; }
+.orient-dot { width: 8px; height: 8px; border-radius: 50%; background: #2a3a4a; flex-shrink: 0; transition: background .3s, box-shadow .3s; }
+.orient-dot.ok { background: #00ff88; box-shadow: 0 0 5px rgba(0,255,136,.5); }
+.orient-dot.warn { background: #ffaa00; box-shadow: 0 0 5px rgba(255,170,0,.5); }
+.orient-label { color: #4a6a8a; }
+.orient-label.ok { color: #00ff88; }
+.orient-label.warn { color: #ffaa00; }
+.save-folder-row { width: 100%; max-width: 440px; background: #0d1117; border: 1px solid #1e2a38; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
+.save-folder-hdr { display: flex; align-items: center; justify-content: space-between; }
+.save-folder-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: #4a6a8a; text-transform: uppercase; font-family: 'Rajdhani', sans-serif; }
+.save-folder-android { font-size: 8px; font-family: 'Share Tech Mono', monospace; color: #ffaa00; background: rgba(255,170,0,.1); border: 1px solid rgba(255,170,0,.3); padding: 1px 5px; letter-spacing: 1px; }
+.save-folder-path { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #8ab4cc; word-break: break-all; min-height: 12px; }
+.save-folder-path.none { color: #2a3a4a; font-style: italic; }
+.btn-folder-pick { padding: 4px 10px; background: transparent; border: 1px solid var(--accent-30); color: var(--accent); font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; white-space: nowrap; }
+.btn-folder-clear { padding: 4px 8px; background: transparent; border: 1px solid #2a3a4a; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; cursor: pointer; }
+.save-folder-note { font-family: 'Share Tech Mono', monospace; font-size: 7px; color: #2a3a4a; line-height: 1.5; }
+.photo-pg { overflow: hidden; }
+.photo-toolbar { display: flex; align-items: center; gap: 6px; padding: 7px 12px; border-bottom: 1px solid #1e2a38; background: #0d1117; flex-shrink: 0; flex-wrap: wrap; }
+.photo-count { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #4a6a8a; flex: 1; white-space: nowrap; }
+.merge-bar { display: none; align-items: center; gap: 8px; padding: 7px 12px; border-bottom: 1px solid var(--accent-20); background: var(--accent-10); flex-shrink: 0; }
+.merge-bar.on { display: flex; }
+.merge-bar-txt { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); flex: 1; }
+.btn-merge-exec { padding: 7px 14px; background: var(--accent); color: #0a0c0f; border: none; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px)); }
+.btn-merge-exec:disabled { opacity: .4; cursor: default; }
+.btn-merge-cancel { padding: 7px 10px; background: transparent; border: 1px solid #2a3a4a; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; }
+.multi-sel-bar { display: none; align-items: center; gap: 6px; padding: 7px 12px; border-bottom: 1px solid rgba(0,255,136,.3); background: rgba(0,255,136,.1); flex-shrink: 0; flex-wrap: wrap; }
+.multi-sel-bar.on { display: flex; }
+.multi-sel-txt { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #00ff88; flex: 1; min-width: 80px; }
+.btn-multi-dl { padding: 6px 10px; background: #00ff88; color: #000; border: none; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
+.btn-multi-del { padding: 6px 10px; background: transparent; border: 1px solid #ff4466; color: #ff4466; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
+.btn-multi-move { padding: 6px 10px; background: transparent; border: 1px solid var(--accent); color: var(--accent); font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
+.btn-multi-all { padding: 6px 10px; background: transparent; border: 1px solid #8ab4cc; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
+.btn-multi-cancel { padding: 6px 8px; background: transparent; border: 1px solid #2a3a4a; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
+.photo-list { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px 4px; display: flex; flex-wrap: wrap; gap: 2px; align-content: flex-start; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
+.photo-section-header { width: 100%; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #8ab4cc; padding: 12px 6px 4px; border-bottom: 1px solid #1e2a38; margin-bottom: 4px; margin-top: 8px; }
+.photo-section-header:first-child { margin-top: 0; }
+.photo-card { background: #0d1117; width: var(--photo-size); height: var(--photo-size); display: flex; flex-direction: column; overflow: hidden; position: relative; flex-shrink: 0; cursor: pointer; }
+.photo-card.selected::after { content: ''; position: absolute; inset: 0; border: 3px solid var(--accent); pointer-events: none; z-index: 5; }
+.photo-card-img { width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
+.photo-card-img img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .15s; }
+.photo-card.selected .photo-card-img img { transform: scale(.88); }
+.photo-card-meta { display: none; }
+.photo-select-overlay { position: absolute; inset: 0; z-index: 4; display: none; align-items: center; justify-content: flex-end; padding: 4px; background: rgba(0,0,0,.2); pointer-events: none; }
+.merge-mode .photo-select-overlay, .multi-mode-ph .photo-select-overlay { display: flex; }
+.photo-select-check { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #fff; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; font-size: 12px; color: transparent; margin-bottom: auto; margin-left: auto; }
+.photo-card.selected .photo-select-check { background: var(--accent); color: #fff; border-color: var(--accent); }
+.merge-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.merge-modal { background: #0d1117; border: 1px solid #1e2a38; width: 100%; max-width: 340px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.merge-modal-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; font-family: 'Rajdhani', sans-serif; }
+.merge-layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.merge-layout-btn { padding: 14px 8px; border: 1px solid #1e2a38; background: #0a0c0f; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-align: center; transition: all .2s; }
+.merge-layout-btn:active { border-color: var(--accent); color: var(--accent); }
+.merge-layout-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+.merge-cancel-btn { padding: 10px; background: transparent; border: 1px solid #2a3a4a; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; }
+.settings-pg { overflow-y: auto; padding: 0; -webkit-overflow-scrolling: touch; }
+.settings-section { padding: 14px 14px 0; }
+.settings-title { font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 3px; color: #4a6a8a; text-transform: uppercase; border-bottom: 1px solid #1e2a38; padding-bottom: 6px; margin-bottom: 10px; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(30,42,56,.6); }
+.settings-row:last-child { border-bottom: none; }
+.settings-lbl { font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 600; color: #8ab4cc; letter-spacing: 1px; }
+.settings-sub { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: #4a6a8a; margin-top: 1px; }
+.settings-ctrl { display: flex; gap: 4px; flex-shrink: 0; }
+.seg-btn { padding: 4px 10px; background: #0a0c0f; border: 1px solid #1e2a38; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all .2s; }
+.seg-btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-10); }
+.toggle-sw { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+.toggle-sw input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #1e2a38; border-radius: 13px; transition: .3s; }
+.toggle-slider:before { position: absolute; content: ''; height: 18px; width: 18px; left: 4px; bottom: 4px; background: #4a6a8a; border-radius: 50%; transition: .3s; }
+input:checked + .toggle-slider { background: var(--accent-30); border: 1px solid var(--accent-50); }
+input:checked + .toggle-slider:before { transform: translateX(20px); background: var(--accent); }
+.settings-btn-row { padding: 10px 14px; }
+.settings-btn { width: 100%; padding: 11px; background: transparent; border: 1px solid #1e2a38; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; text-align: center; transition: all .2s; display: block; margin-bottom: 8px; }
+.settings-btn:active { border-color: var(--accent); color: var(--accent); }
+.settings-btn.danger { border-color: rgba(255,68,102,.3); color: #ff6688; }
+.settings-btn.danger:active { border-color: #ff4466; }
+.settings-divider { height: 1px; background: #1e2a38; margin: 8px 14px; }
+.settings-ver { text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 8px; color: #2a3a4a; letter-spacing: 2px; padding: 12px; }
+.grp-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+.grp-item { display: flex; align-items: center; justify-content: space-between; background: #080b0f; border: 1px solid #1e2a38; padding: 6px 10px; font-family: 'Rajdhani', sans-serif; font-size: 11px; color: #e0e8f0; }
+.grp-item .btn-del { padding: 4px 8px; font-size: 10px; background: none; border: 1px solid #2a3a4a; color: #ff4466; cursor: pointer; }
+.grp-add-row { display: flex; gap: 4px; margin-top: 4px; }
+.grp-add-input { flex: 1; background: #0d1117; border: 1px solid #1e2a38; color: #e0e8f0; padding: 6px; font-size: 11px; outline: none; }
+.grp-add-btn { padding: 6px 12px; background: var(--accent); color: #000; font-weight: bold; border: none; cursor: pointer; font-family: 'Rajdhani', sans-serif; }
+.lb { position: fixed; inset: 0; background: rgba(0,0,0,.97); z-index: 200; display: flex; flex-direction: column; touch-action: none; }
+.lb-hdr { padding: 9px 14px; padding-top: max(9px, env(safe-area-inset-top)); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e2a38; flex-shrink: 0; }
+.lb-ttl { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; letter-spacing: 1px; }
+.lb-img { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 8px; touch-action: none; }
+.lb-img img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+.lb-ftr { padding: 9px 14px; padding-bottom: max(9px, env(safe-area-inset-bottom)); display: flex; gap: 8px; border-top: 1px solid #1e2a38; flex-shrink: 0; }
+.btn-dl { flex: 1; padding: 11px; background: var(--accent); color: #0a0c0f; border: none; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
+.lb-rotate-btn { padding: 11px 12px; background: transparent; border: 1px solid #2a3a4a; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+.lb-rotate-btn:active { color: var(--accent); border-color: var(--accent); }
+.btn-del { padding: 11px 12px; background: transparent; border: 1px solid #2a3a4a; color: #ff4466; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+.btn-del:active { background: rgba(255,68,102,.1); }
+.btn-close { background: none; border: none; color: #4a6a8a; cursor: pointer; font-size: 24px; line-height: 1; padding: 4px; }
+.btn-close:active { color: #e0e8f0; }
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.9); z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
+.modal { background: #0d1117; border: 1px solid #1e2a38; border-bottom: none; width: 100%; max-width: 480px; padding: 15px 14px; padding-bottom: max(20px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 9px; }
+.modal-hdr { display: flex; align-items: center; justify-content: space-between; }
+.modal-lbl { font-size: 9px; font-weight: 700; letter-spacing: 3px; color: #4a6a8a; text-transform: uppercase; }
+.modal-val { font-family: 'Share Tech Mono', monospace; font-size: 16px; color: #e0e8f0; word-break: break-all; }
+.modal-meta { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; }
+.modal-bc { background: #fff; padding: 10px 6px; text-align: center; border: 1px solid #1e2a38; }
+.modal-bc canvas { max-width: 100%; display: block; margin: 0 auto; }
+.modal-2d { background: #111; padding: 12px; text-align: center; border: 1px solid #1e2a38; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; line-height: 1.8; }
+.modal-acts { display: flex; gap: 8px; }
+.btn-png { flex: 1; padding: 11px; background: var(--accent); color: #0a0c0f; border: none; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
+.btn-copy { padding: 11px 14px; background: transparent; border: 1px solid #1e2a38; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+.copied { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #00ff88; text-align: center; }
+.toast { position: fixed; bottom: max(80px, calc(env(safe-area-inset-bottom) + 70px)); left: 50%; transform: translateX(-50%) translateY(20px); background: #1a2a3a; border: 1px solid #2a4a6a; color: #e0e8f0; font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 1px; padding: 10px 18px; white-space: nowrap; z-index: 500; pointer-events: none; opacity: 0; transition: opacity .25s, transform .25s; border-radius: 2px; max-width: 92vw; text-align: center; }
+.toast.ok { border-color: rgba(0,255,136,.4); color: #00ff88; }
+.toast.warn { border-color: rgba(255,170,0,.4); color: #ffcc66; }
+.toast.dup { border-color: rgba(255,100,0,.4); color: #ffaa66; }
+.toast.err { border-color: rgba(255,68,102,.5); color: #ff8899; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.popup-bg { position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 400; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.popup { background: #0d1117; border: 1px solid #1e2a38; width: 100%; max-width: 340px; padding: 20px 18px; display: flex; flex-direction: column; gap: 12px; }
+.popup-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: #e0e8f0; text-transform: uppercase; }
+.popup-body { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #8ab4cc; line-height: 1.9; letter-spacing: .5px; }
+.popup-body b { color: #ffcc66; }
+.popup-btn { padding: 11px; background: var(--accent); color: #0a0c0f; border: none; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
+.grp-move-select { width: 100%; background: #0a0c0f; border: 1px solid #1e2a38; color: var(--accent); font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; padding: 8px; outline: none; margin-top: 8px; }
+.popup-btn-row { display: flex; gap: 8px; margin-top: 4px; }
+.popup-btn-cancel { flex: 1; padding: 11px; background: transparent; border: 1px solid #2a3a4a; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
+.popup-btn-exec { flex: 1; padding: 11px; background: var(--accent); color: #000; border: none; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
+.warp-cam-btn { width: 100%; padding: 15px; margin: 10px 0; background: var(--accent); color: #0a0c0f; border: none; font-weight: 700; font-size: 16px; cursor: pointer; clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); }
+.cam-controls .btn-row { display: flex; justify-content: space-around; align-items: center; padding: 20px 10px; }
+.btn-sub { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+.btn-shutter { width: 70px; height: 70px; border-radius: 50%; background: white; border: 5px solid rgba(255,255,255,0.3); box-shadow: 0 0 15px rgba(0,0,0,0.5); cursor: pointer; }
+</style>
 </head>
 <body class="theme-cyan">
 <div id="app">
-  <!-- ヘッダー -->
   <div class="hdr">
     <div class="hdr-icon">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="#0a0c0f">
@@ -27,7 +328,6 @@
     <div class="hdr-count" id="hdr-count">0BC / 0📷</div>
   </div>
 
-  <!-- タブナビゲーション -->
   <div class="tabs">
     <button class="tab on" data-tab="scan">▶ スキャン</button>
     <button class="tab" data-tab="history">≡ BC(<span id="bc-count">0</span>)</button>
@@ -36,7 +336,7 @@
     <button class="tab" data-tab="settings">⚙ 設定</button>
   </div>
 
-  <!-- ==================== スキャン画面 ==================== -->
+  <!-- スキャン画面 -->
   <div class="page on scan-pg" id="pg-scan">
     <div id="scan-group-bar" class="group-bar">
       <span class="group-lbl">📂 グループ:</span>
@@ -72,7 +372,7 @@
       <div class="scan-bc-placeholder" id="scan-bc-placeholder">— バーコード表示エリア —</div>
       <div class="scan-bc-display" id="scan-bc-display" style="display:none">
         <div class="scan-bc-val" id="scan-bc-val"></div>
-        <button class="btn-goto-cam" id="btn-goto-cam">📷 撮影する</button>
+        <button id="btn-warp-cam" class="warp-cam-btn">📷 撮影する</button>
         <div class="scan-bc-canvas-wrap" id="scan-bc-canvas-wrap">
           <canvas id="scan-bc-canvas"></canvas>
         </div>
@@ -85,7 +385,7 @@
     </div>
   </div>
 
-  <!-- ==================== バーコード履歴画面 ==================== -->
+  <!-- バーコード履歴画面 -->
   <div class="page hist-pg" id="pg-history">
     <div class="toolbar">
       <input class="sbox" id="search-box" placeholder="バーコード値を検索..." type="search"/>
@@ -122,7 +422,7 @@
     <div class="list" id="bc-list" style="display:none"></div>
   </div>
 
-  <!-- ==================== カメラ画面 ==================== -->
+  <!-- カメラ画面 -->
   <div class="page cam-pg" id="pg-camera">
     <div id="cam-group-bar" class="group-bar" style="margin-bottom:4px;">
       <span class="group-lbl">📂 グループ:</span>
@@ -157,12 +457,14 @@
       <button class="quality-btn" data-q="high">高</button>
       <button class="quality-btn" data-q="max">最高</button>
     </div>
-    <div class="cam-ctrl">
-      <button class="ctrl-btn" id="btn-cam-switch" title="カメラ切替" style="font-size:18px;">🔄</button>
-      <button class="ctrl-btn" id="btn-torch" title="懐中電灯" style="font-size:18px;">🔦</button>
-      <button class="shutter" id="btn-shutter" disabled></button>
-      <button class="ctrl-btn" id="btn-folder-toggle" title="保存先設定" style="font-size:16px;">📁</button>
-      <button class="ctrl-btn" id="btn-goto-scan" title="スキャンに戻る" style="font-size:11px; font-weight:bold; letter-spacing:1px;">SCAN</button>
+    <div class="cam-controls">
+      <div class="btn-row">
+        <button id="btn-cam-switch" class="btn-sub">🔄</button>
+        <button id="btn-torch" class="btn-sub">🔦</button>
+        <button id="btn-shutter" class="btn-shutter"></button>
+        <button id="btn-folder-toggle" class="btn-sub">📁</button>
+        <button id="btn-goto-scan" class="btn-sub">SCAN</button>
+      </div>
     </div>
     <div class="thumb-strip-wrap" id="thumb-strip-wrap" style="display:none;">
       <div class="thumb-strip-hdr">
@@ -193,7 +495,7 @@
     </div>
   </div>
 
-  <!-- ==================== 写真ギャラリー画面 ==================== -->
+  <!-- 写真ギャラリー画面 -->
   <div class="page photo-pg" id="pg-photos">
     <div class="photo-toolbar">
       <span class="photo-count" id="photo-count-txt">0 / 200 枚</span>
@@ -228,7 +530,7 @@
     <div class="photo-list" id="photo-grid" style="display:none"></div>
   </div>
 
-  <!-- ==================== 設定画面 ==================== -->
+  <!-- 設定画面 -->
   <div class="page settings-pg" id="pg-settings">
     <div class="settings-section">
       <div class="settings-title">📱 UI設定</div>
@@ -241,7 +543,6 @@
       </div>
     </div>
     <div class="settings-divider"></div>
-
     <div class="settings-section">
       <div class="settings-title">▶ スキャン設定</div>
       <div class="settings-row">
@@ -261,7 +562,6 @@
       </div>
     </div>
     <div class="settings-divider"></div>
-
     <div class="settings-section">
       <div class="settings-title">📁 グループ分け機能</div>
       <div class="settings-row">
@@ -277,7 +577,6 @@
       </div>
     </div>
     <div class="settings-divider"></div>
-
     <div class="settings-section">
       <div class="settings-title">⚙ システム / 保存設定</div>
       <div class="settings-row">
@@ -302,7 +601,6 @@
       </div>
     </div>
     <div class="settings-divider"></div>
-
     <div class="settings-section">
       <div class="settings-title">🗄 データ管理</div>
     </div>
@@ -316,8 +614,7 @@
   </div>
 </div>
 
-<!-- ==================== モーダル・ポップアップ群 ==================== -->
-<!-- 写真拡大表示 (Lightbox) -->
+<!-- Lightbox -->
 <div class="lb" id="lightbox" style="display:none">
   <div class="lb-hdr"><span class="lb-ttl" id="lb-ttl"></span><button class="btn-close" id="lb-close">×</button></div>
   <div class="lb-img"><img id="lb-img" src="" alt=""/></div>
@@ -328,7 +625,7 @@
   </div>
 </div>
 
-<!-- バーコード詳細 (Modal) -->
+<!-- BCモーダル -->
 <div class="modal-bg" id="bc-modal" style="display:none">
   <div class="modal">
     <div class="modal-hdr"><span class="modal-lbl">バーコード詳細</span><button class="btn-close" id="modal-close">×</button></div>
@@ -358,7 +655,7 @@
   </div>
 </div>
 
-<!-- グループ変更ポップアップ -->
+<!-- グループ移動ポップアップ -->
 <div class="popup-bg" id="group-move-popup" style="display:none">
   <div class="popup">
     <div class="popup-title">📁 グループに移動</div>
@@ -380,381 +677,12 @@
   </div>
 </div>
 
-<!-- トースト通知 -->
 <div class="toast" id="toast"></div>
 
-<!-- ==================== JSモジュールの読み込み ==================== -->
-<script src="state.js"></script>
-<script src="utils.js"></script>
-<script src="storage.js"></script>
-<script src="scanner.js"></script>
-<script src="camera.js"></script>
-<script src="photos.js"></script>
-<script src="main.js"></script>
-
-</body>
-</html>--- START OF FILE text/css ---
-
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
-
-:root {
-  --card-height: 100px;
-  --photo-size: 80px; 
-  --accent: #00d4ff;
-  --accent-10: rgba(0,212,255,.1);
-  --accent-20: rgba(0,212,255,.2);
-  --accent-30: rgba(0,212,255,.3);
-  --accent-40: rgba(0,212,255,.4);
-  --accent-50: rgba(0,212,255,.5);
-  --accent-70: rgba(0,212,255,.7);
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; overflow: hidden; background: #0a0c0f; }
-body { color: #e0e8f0; font-family: 'Rajdhani', sans-serif; }
-#app { height: 100%; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; background: #0a0c0f; }
-
-/* Header */
-.hdr { display: flex; align-items: center; gap: 10px; padding: 9px 14px; padding-top: max(9px, env(safe-area-inset-top)); background: #0d1117; border-bottom: 1px solid #1e2a38; flex-shrink: 0; }
-.hdr-icon { width: 26px; height: 26px; background: var(--accent); flex-shrink: 0; display: flex; align-items: center; justify-content: center; clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px)); }
-.hdr-title { font-size: 15px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; }
-.hdr-sub { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: #4a6a8a; letter-spacing: 2px; }
-.hdr-count { margin-left: auto; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--accent); background: var(--accent-10); border: 1px solid var(--accent-20); padding: 3px 7px; white-space: nowrap; }
-
-/* Tabs */
-.tabs { display: flex; background: #0d1117; border-bottom: 1px solid #1e2a38; flex-shrink: 0; }
-.tab { flex: 1; padding: 9px 1px; text-align: center; font-size: 8.5px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; cursor: pointer; color: #4a6a8a; border: none; background: none; border-bottom: 2px solid transparent; font-family: 'Rajdhani', sans-serif; transition: color .2s, border-color .2s; }
-.tab.on { color: var(--accent); border-bottom-color: var(--accent); background: var(--accent-10); }
-
-/* Pages */
-.page { flex: 1; overflow: hidden; display: none; flex-direction: column; min-height: 0; }
-.page.on { display: flex; }
-
-.group-bar { display: none; align-items: center; padding: 6px 12px; background: #0d1117; border-bottom: 1px solid #1e2a38; flex-shrink: 0; gap: 8px; width: 100%; max-width: 440px; margin: 0 auto; }
-.group-lbl { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #8ab4cc; white-space: nowrap; }
-.group-select { flex: 1; background: #0a0c0f; border: 1px solid #1e2a38; color: var(--accent); font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; padding: 4px 8px; outline: none; }
-.card-group-badge { position: absolute; top: 0; right: 0; background: var(--accent-20); color: var(--accent); font-family: 'Rajdhani', sans-serif; font-size: 9px; font-weight: 700; padding: 2px 8px; border-bottom-left-radius: 6px; z-index: 2; }
-
-/* ═══ SCAN ═══ */
-.scan-pg { padding: 0; gap: 0; overflow: hidden; }
-.scan-top { display: flex; flex-direction: column; align-items: center; padding: 6px 10px; gap: 5px; flex: 1; min-height: 0; overflow: hidden; }
-.mode-row { width: 100%; max-width: 420px; display: flex; border: 1px solid #1e2a38; overflow: hidden; flex-shrink: 0; }
-.mode-btn { flex: 1; padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; border: none; background: #0d1117; color: #4a6a8a; transition: all .2s; font-family: 'Rajdhani', sans-serif; }
-.mode-btn + .mode-btn { border-left: 1px solid #1e2a38; }
-.mode-btn.on { background: var(--accent-10); color: var(--accent); }
-.badge { display: inline-block; font-size: 7px; font-family: 'Share Tech Mono', monospace; background: rgba(255,170,0,.15); color: #ffaa00; border: 1px solid rgba(255,170,0,.3); padding: 1px 4px; margin-left: 4px; vertical-align: middle; }
-
-.finder { position: relative; width: 100%; max-width: 420px; flex: 1; min-height: 0; background: #060809; border: 1px solid #1e2a38; overflow: hidden; }
-.finder video { width: 100%; height: 100%; object-fit: cover; display: block; }
-.corner { position: absolute; width: 22px; height: 22px; border-color: var(--accent); border-style: solid; z-index: 2; pointer-events: none; }
-.corner.tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; }
-.corner.tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; }
-.corner.bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; }
-.corner.br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
-.scan-line { position: absolute; left: 10px; right: 10px; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); animation: scanMove 2s ease-in-out infinite; z-index: 2; box-shadow: 0 0 6px var(--accent); pointer-events: none; }
-@keyframes scanMove { 0% { top: 15%; } 50% { top: 82%; } 100% { top: 15%; } }
-.ean-guide { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2; pointer-events: none; }
-.ean-box { border: 2px dashed rgba(255,170,0,.55); width: 88%; height: 28%; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-.ean-line { position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: linear-gradient(90deg, transparent, #ffaa00, transparent); box-shadow: 0 0 6px #ffaa00; animation: eanP 1.1s ease-in-out infinite; }
-@keyframes eanP { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
-.ean-txt { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: rgba(255,170,0,.75); letter-spacing: 1px; }
-.finder-ov { position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent-70); z-index: 2; pointer-events: none; }
-.finder-ov.ean { color: rgba(255,170,0,.7); }
-.finder-flash { position: absolute; inset: 0; z-index: 4; pointer-events: none; opacity: 0; background: rgba(0,255,136,.18); transition: opacity .08s; }
-.finder-flash.show { opacity: 1; }
-.ph { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
-.ph p { font-family: 'Share Tech Mono', monospace; font-size: 10px; text-align: center; max-width: 200px; line-height: 1.8; color: #3a5a7a; }
-
-.sbar { width: 100%; max-width: 420px; padding: 6px 12px; background: #0d1117; border: 1px solid #1e2a38; font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 1px; color: #4a6a8a; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.sdot { width: 6px; height: 6px; border-radius: 50%; background: #2a3a4a; flex-shrink: 0; transition: background .3s, box-shadow .3s; }
-.sdot.go { background: var(--accent); box-shadow: 0 0 6px var(--accent); animation: pulse 1.2s ease-in-out infinite; }
-.sdot.go.ean { background: #ffaa00; box-shadow: 0 0 6px #ffaa00; }
-.sdot.ok { background: #00ff88; box-shadow: 0 0 6px #00ff88; }
-.sdot.err { background: #ff4466; box-shadow: 0 0 6px #ff4466; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
-
-.btn-main { width: 100%; max-width: 420px; padding: 11px; background: var(--accent); color: #0a0c0f; border: none; font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); transition: background .2s, transform .1s; flex-shrink: 0; }
-.btn-main:active { transform: scale(.98); }
-.btn-main.stop { background: #ff4466; }
-
-.scan-bc-section { flex-shrink: 0; min-height: 220px; border-top: 2px solid #1e2a38; background: #080b0f; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; position: relative; }
-.scan-bc-placeholder { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #2a3a4a; letter-spacing: 2px; text-align: center; }
-.scan-bc-display { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px 8px; }
-.scan-bc-canvas-wrap { width: 100%; flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; background: #fff; overflow: hidden; }
-.scan-bc-canvas-wrap canvas { width: 100% !important; height: auto !important; max-height: 140px; display: block; }
-.scan-bc-val { font-family: 'Share Tech Mono', monospace; font-size: clamp(18px, 5.5vw, 28px); color: #e0e8f0; font-weight: 700; letter-spacing: 3px; text-align: center; line-height: 1; margin-top: 4px; }
-.btn-goto-cam { padding: 12px; margin: 4px 0 8px; width: 100%; max-width: 320px; background: var(--accent); color: #0a0c0f; border: none; font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 2px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,212,255,0.3); transition: transform 0.1s; flex-shrink: 0; }
-.btn-goto-cam:active { transform: scale(0.97); }
-
-.scan-bc-footer { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-top: 4px; }
-.scan-bc-meta { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; letter-spacing: 1px; }
-.scan-bc-copy { padding: 4px 12px; background: transparent; border: 1px solid var(--accent-30); color: var(--accent); font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; cursor: pointer; }
-.scan-bc-dup { position: absolute; top: 6px; right: 8px; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #ffaa00; letter-spacing: 1px; display: none; }
-.scan-bc-dup.show { display: block; }
-
-/* ═══ HISTORY ═══ */
-.hist-pg { overflow: hidden; }
-.toolbar { display: flex; align-items: center; gap: 7px; padding: 7px 12px; border-bottom: 1px solid #1e2a38; background: #0d1117; flex-shrink: 0; flex-wrap: wrap; }
-.sbox { flex: 1; background: #0a0c0f; border: 1px solid #1e2a38; padding: 7px 10px; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #e0e8f0; outline: none; transition: border-color .2s; min-width: 120px; }
-.sbox::placeholder { color: #2a3a4a; }
-.sbox:focus { border-color: var(--accent); }
-.btn-sm { padding: 5px 10px; background: transparent; border: 1px solid #2a3a4a; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; white-space: nowrap; }
-.btn-sm.danger { color: #ff4466; }
-.btn-sm.accent { color: var(--accent); border-color: #1e2a38; }
-.btn-sm.on { border-color: var(--accent); color: var(--accent); background: var(--accent-10); }
-
-.hist-filter-row { display: flex; align-items: center; gap: 5px; padding: 5px 12px; background: #0d1117; border-bottom: 1px solid #1e2a38; flex-shrink: 0; flex-wrap: wrap; }
-.hist-filter-lbl { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; flex-shrink: 0; }
-.flt-btn { padding: 3px 9px; background: transparent; border: 1px solid #1e2a38; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all .2s; }
-.flt-btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-10); }
-.flt-btn.grn.on { border-color: #00ff88; color: #00ff88; background: rgba(0,255,136,.1); }
-
-.list { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 20px; -webkit-overflow-scrolling: touch; }
-.empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #2a3a4a; padding: 40px; text-align: center; }
-.empty p { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 1px; line-height: 1.9; }
-
-.bc-card { background: #0d1117; border: 1px solid #1e2a38; padding: 0; display: flex; flex-direction: column; position: relative; overflow: hidden; transition: border-color .2s, background .2s; flex-shrink: 0; }
-.bc-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--accent); z-index: 1; }
-.bc-card.ean::before { background: #ffaa00; }
-.bc-card.checked { background: rgba(0,255,136,.04); border-color: rgba(0,255,136,.3); }
-.bc-card.checked::before { background: #00ff88; }
-.bc-card.multi-selected { border: 2px solid #00ff88; background: rgba(0,255,136,.05); }
-
-.bc-thumb { background: #fff; width: 100%; height: var(--card-height); padding: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; pointer-events: none; }
-.bc-thumb canvas { max-width: 100% !important; max-height: 100% !important; display: block; object-fit: contain; }
-.bc-thumb-txt { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #666; text-align: center; padding: 16px 0; width: 100%; }
-
-.bc-val-large { font-family: 'Share Tech Mono', monospace; font-size: clamp(15px, 4.5vw, 22px); color: #e0e8f0; letter-spacing: 3px; text-align: center; padding: 6px 10px 2px; line-height: 1.2; word-break: break-all; }
-.bc-meta-row { display: flex; align-items: center; justify-content: space-between; padding: 5px 8px 7px 10px; gap: 6px; }
-.card-check { width: 32px; height: 32px; border-radius: 50%; border: 1.5px solid #2a3a4a; background: transparent; color: #2a3a4a; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .2s; font-size: 14px; -webkit-tap-highlight-color: transparent; }
-.bc-card.checked .card-check { border-color: #00ff88; background: rgba(0,255,136,.15); color: #00ff88; }
-
-.bc-sel-chk { display: none; width: 32px; height: 32px; border-radius: 50%; border: 2px solid #4a6a8a; background: rgba(0,0,0,.5); color: transparent; font-size: 16px; align-items: center; justify-content: center; position: absolute; top: 8px; left: 8px; z-index: 3; cursor: pointer; }
-.multi-mode-bc .bc-sel-chk { display: flex; }
-.bc-card.multi-selected .bc-sel-chk { background: #00ff88; border-color: #00ff88; color: #000; }
-
-.bc-meta-info { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; flex: 1; min-width: 0; }
-.card-fmt { font-size: 8px; font-weight: 700; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; flex-shrink: 0; }
-.card-fmt.ean { color: #ffaa00; }
-.card-time, .card-num { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: #2a3a4a; }
-.card-chk-lbl { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: #00ff88; font-weight: 700; }
-.btn-x { background: none; border: none; color: #2a3a4a; cursor: pointer; padding: 6px 8px; font-size: 16px; line-height: 1; flex-shrink: 0; }
-.btn-x:active { color: #ff4466; }
-
-/* コンパクトモード */
-.list.compact-mode { gap: 6px; padding: 10px 8px; }
-.list.compact-mode .bc-card { flex-direction: row; height: 44px; align-items: center; border-radius: 4px; padding: 0; }
-.list.compact-mode .bc-thumb { display: none; }
-.list.compact-mode .bc-val-large { font-size: 14px; text-align: left; flex: 1; padding: 0 10px; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 44px; }
-.list.compact-mode .bc-meta-row { position: static; padding: 0 10px; width: auto; background: transparent; border: none; }
-.list.compact-mode .card-fmt, .list.compact-mode .card-num, .list.compact-mode .card-chk-lbl, .list.compact-mode .card-group-badge { display: none; }
-.list.compact-mode .card-time { font-size: 9px; color: #4a6a8a; }
-.list.compact-mode .card-check { width: 28px; height: 28px; font-size: 12px; margin-right: 6px; }
-.list.compact-mode .bc-sel-chk { position: static; width: 26px; height: 26px; font-size: 12px; margin-left: 8px; margin-right: 2px; }
-
-/* ═══ CAMERA ═══ */
-.cam-pg { align-items: center; padding: 0 10px 6px; gap: 4px; overflow: hidden; padding-bottom: max(6px, env(safe-area-inset-bottom)); }
-.vf { position: relative; width: 100%; max-width: 440px; border: 1px solid #1e2a38; overflow: hidden; background: #000; flex: 1; min-height: 0; }
-.vf video { width: 100%; height: 100%; display: block; object-fit: cover; }
-.flash { position: absolute; inset: 0; background: #fff; z-index: 10; pointer-events: none; opacity: 0; transition: opacity .05s; }
-.flash.on { opacity: 1; }
-.focus-ring { position: absolute; width: 64px; height: 64px; border: 2px solid #ffdd00; border-radius: 4px; pointer-events: none; z-index: 5; transform: translate(-50%, -50%) scale(1.2); transition: transform .15s, opacity .3s; opacity: 0; }
-.focus-ring.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-.focus-ring::before, .focus-ring::after { content: ''; position: absolute; background: #ffdd00; }
-.focus-ring::before { left: 50%; top: -6px; width: 1px; height: 5px; transform: translateX(-50%); }
-.focus-ring::after { top: 50%; left: -6px; height: 1px; width: 5px; transform: translateY(-50%); }
-
-.err-box { width: 100%; max-width: 440px; padding: 10px 12px; background: rgba(255,68,102,.07); border: 1px solid rgba(255,68,102,.35); display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
-.err-title { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 2px; color: #ff4466; text-transform: uppercase; }
-.err-code-badge { display: inline-block; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #ff8888; background: rgba(255,68,102,.15); border: 1px solid rgba(255,68,102,.3); padding: 1px 6px; letter-spacing: 2px; }
-.err-body { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #cc8888; line-height: 1.7; }
-.err-retry { padding: 6px 12px; background: transparent; border: 1px solid rgba(255,68,102,.4); color: #ff8899; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; align-self: flex-start; }
-
-.zoom-row { width: 100%; max-width: 440px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-.zoom-lbl { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--accent); width: 36px; text-align: right; white-space: nowrap; flex-shrink: 0; }
-input[type=range] { flex: 1; -webkit-appearance: none; height: 2px; background: #1e2a38; outline: none; cursor: pointer; border-radius: 1px; }
-input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; }
-
-.quality-row { width: 100%; max-width: 440px; display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
-.quality-lbl { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; white-space: nowrap; flex-shrink: 0; }
-.quality-btn { flex: 1; padding: 4px 2px; text-align: center; font-size: 9px; font-weight: 700; letter-spacing: 1px; cursor: pointer; border: 1px solid #1e2a38; background: #0d1117; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; transition: all .2s; }
-.quality-btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-10); }
-
-.cam-ctrl { width: 100%; max-width: 440px; display: flex; align-items: center; justify-content: space-around; padding: 4px; flex-shrink: 0; gap: 8px; }
-.ctrl-btn { width: 50px; height: 50px; border-radius: 50%; border: 1px solid #1e2a38; background: #0d1117; color: #8ab4cc; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: all .2s; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
-.ctrl-btn:active { border-color: var(--accent); color: var(--accent); }
-.ctrl-btn.red { border-color: #ff4466; color: #ff4466; }
-.ctrl-btn.torch-on { border-color: #ffdd00 !important; color: #ffdd00 !important; box-shadow: 0 0 10px rgba(255,221,0,.35); }
-.ctrl-btn.hilite { border-color: var(--accent); color: var(--accent); }
-.shutter { width: 68px; height: 68px; border-radius: 50%; border: 3px solid #e0e8f0; background: transparent; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; flex-shrink: 0; }
-.shutter::after { content: ''; width: 52px; height: 52px; border-radius: 50%; background: #e0e8f0; display: block; transition: transform .1s; }
-.shutter:active::after { transform: scale(.85); }
-.shutter:disabled { opacity: .3; cursor: default; }
-#btn-goto-scan { font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--accent); border-color: var(--accent); }
-
-.thumb-strip-wrap { width: 100%; max-width: 440px; flex-shrink: 0; }
-.thumb-strip-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
-.thumb-strip-lbl { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; letter-spacing: 1px; }
-.thumb-toggle-btn { background: none; border: 1px solid #1e2a38; color: #4a6a8a; font-family: 'Share Tech Mono', monospace; font-size: 9px; padding: 2px 8px; cursor: pointer; letter-spacing: 1px; }
-.thumb-toggle-btn.on { border-color: var(--accent); color: var(--accent); }
-.thumb-strip { display: flex; gap: 3px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-.thumb-strip::-webkit-scrollbar { display: none; }
-.mini-thumb { width: 52px; height: 52px; flex-shrink: 0; overflow: hidden; cursor: pointer; border: 1px solid #1e2a38; }
-.mini-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.more-btn { width: 52px; height: 52px; flex-shrink: 0; background: #0d1117; border: 1px solid #1e2a38; color: #4a6a8a; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 10px; display: flex; align-items: center; justify-content: center; }
-
-.cam-bottom-row { width: 100%; max-width: 440px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; padding: 2px 0; }
-.orient-bar { display: flex; align-items: center; gap: 7px; font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 1px; }
-.orient-dot { width: 8px; height: 8px; border-radius: 50%; background: #2a3a4a; flex-shrink: 0; transition: background .3s, box-shadow .3s; }
-.orient-dot.ok { background: #00ff88; box-shadow: 0 0 5px rgba(0,255,136,.5); }
-.orient-dot.warn { background: #ffaa00; box-shadow: 0 0 5px rgba(255,170,0,.5); }
-.orient-label { color: #4a6a8a; }
-.orient-label.ok { color: #00ff88; }
-.orient-label.warn { color: #ffaa00; }
-
-.save-folder-row { width: 100%; max-width: 440px; background: #0d1117; border: 1px solid #1e2a38; padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
-.save-folder-hdr { display: flex; align-items: center; justify-content: space-between; }
-.save-folder-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: #4a6a8a; text-transform: uppercase; font-family: 'Rajdhani', sans-serif; }
-.save-folder-android { font-size: 8px; font-family: 'Share Tech Mono', monospace; color: #ffaa00; background: rgba(255,170,0,.1); border: 1px solid rgba(255,170,0,.3); padding: 1px 5px; letter-spacing: 1px; }
-.save-folder-path { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #8ab4cc; word-break: break-all; min-height: 12px; }
-.save-folder-path.none { color: #2a3a4a; font-style: italic; }
-.btn-folder-pick { padding: 4px 10px; background: transparent; border: 1px solid var(--accent-30); color: var(--accent); font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all .2s; white-space: nowrap; }
-.btn-folder-clear { padding: 4px 8px; background: transparent; border: 1px solid #2a3a4a; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; cursor: pointer; }
-.save-folder-note { font-family: 'Share Tech Mono', monospace; font-size: 7px; color: #2a3a4a; line-height: 1.5; }
-
-/* ═══ PHOTOS ═══ */
-.photo-pg { overflow: hidden; }
-.photo-toolbar { display: flex; align-items: center; gap: 6px; padding: 7px 12px; border-bottom: 1px solid #1e2a38; background: #0d1117; flex-shrink: 0; flex-wrap: wrap; }
-.photo-count { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #4a6a8a; flex: 1; white-space: nowrap; }
-.merge-bar { display: none; align-items: center; gap: 8px; padding: 7px 12px; border-bottom: 1px solid var(--accent-20); background: var(--accent-10); flex-shrink: 0; }
-.merge-bar.on { display: flex; }
-.merge-bar-txt { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); flex: 1; }
-.btn-merge-exec { padding: 7px 14px; background: var(--accent); color: #0a0c0f; border: none; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px)); }
-.btn-merge-exec:disabled { opacity: .4; cursor: default; }
-.btn-merge-cancel { padding: 7px 10px; background: transparent; border: 1px solid #2a3a4a; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; }
-
-.multi-sel-bar { display: none; align-items: center; gap: 6px; padding: 7px 12px; border-bottom: 1px solid rgba(0,255,136,.3); background: rgba(0,255,136,.1); flex-shrink: 0; flex-wrap: wrap; }
-.multi-sel-bar.on { display: flex; }
-.multi-sel-txt { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #00ff88; flex: 1; min-width: 80px; }
-.btn-multi-dl { padding: 6px 10px; background: #00ff88; color: #000; border: none; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
-.btn-multi-del { padding: 6px 10px; background: transparent; border: 1px solid #ff4466; color: #ff4466; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
-.btn-multi-move { padding: 6px 10px; background: transparent; border: 1px solid var(--accent); color: var(--accent); font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
-.btn-multi-all { padding: 6px 10px; background: transparent; border: 1px solid #8ab4cc; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
-.btn-multi-cancel { padding: 6px 8px; background: transparent; border: 1px solid #2a3a4a; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 2px; }
-
-.photo-list { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px 4px; display: flex; flex-wrap: wrap; gap: 2px; align-content: flex-start; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
-.photo-section-header { width: 100%; font-family: 'Share Tech Mono', monospace; font-size: 11px; color: #8ab4cc; padding: 12px 6px 4px; border-bottom: 1px solid #1e2a38; margin-bottom: 4px; margin-top: 8px; }
-.photo-section-header:first-child { margin-top: 0; }
-.photo-card { background: #0d1117; width: var(--photo-size); height: var(--photo-size); display: flex; flex-direction: column; overflow: hidden; position: relative; flex-shrink: 0; cursor: pointer; }
-.photo-card.selected::after { content: ''; position: absolute; inset: 0; border: 3px solid var(--accent); pointer-events: none; z-index: 5; }
-
-.photo-card-img { width: 100%; height: 100%; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
-.photo-card-img img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .15s; }
-.photo-card.selected .photo-card-img img { transform: scale(.88); }
-.photo-card-meta { display: none; }
-
-.photo-select-overlay { position: absolute; inset: 0; z-index: 4; display: none; align-items: center; justify-content: flex-end; padding: 4px; background: rgba(0,0,0,.2); pointer-events: none; }
-.merge-mode .photo-select-overlay, .multi-mode-ph .photo-select-overlay { display: flex; }
-.photo-select-check { width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid #fff; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; font-size: 12px; color: transparent; margin-bottom: auto; margin-left: auto; }
-.photo-card.selected .photo-select-check { background: var(--accent); color: #fff; border-color: var(--accent); }
-
-.merge-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.merge-modal { background: #0d1117; border: 1px solid #1e2a38; width: 100%; max-width: 340px; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
-.merge-modal-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; font-family: 'Rajdhani', sans-serif; }
-.merge-layout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.merge-layout-btn { padding: 14px 8px; border: 1px solid #1e2a38; background: #0a0c0f; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-align: center; transition: all .2s; }
-.merge-layout-btn:active { border-color: var(--accent); color: var(--accent); }
-.merge-layout-icon { font-size: 18px; display: block; margin-bottom: 4px; }
-.merge-cancel-btn { padding: 10px; background: transparent; border: 1px solid #2a3a4a; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; text-align: center; }
-
-/* ═══ SETTINGS ═══ */
-.settings-pg { overflow-y: auto; padding: 0; -webkit-overflow-scrolling: touch; }
-.settings-section { padding: 14px 14px 0; }
-.settings-title { font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 3px; color: #4a6a8a; text-transform: uppercase; border-bottom: 1px solid #1e2a38; padding-bottom: 6px; margin-bottom: 10px; }
-.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(30,42,56,.6); }
-.settings-row:last-child { border-bottom: none; }
-.settings-lbl { font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 600; color: #8ab4cc; letter-spacing: 1px; }
-.settings-sub { font-family: 'Share Tech Mono', monospace; font-size: 8px; color: #4a6a8a; margin-top: 1px; }
-.settings-ctrl { display: flex; gap: 4px; flex-shrink: 0; }
-.seg-btn { padding: 4px 10px; background: #0a0c0f; border: 1px solid #1e2a38; color: #4a6a8a; font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all .2s; }
-.seg-btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-10); }
-.toggle-sw { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
-.toggle-sw input { opacity: 0; width: 0; height: 0; }
-.toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #1e2a38; border-radius: 13px; transition: .3s; }
-.toggle-slider:before { position: absolute; content: ''; height: 18px; width: 18px; left: 4px; bottom: 4px; background: #4a6a8a; border-radius: 50%; transition: .3s; }
-input:checked + .toggle-slider { background: var(--accent-30); border: 1px solid var(--accent-50); }
-input:checked + .toggle-slider:before { transform: translateX(20px); background: var(--accent); }
-.settings-btn-row { padding: 10px 14px; }
-.settings-btn { width: 100%; padding: 11px; background: transparent; border: 1px solid #1e2a38; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; text-align: center; transition: all .2s; display: block; margin-bottom: 8px; }
-.settings-btn:active { border-color: var(--accent); color: var(--accent); }
-.settings-btn.danger { border-color: rgba(255,68,102,.3); color: #ff6688; }
-.settings-btn.danger:active { border-color: #ff4466; }
-.settings-divider { height: 1px; background: #1e2a38; margin: 8px 14px; }
-.settings-ver { text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 8px; color: #2a3a4a; letter-spacing: 2px; padding: 12px; }
-
-/* Group Setting UI */
-.grp-list { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
-.grp-item { display: flex; align-items: center; justify-content: space-between; background: #080b0f; border: 1px solid #1e2a38; padding: 6px 10px; font-family: 'Rajdhani', sans-serif; font-size: 11px; color: #e0e8f0; }
-.grp-item .btn-del { padding: 4px 8px; font-size: 10px; background: none; border: 1px solid #2a3a4a; color: #ff4466; cursor: pointer; }
-.grp-add-row { display: flex; gap: 4px; margin-top: 4px; }
-.grp-add-input { flex: 1; background: #0d1117; border: 1px solid #1e2a38; color: #e0e8f0; padding: 6px; font-size: 11px; outline: none; }
-.grp-add-btn { padding: 6px 12px; background: var(--accent); color: #000; font-weight: bold; border: none; cursor: pointer; font-family: 'Rajdhani', sans-serif; }
-
-/* ═══ LIGHTBOX ═══ */
-.lb { position: fixed; inset: 0; background: rgba(0,0,0,.97); z-index: 200; display: flex; flex-direction: column; }
-.lb-hdr { padding: 9px 14px; padding-top: max(9px, env(safe-area-inset-top)); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e2a38; flex-shrink: 0; }
-.lb-ttl { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; letter-spacing: 1px; }
-.lb-img { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 8px; touch-action: none; }
-.lb-img img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
-.lb-ftr { padding: 9px 14px; padding-bottom: max(9px, env(safe-area-inset-bottom)); display: flex; gap: 8px; border-top: 1px solid #1e2a38; flex-shrink: 0; }
-.btn-dl { flex: 1; padding: 11px; background: var(--accent); color: #0a0c0f; border: none; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
-.lb-rotate-btn { padding: 11px 12px; background: transparent; border: 1px solid #2a3a4a; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
-.lb-rotate-btn:active { color: var(--accent); border-color: var(--accent); }
-.btn-del { padding: 11px 12px; background: transparent; border: 1px solid #2a3a4a; color: #ff4466; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
-.btn-del:active { background: rgba(255,68,102,.1); }
-.btn-close { background: none; border: none; color: #4a6a8a; cursor: pointer; font-size: 24px; line-height: 1; padding: 4px; }
-.btn-close:active { color: #e0e8f0; }
-
-/* ═══ BC MODAL ═══ */
-.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.9); z-index: 100; display: flex; align-items: flex-end; justify-content: center; }
-.modal { background: #0d1117; border: 1px solid #1e2a38; border-bottom: none; width: 100%; max-width: 480px; padding: 15px 14px; padding-bottom: max(20px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 9px; }
-.modal-hdr { display: flex; align-items: center; justify-content: space-between; }
-.modal-lbl { font-size: 9px; font-weight: 700; letter-spacing: 3px; color: #4a6a8a; text-transform: uppercase; }
-.modal-val { font-family: 'Share Tech Mono', monospace; font-size: 16px; color: #e0e8f0; word-break: break-all; }
-.modal-meta { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; }
-.modal-bc { background: #fff; padding: 10px 6px; text-align: center; border: 1px solid #1e2a38; }
-.modal-bc canvas { max-width: 100%; display: block; margin: 0 auto; }
-.modal-2d { background: #111; padding: 12px; text-align: center; border: 1px solid #1e2a38; font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #4a6a8a; line-height: 1.8; }
-.modal-acts { display: flex; gap: 8px; }
-.btn-png { flex: 1; padding: 11px; background: var(--accent); color: #0a0c0f; border: none; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
-.btn-copy { padding: 11px 14px; background: transparent; border: 1px solid #1e2a38; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
-.copied { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: #00ff88; text-align: center; }
-
-/* ═══ TOAST / POPUP ═══ */
-.toast { position: fixed; bottom: max(80px, calc(env(safe-area-inset-bottom) + 70px)); left: 50%; transform: translateX(-50%) translateY(20px); background: #1a2a3a; border: 1px solid #2a4a6a; color: #e0e8f0; font-family: 'Share Tech Mono', monospace; font-size: 11px; letter-spacing: 1px; padding: 10px 18px; white-space: nowrap; z-index: 500; pointer-events: none; opacity: 0; transition: opacity .25s, transform .25s; border-radius: 2px; max-width: 92vw; text-align: center; }
-.toast.ok { border-color: rgba(0,255,136,.4); color: #00ff88; }
-.toast.warn { border-color: rgba(255,170,0,.4); color: #ffcc66; }
-.toast.dup { border-color: rgba(255,100,0,.4); color: #ffaa66; }
-.toast.err { border-color: rgba(255,68,102,.5); color: #ff8899; }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-.popup-bg { position: fixed; inset: 0; background: rgba(0,0,0,.8); z-index: 400; display: flex; align-items: center; justify-content: center; padding: 20px; }
-.popup { background: #0d1117; border: 1px solid #1e2a38; width: 100%; max-width: 340px; padding: 20px 18px; display: flex; flex-direction: column; gap: 12px; }
-.popup-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: #e0e8f0; text-transform: uppercase; }
-.popup-body { font-family: 'Share Tech Mono', monospace; font-size: 10px; color: #8ab4cc; line-height: 1.9; letter-spacing: .5px; }
-.popup-body b { color: #ffcc66; }
-.popup-btn { padding: 11px; background: var(--accent); color: #0a0c0f; border: none; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
-
-/* グループ移動用ポップアップ */
-.grp-move-select { width: 100%; background: #0a0c0f; border: 1px solid #1e2a38; color: var(--accent); font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700; padding: 8px; outline: none; margin-top: 8px; }
-.popup-btn-row { display: flex; gap: 8px; margin-top: 4px; }
-.popup-btn-cancel { flex: 1; padding: 11px; background: transparent; border: 1px solid #2a3a4a; color: #8ab4cc; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
-.popup-btn-exec { flex: 1; padding: 11px; background: var(--accent); color: #000; border: none; font-family: 'Rajdhani', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
---- START OF FILE state.js ---
-
+<script>
 'use strict';
 
-/* ════ グローバル状態・設定 ════ */
+/* ════ state.js ════ */
 const SETTINGS_KEY = 'sc-settings-v1';
 const BC_KEY = 'sc-bc-v3';
 let MAX_PH = 200;
@@ -764,8 +692,8 @@ let cfg = {
   scanFormat: 'ean13',
   camQuality: 'mid',
   maxPhotos: 200,
-  photoSize: 80, 
-  bcCompactMode: false, 
+  photoSize: 80,
+  bcCompactMode: false,
   useVibration: true,
   continuousScan: false,
   useGroup: false,
@@ -789,7 +717,7 @@ let lastCode = null;
 let lastCodeTime = 0;
 let camTrack = null;
 
-let lastScannedValue = ""; // 最新のバーコード値
+let lastScannedValue = '';
 
 let activeTab = 'scan';
 let currentDetail = null;
@@ -801,16 +729,15 @@ let mergeMode = false;
 let mergeSelected = [];
 
 let multiSelModePh = false;
-let multiSelectedPh = []; 
+let multiSelectedPh = [];
 let multiSelModeBc = false;
 let multiSelectedBc = [];
 
-let sortOrderBc = 'desc'; 
+let sortOrderBc = 'desc';
 let sortOrderPh = 'desc';
-let facingMode = 'environment'; 
+let facingMode = 'environment';
 let groupMoveTarget = 'ph';
 
-// カメラの定数
 const CAM_QUALITY = {
   low: { width: { ideal: 640 }, height: { ideal: 480 } },
   mid: { width: { ideal: 1280 }, height: { ideal: 720 } },
@@ -829,662 +756,143 @@ const ALL_FMTS = [
   'code_93', 'itf', 'upc_a', 'upc_e', 'aztec',
   'data_matrix', 'pdf417'
 ];
---- START OF FILE camera.js ---
 
-'use strict';
+/* ════ utils.js (missing from zip — reconstructed) ════ */
+const $ = id => document.getElementById(id);
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+let iosPopupShown = false;
 
-/* ════ カメラ制御・UI更新 ════ */
-function showCamError(code, msg) {
-  $('cam-err').style.display = '';
-  $('cam-err-code').textContent = code;
-  $('cam-err-body').textContent = msg;
+let _toastTimer = null;
+function showToast(msg, type = '', dur = 2200) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '') + ' show';
+  if (_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { t.classList.remove('show'); }, dur);
 }
 
-function hideCamError() { 
-  $('cam-err').style.display = 'none'; 
+function vibrate(pat) {
+  if (cfg.useVibration && navigator.vibrate) navigator.vibrate(pat);
 }
 
-function setCamActive(active) {
-  camActive = active;
-  $('cam-ph').style.display = active ? 'none' : '';
-  $('zoom-row').style.display = active ? 'flex' : 'none';
-  $('quality-row').style.display = active ? 'flex' : 'none';
-  $('btn-shutter').disabled = !active;
-  if (active) {
-    hideCamError();
-    if (typeof startOrientSensor === 'function') startOrientSensor();
-    if (typeof updateOrientUI === 'function') setTimeout(updateOrientUI, 300);
-  }
+function fmtTime(ts) {
+  const d = new Date(ts);
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
-let torchOn = false;
-async function toggleTorch() {
-  if (!camTrack) { showToast('[E008] カメラを起動してください', 'warn'); return; }
+function fmtShort(ts) {
+  const d = new Date(ts);
+  const pad = n => String(n).padStart(2, '0');
+  return `${pad(d.getMonth()+1)}/${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function fmtFileDate(d) {
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+}
+
+function getDayString(ts) {
+  const d = new Date(ts);
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}`;
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+}
+
+function dataUrlToBlob(dataUrl) {
   try {
-    const caps = camTrack.getCapabilities ? camTrack.getCapabilities() : {};
-    if (!caps.torch) { showToast('[E008] このデバイスはフラッシュ非対応です', 'warn'); return; }
-    torchOn = !torchOn;
-    await camTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
-    $('btn-torch').classList.toggle('torch-on', torchOn);
-    showToast(torchOn ? '🔦 懐中電灯 ON' : '懐中電灯 OFF', torchOn ? 'ok' : '');
-  } catch (e) {
-    showToast('[E008] ' + e.message, 'warn');
-  }
+    const arr = dataUrl.split(','), mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8 = new Uint8Array(n);
+    while (n--) u8[n] = bstr.charCodeAt(n);
+    return new Blob([u8], { type: mime });
+  } catch(e) { return null; }
 }
 
-function stopCam() {
-  if (camStream) { 
-    camStream.getTracks().forEach(t => t.stop()); 
-    camStream = null; 
-  }
-  const v = $('cam-video');
-  if (v) { v.srcObject = null; v.style.transform = ''; }
-  camTrack = null;
-  torchOn = false;
-  $('btn-torch').classList.remove('torch-on');
-  $('focus-ring').classList.remove('show');
-  setCamActive(false);
+async function createThumbnail(dataUrl, maxSize = 400) {
+  return new Promise(res => {
+    const img = new Image();
+    img.onload = () => {
+      const sc = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * sc);
+      c.height = Math.round(img.height * sc);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      res(c.toDataURL('image/jpeg', 0.7));
+    };
+    img.onerror = () => res(dataUrl);
+    img.src = dataUrl;
+  });
 }
 
-async function startCam() {
-  hideCamError();
-  $('cam-ph-txt').textContent = 'カメラを起動中...';
-  
-  const qc = CAM_QUALITY[camQuality] || CAM_QUALITY.mid;
-  const stabHints = { videoStabilization: true }; 
-  const constraints = [
-    { video: { facingMode: { ideal: facingMode }, ...qc, ...stabHints } },
-    { video: { facingMode: { ideal: facingMode }, ...qc } },
-    { video: { facingMode: { ideal: facingMode } } },
-    { video: { facingMode: facingMode } },
-    { video: true },
-  ];
-  
-  let stream = null;
-  for (const c of constraints) {
-    try {
-      if (camStream) { 
-        camStream.getTracks().forEach(t => t.stop()); 
-        camStream = null; 
-      }
-      stream = await navigator.mediaDevices.getUserMedia(c);
-      break;
-    } catch (e) {
-      if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-        showCamError('E002', 'カメラの許可が必要です。ブラウザのアドレスバー左端 🔒 → カメラ → 許可 → ページを再読み込み');
-        return;
-      }
-    }
-  }
-  if (!stream) { showCamError('E001', 'カメラが見つかりません。'); return; }
-  
-  camStream = stream;
-  camTrack = stream.getVideoTracks()[0];
-  
-  try {
-    const caps = camTrack.getCapabilities?.() ?? {};
-    const adv = {};
-    if ('videoStabilization' in caps) adv.videoStabilization = true;
-    if (Object.keys(adv).length > 0) await camTrack.applyConstraints({ advanced: [adv] });
-  } catch (e) {}
-  
-  const v = $('cam-video');
-  v.setAttribute('playsinline', '');
-  v.setAttribute('muted', '');
-  v.setAttribute('autoplay', '');
-  v.muted = true;
-  v.srcObject = stream;
-  
-  try {
-    await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = rej; setTimeout(res, 4000); });
-    await v.play();
-    setCamActive(true);
-    $('zoom-slider').value = 1;
-    applyZoom(1);
-    if (typeof updateThumbStrip === 'function') updateThumbStrip();
-    updateStabUI();
-  } catch (e) {
-    showCamError('E005', 'カメラの再生に失敗: ' + e.message);
-  }
-}
-
-function updateStabUI() {
-  if (!camTrack) return;
-  try {
-    const settings = camTrack.getSettings?.() ?? {};
-    const on = settings.videoStabilization === true;
-    const ind = $('stab-ind');
-    if (ind) { 
-      ind.textContent = on ? '🔧 手ブレ補正 ON' : '手ブレ補正 OFF'; 
-      ind.style.color = on ? '#00ff88' : '#4a6a8a'; 
-    }
-  } catch (e) {}
-}
-
-function applyZoom(z) {
-  const v = $('cam-video');
-  $('zoom-lbl').textContent = z.toFixed(1) + '×';
-  if (!v) return;
-  
-  if (z < 1) {
-    v.style.transform = `scale(${z})`;
-    v.style.transformOrigin = 'center center';
-    if (camTrack) {
-      try { camTrack.applyConstraints({ advanced: [{ zoom: 1 }] }).catch(()=>{}); } catch(e){}
-    }
-    return;
-  }
-  
-  v.style.transform = '';
-  if (!camTrack) return;
-  try {
-    const caps = camTrack.getCapabilities?.();
-    if (caps?.zoom) {
-      const zc = Math.min(Math.max(z, caps.zoom.min || 1), caps.zoom.max || 8);
-      camTrack.applyConstraints({ advanced: [{ zoom: zc }] }).catch(()=>{});
-    }
-  } catch (e) {}
-}
-
-/* ════ 撮影・画像処理 (楽観的UI更新) ════ */
-async function compressIfNeeded(blob, maxBytes = 1024 * 1024) {
-  if (!blob || blob.size <= maxBytes) return blob;
-  const bmp = await createImageBitmap(blob).catch(() => null);
-  if (!bmp) return blob;
-  
-  const c = document.createElement('canvas');
-  const scale = Math.min(1, Math.sqrt(maxBytes / blob.size) * 0.92);
-  c.width = Math.round(bmp.width * scale);
-  c.height = Math.round(bmp.height * scale);
-  const ctx = c.getContext('2d');
-  ctx.drawImage(bmp, 0, 0, c.width, c.height);
-  bmp.close();
-  
-  for (const q of [0.82, 0.72, 0.60, 0.48, 0.36]) {
-    const out = await new Promise(res => c.toBlob(b => res(b), 'image/jpeg', q));
-    if (out && out.size <= maxBytes) return out;
-  }
-  return blob;
-}
-
-async function takePhoto() {
-  if (!camActive) return;
-  $('btn-shutter').disabled = true;
-  const fl = $('flash');
-  fl.classList.add('on');
-  setTimeout(() => fl.classList.remove('on'), 200);
-  if (typeof vibrate === 'function') vibrate([40]); 
-
-  const v = $('cam-video');
-  if (!v || !camActive) {
-    $('btn-shutter').disabled = false;
-    return;
-  }
-
-  const vw = v.videoWidth, vh = v.videoHeight;
-  if (!vw || !vh) {
-    $('btn-shutter').disabled = false;
-    return;
-  }
-
-  // 1. 同期的にプレビュー作成（低画質・高速）
-  const corrAngle = (typeof sensorAngle !== 'undefined') ? (360 - sensorAngle) % 360 : 0;
-  const swap = corrAngle === 90 || corrAngle === 270;
-  const c = document.createElement('canvas');
-  c.width = swap ? vh : vw;
-  c.height = swap ? vw : vh;
-  const ctx = c.getContext('2d', { willReadFrequently: true });
-
-  ctx.translate(c.width / 2, c.height / 2);
-  if (corrAngle) ctx.rotate(corrAngle * Math.PI / 180);
-  ctx.drawImage(v, -vw / 2, -vh / 2, vw, vh);
-
-  // 仮サムネイル
-  const tmpC = document.createElement('canvas');
-  const sc = Math.min(1, 200 / Math.max(c.width, c.height));
-  tmpC.width = c.width * sc;
-  tmpC.height = c.height * sc;
-  tmpC.getContext('2d').drawImage(c, 0, 0, tmpC.width, tmpC.height);
-  const tempDataUrl = tmpC.toDataURL('image/jpeg', 0.5);
-
-  const grp = cfg.useGroup ? cfg.currentGroup : '';
-  const pid = Date.now() + Math.random();
-  const photo = { 
-    id: pid, 
-    dataUrl: tempDataUrl, 
-    thumbDataUrl: tempDataUrl, 
-    timestamp: Date.now(), 
-    facingMode, 
-    rotation: 0, 
-    group: grp,
-    scannedCode: lastScannedValue
-  };
-
-  // UI即時反映 (楽観的更新)
-  photos.unshift(photo);
-  if (typeof updateCounts === 'function') updateCounts();
-  if (typeof updateThumbStrip === 'function') updateThumbStrip();
-  if (activeTab === 'photos' && typeof renderPhotoGrid === 'function') renderPhotoGrid();
-
-  $('btn-shutter').disabled = false; // すぐに次が撮れる
-
-  // 2. 非同期で高画質保存
-  setTimeout(async () => {
-    try {
-      let blob;
-      // ImageCapture 優先
-      if ('ImageCapture' in window && camTrack) {
-        try {
-          const ic = new ImageCapture(camTrack);
-          const photoOpts = {};
-          const pc = await ic.getPhotoCapabilities();
-          if (pc.imageStabilization?.includes?.('on')) photoOpts.imageStabilization = 'on';
-          const icBlob = await ic.takePhoto(photoOpts);
-          if (icBlob && icBlob.size > 0) blob = icBlob;
-        } catch (e) {}
-      }
-      
-      // Fallback
-      if (!blob) {
-        const quality = { low: 0.62, mid: 0.82, high: 0.92, max: 0.98 }[camQuality] || 0.82;
-        blob = await new Promise(res => c.toBlob(b => res(b), 'image/jpeg', quality));
-      }
-
-      if (blob && blob.size > 1024 * 1024) {
-        blob = await compressIfNeeded(blob, 1024 * 1024);
-      }
-
-      if (!blob || blob.size === 0) return;
-
-      const finalDataUrl = await blobToDataUrl(blob);
-      const finalThumbDataUrl = await createThumbnail(finalDataUrl, 400);
-
-      // 本データに差し替え
-      photo.dataUrl = finalDataUrl;
-      photo.thumbDataUrl = finalThumbDataUrl;
-
-      // デバイス保存
-      if (typeof autoSaveToDevice === 'function') autoSaveToDevice(photo, blob);
-
-      // DB保存
-      if (typeof dbPut === 'function' && typeof dbPrune === 'function') {
-        await dbPut(photo);
-        await dbPrune(MAX_PH);
-        photos = (await dbAll()).reverse();
-        if (typeof updateThumbStrip === 'function') updateThumbStrip();
-        if (activeTab === 'photos' && typeof renderPhotoGrid === 'function') renderPhotoGrid();
-      }
-    } catch(err) {
-      console.error('Photo save error:', err);
-    }
-  }, 10);
-}
---- START OF FILE scanner.js ---
-
-'use strict';
-
-/* ════ スキャン制御 ════ */
-function setScanUI(active) {
-  $('scan-line').style.display = (!active || scanMode !== 'all') ? 'none' : '';
-  $('ean-guide').style.display = (active && scanMode === 'ean13') ? '' : 'none';
-  $('scan-ov').style.display = active ? '' : 'none';
-  $('scan-ph').style.display = active ? 'none' : '';
-  $('scan-ov').className = 'finder-ov' + (scanMode === 'ean13' ? ' ean' : '');
-  $('scan-ov').textContent = scanMode === 'ean13' ? 'EAN-13 MODE' : 'SCANNING...';
-}
-
-function setStatus(dot, txt) {
-  $('sdot').className = 'sdot' + (dot === 'go' ? ' go' + (scanMode === 'ean13' ? ' ean' : '') : dot === 'ok' ? ' ok' : dot === 'err' ? ' err' : '');
-  $('stxt').textContent = txt;
-}
-
-function stopScan() {
-  if (raf) { cancelAnimationFrame(raf); raf = null; }
-  if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
-  const v = $('scan-video');
-  if (v) v.srcObject = null;
-  scanning = false;
-  setScanUI(false);
-  setStatus('', '待機中');
-  $('btn-scan').textContent = '▶ スキャン開始';
-  $('btn-scan').classList.remove('stop');
-}
-
-async function startScan() {
-  if (scanning) return;
-  if (!('BarcodeDetector' in window)) {
-    setStatus('err', '[E001] BarcodeDetector 非対応 (Chrome等が必要)');
-    return;
-  }
-  try {
-    scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-    const v = $('scan-video');
-    v.srcObject = scanStream;
-    v.setAttribute('playsinline', '');
-    v.setAttribute('muted', '');
-    await v.play();
-    
-    detector = new BarcodeDetector({ formats: scanMode === 'ean13' ? ['ean_13'] : ALL_FMTS });
-    scanning = true;
-    setScanUI(true);
-    setStatus('go', scanMode === 'ean13' ? 'EAN-13 スキャン中...' : 'スキャン中...');
-    $('btn-scan').textContent = '■ スキャン停止';
-    $('btn-scan').classList.add('stop');
-    detect();
-  } catch (e) {
-    const code = e.name === 'NotAllowedError' ? 'E002' : 'E005';
-    setStatus('err', `[${code}] ` + (e.name === 'NotAllowedError' ? 'カメラの許可が必要です' : 'カメラエラー: ' + e.message));
-  }
-}
-
-async function detect() {
-  const v = $('scan-video');
-  if (!v || !scanning || v.readyState < 2) {
-    raf = requestAnimationFrame(detect);
-    return;
-  }
-  try {
-    const codes = await detector.detect(v);
-    if (codes.length) {
-      const c = codes[0], now = Date.now();
-      if (c.rawValue.length !== 13) {
-        // EAN-13以外の場合はスルー
-      } else {
-        const waitTime = cfg.continuousScan ? 500 : 3000;
-        if (c.rawValue !== lastCode || now - lastCodeTime > waitTime) {
-          lastCode = c.rawValue;
-          lastCodeTime = now;
-          onDetected(c.rawValue, c.format);
-        }
-      }
-    }
-  } catch (e) {}
-  if (scanning) raf = requestAnimationFrame(detect);
-}
-
-let flashTimer = null;
-function flashFinder() {
-  const fl = $('finder-flash');
-  fl.classList.add('show');
-  if (flashTimer) clearTimeout(flashTimer);
-  flashTimer = setTimeout(() => fl.classList.remove('show'), 220);
-}
-
-function showLargeBarcode(value, format, isDup) {
-  $('scan-bc-placeholder').style.display = 'none';
-  $('scan-bc-display').style.display = '';
-  $('scan-bc-val').textContent = value;
-  $('scan-bc-meta').textContent = (format || '').toUpperCase().replace('_', ' ');
-  $('scan-bc-dup').className = 'scan-bc-dup' + (isDup ? ' show' : '');
-  const cv = $('scan-bc-canvas');
+function renderBC(canvas, value, format, height = 68, displayValue = true) {
   const jf = JS_FMT[format];
-  if (jf && window.JsBarcode) {
-    try {
-      const wrap = $('scan-bc-canvas-wrap');
-      const maxW = Math.min(wrap.clientWidth || window.innerWidth - 20, 600);
-      JsBarcode(cv, value, { 
-        format: jf, 
-        width: Math.max(2, Math.floor(maxW / 80)), 
-        height: 110, 
-        displayValue: true, 
-        fontSize: 18, 
-        background: '#ffffff', 
-        lineColor: '#111111', 
-        margin: 10 
-      });
-    } catch (e) { cv.width = 0; }
-  }
-}
-
-function onDetected(value, format) {
-  lastScannedValue = value; // 写真のファイル名自動変更用に保持
-  const now = Date.now();
-  const isDup = bcHistory.some(x => x.value === value);
-  flashFinder();
-  vibrate([50]); 
-  showLargeBarcode(value, format, isDup);
-
-  const wait = cfg.continuousScan ? 300 : 1500;
-
-  if (isDup) {
-    showToast('⊘ 登録済み: ' + value, 'dup', 1800);
-    setStatus('ok', '登録済み: ' + value.slice(0, 20));
-    setTimeout(() => { if (scanning) setStatus('go', scanMode === 'ean13' ? 'EAN-13 スキャン中...' : 'スキャン中...'); }, wait);
-    return;
-  }
-
-  const grp = cfg.useGroup ? cfg.currentGroup : '';
-  const entry = { id: now + Math.random(), value, format, timestamp: now, checked: false, group: grp };
-  bcHistory = [entry, ...bcHistory];
-  localStorage.setItem(BC_KEY, JSON.stringify(bcHistory));
-  
-  if (typeof updateCounts === 'function') updateCounts();
-  
-  setStatus('ok', '検出！ ' + value.slice(0, 22));
-  setTimeout(() => { if (scanning) setStatus('go', scanMode === 'ean13' ? 'EAN-13 スキャン中...' : 'スキャン中...'); }, wait);
-}
-
-/* ════ バーコード履歴UI ════ */
-function toggleBcChecked(id) {
-  const item = bcHistory.find(x => x.id === id);
-  if (!item) return;
-  item.checked = !item.checked;
-  localStorage.setItem(BC_KEY, JSON.stringify(bcHistory));
-  renderBcList();
-}
-
-function getFilteredBc() {
-  const q = $('search-box').value.toLowerCase();
-  let filtered = bcHistory.slice();
-  if (q) filtered = filtered.filter(x => x.value.toLowerCase().includes(q));
-  if (histFilter === 'checked') filtered = filtered.filter(x => x.checked);
-  else if (histFilter === 'unchecked') filtered = filtered.filter(x => !x.checked);
-  if (cfg.useGroup) {
-    const g = $('hist-bc-group-select').value;
-    if (g !== 'all') filtered = filtered.filter(x => x.group === g);
-  }
-  if (sortOrderBc === 'asc') filtered.reverse();
-  return filtered;
-}
-
-function renderBcList() {
-  const filtered = getFilteredBc();
-  const list = $('bc-list'), empty = $('bc-empty');
-  if (!filtered.length) { list.style.display = 'none'; empty.style.display = ''; return; }
-  
-  empty.style.display = 'none';
-  list.style.display = '';
-  list.innerHTML = '';
-
-  if (cfg.bcCompactMode) list.classList.add('compact-mode');
-  else list.classList.remove('compact-mode');
-
-  if (multiSelModeBc) list.classList.add('multi-mode-bc');
-  else list.classList.remove('multi-mode-bc');
-
-  filtered.forEach((item, i) => {
-    const card = document.createElement('div');
-    const isSel = multiSelModeBc && multiSelectedBc.includes(item.id);
-    card.className = 'bc-card' + (item.format === 'ean_13' ? ' ean' : '') + (item.checked ? ' checked' : '') + (isSel ? ' multi-selected' : '');
-
-    const selChk = document.createElement('div');
-    selChk.className = 'bc-sel-chk';
-    selChk.textContent = '✓';
-    card.appendChild(selChk);
-
-    if (cfg.useGroup && item.group) {
-      const gb = document.createElement('div');
-      gb.className = 'card-group-badge';
-      gb.textContent = item.group;
-      card.appendChild(gb);
-    }
-
-    const thumb = document.createElement('div');
-    thumb.className = 'bc-thumb';
-    const cv = document.createElement('canvas');
-    thumb.appendChild(cv);
-    card.appendChild(thumb);
-
-    const valEl = document.createElement('div');
-    valEl.className = 'bc-val-large';
-    valEl.textContent = item.value;
-    
-    const metaRow = document.createElement('div');
-    metaRow.className = 'bc-meta-row';
-
-    const checkBtn = document.createElement('button');
-    checkBtn.className = 'card-check';
-    checkBtn.textContent = '✓';
-    checkBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      if (!multiSelModeBc) toggleBcChecked(item.id);
+  if (!jf || !window.JsBarcode) return;
+  try {
+    JsBarcode(canvas, value, {
+      format: jf, width: 2, height,
+      displayValue, fontSize: 14,
+      background: '#ffffff', lineColor: '#111111', margin: 8
     });
-
-    const dispNum = sortOrderBc === 'desc' ? (filtered.length - i) : (i + 1);
-
-    const metaInfo = document.createElement('div');
-    metaInfo.className = 'bc-meta-info';
-    metaInfo.innerHTML =
-      `<span class="card-fmt ${item.format === 'ean_13' ? 'ean' : ''}">${(item.format || '').replace('_', ' ')}</span>` +
-      `<span class="card-time">${fmtTime(item.timestamp)}</span>` +
-      `<span class="card-num">#${String(dispNum).padStart(3, '0')}</span>` +
-      (item.checked ? '<span class="card-chk-lbl">✓ 確認済</span>' : '');
-
-    const delBtn = document.createElement('button');
-    delBtn.className = 'btn-x';
-    delBtn.textContent = '✕';
-    delBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      if (!multiSelModeBc) deleteBc(item.id);
-    });
-
-    metaRow.appendChild(checkBtn);
-    metaRow.appendChild(metaInfo);
-    metaRow.appendChild(delBtn);
-    
-    if (cfg.bcCompactMode) {
-      card.appendChild(checkBtn);
-      card.appendChild(valEl);
-      const timeSpan = document.createElement('span');
-      timeSpan.className = 'card-time';
-      timeSpan.textContent = fmtShort(item.timestamp);
-      card.appendChild(timeSpan);
-      card.appendChild(delBtn);
-    } else {
-      card.appendChild(valEl);
-      card.appendChild(metaRow);
-    }
-
-    card.addEventListener('click', () => {
-      if (multiSelModeBc) toggleMultiSelectBc(item.id, card);
-      else openBcModal(item);
-    });
-
-    list.appendChild(card);
-
-    if (!cfg.bcCompactMode) {
-      requestAnimationFrame(() => {
-        const jf = JS_FMT[item.format];
-        if (!jf || !window.JsBarcode) {
-          cv.replaceWith(Object.assign(document.createElement('div'), { className: 'bc-thumb-txt', textContent: item.value }));
-          return;
-        }
-        const containerW = Math.max(thumb.clientWidth || window.innerWidth - 20, 200);
-        const barW = Math.max(2, Math.floor(containerW / 105));
-        try {
-          JsBarcode(cv, item.value, { format: jf, width: barW, height: 60, displayValue: false, background: '#ffffff', lineColor: '#111111', margin: 6 });
-        } catch (e) {
-          cv.replaceWith(Object.assign(document.createElement('div'), { className: 'bc-thumb-txt', textContent: item.value }));
-        }
-      });
-    }
-  });
+  } catch(e) {}
 }
 
-function deleteBc(id) {
-  if (!confirm('このバーコードを削除しますか？')) return;
-  bcHistory = bcHistory.filter(x => x.id !== id);
-  localStorage.setItem(BC_KEY, JSON.stringify(bcHistory));
-  if (typeof updateCounts === 'function') updateCounts();
-  renderBcList();
+function updateCounts() {
+  const bc = bcHistory.length;
+  const ph = photos.length;
+  $('hdr-count').textContent = bc + 'BC / ' + ph + '📷';
+  $('bc-count').textContent = bc;
+  $('ph-count').textContent = ph;
+  $('photo-count-txt').textContent = ph + ' / ' + MAX_PH + ' 枚';
+  $('btn-bc-select-mode').style.display = bc ? '' : 'none';
+  $('btn-bc-csv').style.display = bc ? '' : 'none';
+  $('btn-bc-clear').style.display = bc ? '' : 'none';
+  $('btn-ph-select-mode').style.display = ph ? '' : 'none';
+  $('btn-merge-mode').style.display = ph >= 2 ? '' : 'none';
+  $('btn-photo-clear').style.display = ph ? '' : 'none';
 }
 
-/* ════ BC 一括選択モード ════ */
-function enterMultiSelModeBc() {
-  multiSelModeBc = true;
-  multiSelectedBc = [];
-  $('btn-bc-select-mode').classList.add('on');
-  $('multi-sel-bar-bc').classList.add('on');
-  updateMultiSelTxtBc();
-  renderBcList();
+function saveCfg() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(cfg));
 }
 
-function exitMultiSelModeBc() {
-  multiSelModeBc = false;
-  multiSelectedBc = [];
-  $('btn-bc-select-mode').classList.remove('on');
-  $('multi-sel-bar-bc').classList.remove('on');
-  renderBcList();
+function loadCfg() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    Object.assign(cfg, s);
+  } catch(e) {}
 }
 
-function toggleMultiSelectBc(id, itemEl) {
-  const idx = multiSelectedBc.indexOf(id);
-  if (idx >= 0) { 
-    multiSelectedBc.splice(idx, 1); 
-    itemEl.classList.remove('multi-selected'); 
-  } else { 
-    multiSelectedBc.push(id); 
-    itemEl.classList.add('multi-selected'); 
+// Orientation sensor (stub — real device sensor)
+let sensorAngle = 0;
+function startOrientSensor() {
+  if (typeof DeviceOrientationEvent !== 'undefined') {
+    window.addEventListener('deviceorientation', e => {
+      const g = e.gamma, b = e.beta;
+      let dot = $('orient-dot'), lbl = $('orient-label');
+      if (Math.abs(g) < 15 && Math.abs(b) < 15) {
+        dot.className = 'orient-dot ok'; lbl.className = 'orient-label ok';
+        lbl.textContent = '水平'; sensorAngle = 0;
+      } else {
+        dot.className = 'orient-dot warn'; lbl.className = 'orient-label warn';
+        lbl.textContent = '傾きあり';
+        sensorAngle = Math.abs(g) > Math.abs(b) ? (g > 0 ? 90 : 270) : (b > 0 ? 0 : 180);
+      }
+    }, { passive: true });
   }
-  updateMultiSelTxtBc();
 }
+function updateOrientUI() {}
 
-function updateMultiSelTxtBc() {
-  $('multi-sel-txt-bc').textContent = multiSelectedBc.length + '件 選択中';
-}
-
-/* ════ BC モーダル表示 ════ */
-function openBcModal(item) {
-  currentDetail = item;
-  $('modal-val').textContent = item.value;
-  $('modal-meta').textContent = (item.format || '').toUpperCase().replace('_', ' ') + ' · ' + fmtTime(item.timestamp);
-  $('copied-msg').style.display = 'none';
-  const hasFmt = !!JS_FMT[item.format];
-  
-  $('modal-bc').style.display = hasFmt ? '' : 'none';
-  $('modal-2d').style.display = hasFmt ? 'none' : '';
-  $('btn-png').style.display = hasFmt ? '' : 'none';
-  
-  if (hasFmt) setTimeout(() => renderBC($('modal-canvas'), item.value, item.format, 68, true), 10);
-  $('bc-modal').style.display = '';
-}
-
-function closeBcModal() {
-  $('bc-modal').style.display = 'none';
-  currentDetail = null;
-}
-
-function exportCSV() {
-  if (!bcHistory.length) return;
-  const hasG = cfg.useGroup;
-  const rows = [hasG ? '\uFEFF値,フォーマット,グループ,日時,確認済み' : '\uFEFF値,フォーマット,日時,確認済み'];
-  bcHistory.forEach(x => {
-    const v = `"${x.value}","${(x.format || '').replace('_', ' ')}"`;
-    const g = hasG ? `,"${x.group || ''}"` : '';
-    const d = `,"${fmtTime(x.timestamp)}","${x.checked ? '済' : ''}"`;
-    rows.push(v + g + d);
-  });
-  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'barcodes_' + Date.now() + '.csv';
-  a.click();
-}
---- START OF FILE storage.js ---
-
-'use strict';
-
-/* ════ フォルダ・ファイル保存関連 (File System Access API) ════ */
+/* ════ storage.js ════ */
 let folderHandle = null, _pendingFH = null, _folderDB = null;
 
 async function openFolderDB() {
@@ -1525,52 +933,37 @@ async function restoreFolderHandle() {
       const h = rec.handle;
       const p = await h.queryPermission({ mode: 'readwrite' });
       if (p === 'granted') {
-        folderHandle = h;
-        updateFolderUI(h, h.name, false);
-        updateSetFolderUI();
-        return;
+        folderHandle = h; updateFolderUI(h, h.name, false); updateSetFolderUI(); return;
       } else {
-        _pendingFH = h;
-        updateFolderUI(null, h.name, true);
-        updateSetFolderUI();
-        return;
+        _pendingFH = h; updateFolderUI(null, h.name, true); updateSetFolderUI(); return;
       }
     }
   } catch(e) {}
   const name = localStorage.getItem('sc-folder-name');
-  if (name) {
-    updateFolderUI(null, name, true);
-    updateSetFolderUI();
-  }
+  if (name) { updateFolderUI(null, name, true); updateSetFolderUI(); }
 }
 
 async function pickSaveFolder() {
   if (!window.showDirectoryPicker) {
-    showToast('[E003] フォルダ選択非対応（Android Chrome等をお使いください）', 'err', 4000);
-    return;
+    showToast('[E003] フォルダ選択非対応', 'err', 4000); return;
   }
   if (_pendingFH) {
     try {
       const p = await _pendingFH.requestPermission({ mode: 'readwrite' });
       if (p === 'granted') {
-        folderHandle = _pendingFH;
-        _pendingFH = null;
-        updateFolderUI(folderHandle, folderHandle.name, false);
-        updateSetFolderUI();
-        showToast('✓ 保存先を復元: ' + folderHandle.name, 'ok');
-        return;
+        folderHandle = _pendingFH; _pendingFH = null;
+        updateFolderUI(folderHandle, folderHandle.name, false); updateSetFolderUI();
+        showToast('✓ 保存先を復元: ' + folderHandle.name, 'ok'); return;
       }
     } catch(e) {}
     _pendingFH = null;
   }
   try {
     const h = await window.showDirectoryPicker({ mode: 'readwrite', startIn: 'pictures' });
-    folderHandle = h;
-    await saveFHtoIDB(h);
-    updateFolderUI(h, h.name, false);
-    updateSetFolderUI();
+    folderHandle = h; await saveFHtoIDB(h);
+    updateFolderUI(h, h.name, false); updateSetFolderUI();
     showToast('✓ 保存先を固定: ' + h.name, 'ok');
-  } catch (e) {
+  } catch(e) {
     if (e.name !== 'AbortError') showToast('[E004] フォルダ選択エラー: ' + e.message, 'err');
   }
 }
@@ -1578,8 +971,7 @@ async function pickSaveFolder() {
 function updateFolderUI(h, name, needReselect) {
   const pe = $('folder-path-txt'), ce = $('btn-folder-clear'), pk = $('btn-folder-pick');
   if (!name) {
-    pe.textContent = '未設定（Downloadsフォルダに保存）';
-    pe.className = 'save-folder-path none';
+    pe.textContent = '未設定（Downloadsフォルダに保存）'; pe.className = 'save-folder-path none';
     if(ce) ce.style.display = 'none';
     if(pk) pk.textContent = '📂 フォルダを選択';
   } else if (needReselect) {
@@ -1588,8 +980,7 @@ function updateFolderUI(h, name, needReselect) {
     if(ce) ce.style.display = '';
     if(pk) pk.textContent = '🔄 再選択（固定済み）';
   } else {
-    pe.textContent = '📂 ' + name + ' ✓ 固定済み';
-    pe.className = 'save-folder-path';
+    pe.textContent = '📂 ' + name + ' ✓ 固定済み'; pe.className = 'save-folder-path';
     if(ce) ce.style.display = '';
     if(pk) pk.textContent = '📂 変更する';
   }
@@ -1599,79 +990,58 @@ function updateSetFolderUI() {
   const n = $('set-folder-name'), note = $('set-folder-note'), cb = $('set-folder-clear-btn');
   const name = folderHandle ? folderHandle.name : localStorage.getItem('sc-folder-name') || '';
   if (name) {
-    n.textContent = '📂 ' + name;
-    note.textContent = folderHandle ? '✓ 固定済み' : '※ 再選択が必要';
+    n.textContent = '📂 ' + name; note.textContent = folderHandle ? '✓ 固定済み' : '※ 再選択が必要';
     if(cb) cb.style.display = '';
   } else {
-    n.textContent = '未設定';
-    note.textContent = 'Downloadsフォルダに保存';
+    n.textContent = '未設定'; note.textContent = 'Downloadsフォルダに保存';
     if(cb) cb.style.display = 'none';
   }
 }
 
 function clearSaveFolder() {
-  folderHandle = null;
-  _pendingFH = null;
+  folderHandle = null; _pendingFH = null;
   localStorage.removeItem('sc-folder-name');
   openFolderDB().then(db => {
     const tx = db.transaction('handles', 'readwrite');
     tx.objectStore('handles').delete('folder');
   }).catch(()=>{});
-  updateFolderUI(null, '', false);
-  updateSetFolderUI();
+  updateFolderUI(null, '', false); updateSetFolderUI();
   showToast('保存先をリセットしました');
 }
 
 async function saveToFolderHandle(blob, filename) {
   try {
-    if (!blob || blob.size === 0) return { ok: false, code: 'E011', msg: 'Blobが空です。撮影に失敗した可能性があります' };
+    if (!blob || blob.size === 0) return { ok: false, code: 'E011', msg: 'Blobが空です' };
     const perm = await folderHandle.queryPermission({ mode: 'readwrite' });
     if (perm !== 'granted') {
       const r = await folderHandle.requestPermission({ mode: 'readwrite' });
-      if (r !== 'granted') return { ok: false, code: 'E006', msg: 'フォルダへのアクセス権限がありません' };
+      if (r !== 'granted') return { ok: false, code: 'E006', msg: '権限がありません' };
     }
     const fh = await folderHandle.getFileHandle(filename, { create: true });
     const writable = await fh.createWritable();
-    await writable.write(blob);
-    await writable.close();
+    await writable.write(blob); await writable.close();
     const verFh = await folderHandle.getFileHandle(filename);
     const verFile = await verFh.getFile();
-    if (verFile.size === 0) return { ok: false, code: 'E012', msg: 'ファイルが0Bです。端末のストレージ空き容量を確認してください' };
+    if (verFile.size === 0) return { ok: false, code: 'E012', msg: 'ファイルが0Bです' };
     return { ok: true };
-  } catch (e) {
-    return { ok: false, code: 'E007', msg: e.message };
-  }
+  } catch(e) { return { ok: false, code: 'E007', msg: e.message }; }
 }
 
 async function autoSaveToDevice(photo, originalBlob = null) {
   if (isIOS) {
-    if (!iosPopupShown) {
-      iosPopupShown = true;
-      $('ios-popup').style.display = '';
-    }
+    if (!iosPopupShown) { iosPopupShown = true; $('ios-popup').style.display = ''; }
     return;
   }
-  
-  // ファイル名の生成
   const ts = fmtTime(photo.timestamp).replace(/[/:\s]/g, '-');
   const prefix = photo.scannedCode ? photo.scannedCode.slice(-5) : 'photo';
   const name = `${prefix}_${ts}.jpg`;
-  
   if (folderHandle) {
     let blob = originalBlob;
     if (!blob || blob.size === 0) { blob = dataUrlToBlob(photo.dataUrl); }
-    if (!blob || blob.size === 0) { 
-      showToast('[E010] 画像データ変換失敗', 'err', 4000); 
-      fallbackDownload(photo.dataUrl, name); 
-      return; 
-    }
+    if (!blob || blob.size === 0) { showToast('[E010] 画像データ変換失敗', 'err', 4000); fallbackDownload(photo.dataUrl, name); return; }
     const r = await saveToFolderHandle(blob, name);
-    if (r.ok) {
-      showToast('✓ ' + folderHandle.name + ' に保存しました', 'ok');
-    } else {
-      showToast('[' + r.code + '] 保存失敗→Downloads: ' + r.msg, 'err', 5000);
-      fallbackDownload(photo.dataUrl, name);
-    }
+    if (r.ok) { showToast('✓ ' + folderHandle.name + ' に保存しました', 'ok'); }
+    else { showToast('[' + r.code + '] 保存失敗→Downloads: ' + r.msg, 'err', 5000); fallbackDownload(photo.dataUrl, name); }
   } else {
     fallbackDownload(photo.dataUrl, name);
     showToast('✓ Downloadsに保存しました', 'ok');
@@ -1680,14 +1050,11 @@ async function autoSaveToDevice(photo, originalBlob = null) {
 
 function fallbackDownload(dataUrl, name) {
   const a = document.createElement('a');
-  a.href = dataUrl;
-  a.download = name;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  a.href = dataUrl; a.download = name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
-/* ════ INDEXEDDB (写真の保存) ════ */
+/* ════ IndexedDB ════ */
 let _db = null;
 function openDB() {
   if (_db) return Promise.resolve(_db);
@@ -1729,17 +1096,508 @@ async function dbPrune(max) {
     const tx = db.transaction('photos', 'readwrite');
     const st = tx.objectStore('photos');
     all.slice(0, all.length - max).forEach(p => st.delete(p.id));
-    tx.oncomplete = res;
-    tx.onerror = e => rej(e.target.error);
+    tx.oncomplete = res; tx.onerror = e => rej(e.target.error);
   });
 }
---- START OF FILE photos.js ---
 
-'use strict';
+/* ════ scanner.js ════ */
+function setScanUI(active) {
+  $('scan-line').style.display = (!active || scanMode !== 'all') ? 'none' : '';
+  $('ean-guide').style.display = (active && scanMode === 'ean13') ? '' : 'none';
+  $('scan-ov').style.display = active ? '' : 'none';
+  $('scan-ph').style.display = active ? 'none' : '';
+  $('scan-ov').className = 'finder-ov' + (scanMode === 'ean13' ? ' ean' : '');
+  $('scan-ov').textContent = scanMode === 'ean13' ? 'EAN-13 MODE' : 'SCANNING...';
+}
 
-/* ════ 写真リストとUI更新 ════ */
+function setStatus(dot, txt) {
+  $('sdot').className = 'sdot' + (dot === 'go' ? ' go' + (scanMode === 'ean13' ? ' ean' : '') : dot === 'ok' ? ' ok' : dot === 'err' ? ' err' : '');
+  $('stxt').textContent = txt;
+}
+
+function stopScan() {
+  if (raf) { cancelAnimationFrame(raf); raf = null; }
+  if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+  const v = $('scan-video');
+  if (v) v.srcObject = null;
+  scanning = false;
+  setScanUI(false);
+  setStatus('', '待機中');
+  $('btn-scan').textContent = '▶ スキャン開始';
+  $('btn-scan').classList.remove('stop');
+}
+
+async function startScan() {
+  if (scanning) return;
+  if (!('BarcodeDetector' in window)) {
+    setStatus('err', '[E001] BarcodeDetector 非対応 (Chrome等が必要)'); return;
+  }
+  try {
+    scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    const v = $('scan-video');
+    v.srcObject = scanStream;
+    v.setAttribute('playsinline', '');
+    v.setAttribute('muted', '');
+    await v.play();
+    detector = new BarcodeDetector({ formats: scanMode === 'ean13' ? ['ean_13'] : ALL_FMTS });
+    scanning = true;
+    setScanUI(true);
+    setStatus('go', scanMode === 'ean13' ? 'EAN-13 スキャン中...' : 'スキャン中...');
+    $('btn-scan').textContent = '■ スキャン停止';
+    $('btn-scan').classList.add('stop');
+    detect();
+  } catch(e) {
+    const code = e.name === 'NotAllowedError' ? 'E002' : 'E005';
+    setStatus('err', `[${code}] ` + (e.name === 'NotAllowedError' ? 'カメラの許可が必要です' : 'カメラエラー: ' + e.message));
+  }
+}
+
+async function detect() {
+  const v = $('scan-video');
+  if (!v || !scanning || v.readyState < 2) { raf = requestAnimationFrame(detect); return; }
+  try {
+    const codes = await detector.detect(v);
+    if (codes.length) {
+      const c = codes[0], now = Date.now();
+      if (scanMode === 'ean13' && c.rawValue.length !== 13) { /* skip */ }
+      else {
+        const waitTime = cfg.continuousScan ? 500 : 3000;
+        if (c.rawValue !== lastCode || now - lastCodeTime > waitTime) {
+          lastCode = c.rawValue; lastCodeTime = now;
+          onDetected(c.rawValue, c.format);
+        }
+      }
+    }
+  } catch(e) {}
+  if (scanning) raf = requestAnimationFrame(detect);
+}
+
+let flashTimer = null;
+function flashFinder() {
+  const fl = $('finder-flash');
+  fl.classList.add('show');
+  if (flashTimer) clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => fl.classList.remove('show'), 220);
+}
+
+function showLargeBarcode(value, format, isDup) {
+  $('scan-bc-placeholder').style.display = 'none';
+  $('scan-bc-display').style.display = '';
+  $('scan-bc-val').textContent = value;
+  $('scan-bc-meta').textContent = (format || '').toUpperCase().replace('_', ' ');
+  $('scan-bc-dup').className = 'scan-bc-dup' + (isDup ? ' show' : '');
+  const cv = $('scan-bc-canvas');
+  const jf = JS_FMT[format];
+  if (jf && window.JsBarcode) {
+    try {
+      const wrap = $('scan-bc-canvas-wrap');
+      const maxW = Math.min(wrap.clientWidth || window.innerWidth - 20, 600);
+      JsBarcode(cv, value, {
+        format: jf, width: Math.max(2, Math.floor(maxW / 80)),
+        height: 110, displayValue: true, fontSize: 18,
+        background: '#ffffff', lineColor: '#111111', margin: 10
+      });
+    } catch(e) { cv.width = 0; }
+  }
+}
+
+function onDetected(value, format) {
+  lastScannedValue = value;
+  const now = Date.now();
+  const isDup = bcHistory.some(x => x.value === value);
+  flashFinder(); vibrate([50]);
+  showLargeBarcode(value, format, isDup);
+  const wait = cfg.continuousScan ? 300 : 1500;
+  if (isDup) {
+    showToast('⊘ 登録済み: ' + value, 'dup', 1800);
+    setStatus('ok', '登録済み: ' + value.slice(0, 20));
+    setTimeout(() => { if (scanning) setStatus('go', scanMode === 'ean13' ? 'EAN-13 スキャン中...' : 'スキャン中...'); }, wait);
+    return;
+  }
+  const grp = cfg.useGroup ? cfg.currentGroup : '';
+  const entry = { id: now + Math.random(), value, format, timestamp: now, checked: false, group: grp };
+  bcHistory = [entry, ...bcHistory];
+  localStorage.setItem(BC_KEY, JSON.stringify(bcHistory));
+  updateCounts();
+  setStatus('ok', '検出！ ' + value.slice(0, 22));
+  setTimeout(() => { if (scanning) setStatus('go', scanMode === 'ean13' ? 'EAN-13 スキャン中...' : 'スキャン中...'); }, wait);
+}
+
+function toggleBcChecked(id) {
+  const item = bcHistory.find(x => x.id === id);
+  if (!item) return;
+  item.checked = !item.checked;
+  localStorage.setItem(BC_KEY, JSON.stringify(bcHistory));
+  renderBcList();
+}
+
+function getFilteredBc() {
+  const q = $('search-box').value.toLowerCase();
+  let filtered = bcHistory.slice();
+  if (q) filtered = filtered.filter(x => x.value.toLowerCase().includes(q));
+  if (histFilter === 'checked') filtered = filtered.filter(x => x.checked);
+  else if (histFilter === 'unchecked') filtered = filtered.filter(x => !x.checked);
+  if (cfg.useGroup) {
+    const g = $('hist-bc-group-select').value;
+    if (g !== 'all') filtered = filtered.filter(x => x.group === g);
+  }
+  if (sortOrderBc === 'asc') filtered.reverse();
+  return filtered;
+}
+
+function renderBcList() {
+  const filtered = getFilteredBc();
+  const list = $('bc-list'), empty = $('bc-empty');
+  if (!filtered.length) { list.style.display = 'none'; empty.style.display = ''; return; }
+  empty.style.display = 'none'; list.style.display = '';
+  list.innerHTML = '';
+  if (cfg.bcCompactMode) list.classList.add('compact-mode');
+  else list.classList.remove('compact-mode');
+  if (multiSelModeBc) list.classList.add('multi-mode-bc');
+  else list.classList.remove('multi-mode-bc');
+
+  filtered.forEach((item, i) => {
+    const card = document.createElement('div');
+    const isSel = multiSelModeBc && multiSelectedBc.includes(item.id);
+    card.className = 'bc-card' + (item.format === 'ean_13' ? ' ean' : '') + (item.checked ? ' checked' : '') + (isSel ? ' multi-selected' : '');
+
+    const selChk = document.createElement('div');
+    selChk.className = 'bc-sel-chk'; selChk.textContent = '✓';
+    card.appendChild(selChk);
+
+    if (cfg.useGroup && item.group) {
+      const gb = document.createElement('div');
+      gb.className = 'card-group-badge'; gb.textContent = item.group;
+      card.appendChild(gb);
+    }
+
+    const thumb = document.createElement('div');
+    thumb.className = 'bc-thumb';
+    const cv = document.createElement('canvas');
+    thumb.appendChild(cv); card.appendChild(thumb);
+
+    const valEl = document.createElement('div');
+    valEl.className = 'bc-val-large'; valEl.textContent = item.value;
+
+    const metaRow = document.createElement('div');
+    metaRow.className = 'bc-meta-row';
+
+    const checkBtn = document.createElement('button');
+    checkBtn.className = 'card-check'; checkBtn.textContent = '✓';
+    checkBtn.addEventListener('click', e => { e.stopPropagation(); if (!multiSelModeBc) toggleBcChecked(item.id); });
+
+    const dispNum = sortOrderBc === 'desc' ? (filtered.length - i) : (i + 1);
+    const metaInfo = document.createElement('div');
+    metaInfo.className = 'bc-meta-info';
+    metaInfo.innerHTML =
+      `<span class="card-fmt ${item.format === 'ean_13' ? 'ean' : ''}">${(item.format || '').replace('_', ' ')}</span>` +
+      `<span class="card-time">${fmtTime(item.timestamp)}</span>` +
+      `<span class="card-num">#${String(dispNum).padStart(3, '0')}</span>` +
+      (item.checked ? '<span class="card-chk-lbl">✓ 確認済</span>' : '');
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn-x'; delBtn.textContent = '✕';
+    delBtn.addEventListener('click', e => { e.stopPropagation(); if (!multiSelModeBc) deleteBc(item.id); });
+
+    metaRow.appendChild(checkBtn); metaRow.appendChild(metaInfo); metaRow.appendChild(delBtn);
+
+    if (cfg.bcCompactMode) {
+      card.appendChild(checkBtn); card.appendChild(valEl);
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'card-time'; timeSpan.textContent = fmtShort(item.timestamp);
+      card.appendChild(timeSpan); card.appendChild(delBtn);
+    } else {
+      card.appendChild(valEl); card.appendChild(metaRow);
+    }
+
+    card.addEventListener('click', () => {
+      if (multiSelModeBc) toggleMultiSelectBc(item.id, card);
+      else openBcModal(item);
+    });
+    list.appendChild(card);
+
+    if (!cfg.bcCompactMode) {
+      requestAnimationFrame(() => {
+        const jf = JS_FMT[item.format];
+        if (!jf || !window.JsBarcode) {
+          cv.replaceWith(Object.assign(document.createElement('div'), { className: 'bc-thumb-txt', textContent: item.value }));
+          return;
+        }
+        const containerW = Math.max(thumb.clientWidth || window.innerWidth - 20, 200);
+        const barW = Math.max(2, Math.floor(containerW / 105));
+        try {
+          JsBarcode(cv, item.value, { format: jf, width: barW, height: 60, displayValue: false, background: '#ffffff', lineColor: '#111111', margin: 6 });
+        } catch(e) {
+          cv.replaceWith(Object.assign(document.createElement('div'), { className: 'bc-thumb-txt', textContent: item.value }));
+        }
+      });
+    }
+  });
+}
+
+function deleteBc(id) {
+  if (!confirm('このバーコードを削除しますか？')) return;
+  bcHistory = bcHistory.filter(x => x.id !== id);
+  localStorage.setItem(BC_KEY, JSON.stringify(bcHistory));
+  updateCounts(); renderBcList();
+}
+
+function enterMultiSelModeBc() {
+  multiSelModeBc = true; multiSelectedBc = [];
+  $('btn-bc-select-mode').classList.add('on');
+  $('multi-sel-bar-bc').classList.add('on');
+  updateMultiSelTxtBc(); renderBcList();
+}
+function exitMultiSelModeBc() {
+  multiSelModeBc = false; multiSelectedBc = [];
+  $('btn-bc-select-mode').classList.remove('on');
+  $('multi-sel-bar-bc').classList.remove('on');
+  renderBcList();
+}
+function toggleMultiSelectBc(id, itemEl) {
+  const idx = multiSelectedBc.indexOf(id);
+  if (idx >= 0) { multiSelectedBc.splice(idx, 1); itemEl.classList.remove('multi-selected'); }
+  else { multiSelectedBc.push(id); itemEl.classList.add('multi-selected'); }
+  updateMultiSelTxtBc();
+}
+function updateMultiSelTxtBc() { $('multi-sel-txt-bc').textContent = multiSelectedBc.length + '件 選択中'; }
+
+function openBcModal(item) {
+  currentDetail = item;
+  $('modal-val').textContent = item.value;
+  $('modal-meta').textContent = (item.format || '').toUpperCase().replace('_', ' ') + ' · ' + fmtTime(item.timestamp);
+  $('copied-msg').style.display = 'none';
+  const hasFmt = !!JS_FMT[item.format];
+  $('modal-bc').style.display = hasFmt ? '' : 'none';
+  $('modal-2d').style.display = hasFmt ? 'none' : '';
+  $('btn-png').style.display = hasFmt ? '' : 'none';
+  if (hasFmt) setTimeout(() => renderBC($('modal-canvas'), item.value, item.format, 68, true), 10);
+  $('bc-modal').style.display = '';
+}
+function closeBcModal() { $('bc-modal').style.display = 'none'; currentDetail = null; }
+
+function exportCSV() {
+  if (!bcHistory.length) return;
+  const hasG = cfg.useGroup;
+  const rows = [hasG ? '\uFEFF値,フォーマット,グループ,日時,確認済み' : '\uFEFF値,フォーマット,日時,確認済み'];
+  bcHistory.forEach(x => {
+    const v = `"${x.value}","${(x.format || '').replace('_', ' ')}"`;
+    const g = hasG ? `,"${x.group || ''}"` : '';
+    const d = `,"${fmtTime(x.timestamp)}","${x.checked ? '済' : ''}"`;
+    rows.push(v + g + d);
+  });
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'barcodes_' + Date.now() + '.csv';
+  a.click();
+}
+
+/* ════ camera.js ════ */
+function showCamError(code, msg) {
+  $('cam-err').style.display = '';
+  $('cam-err-code').textContent = code;
+  $('cam-err-body').textContent = msg;
+}
+function hideCamError() { $('cam-err').style.display = 'none'; }
+
+function setCamActive(active) {
+  camActive = active;
+  $('cam-ph').style.display = active ? 'none' : '';
+  $('zoom-row').style.display = active ? 'flex' : 'none';
+  $('quality-row').style.display = active ? 'flex' : 'none';
+  $('btn-shutter').disabled = !active;
+  if (active) {
+    hideCamError();
+    startOrientSensor();
+    setTimeout(updateOrientUI, 300);
+  }
+}
+
+let torchOn = false;
+async function toggleTorch() {
+  if (!camTrack) { showToast('[E008] カメラを起動してください', 'warn'); return; }
+  try {
+    const caps = camTrack.getCapabilities ? camTrack.getCapabilities() : {};
+    if (!caps.torch) { showToast('[E008] このデバイスはフラッシュ非対応です', 'warn'); return; }
+    torchOn = !torchOn;
+    await camTrack.applyConstraints({ advanced: [{ torch: torchOn }] });
+    $('btn-torch').classList.toggle('torch-on', torchOn);
+    showToast(torchOn ? '🔦 懐中電灯 ON' : '懐中電灯 OFF', torchOn ? 'ok' : '');
+  } catch(e) { showToast('[E008] ' + e.message, 'warn'); }
+}
+
+function stopCam() {
+  if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+  const v = $('cam-video');
+  if (v) { v.srcObject = null; v.style.transform = ''; }
+  camTrack = null; torchOn = false;
+  $('btn-torch').classList.remove('torch-on');
+  $('focus-ring').classList.remove('show');
+  setCamActive(false);
+}
+
+async function startCam() {
+  hideCamError();
+  $('cam-ph-txt').textContent = 'カメラを起動中...';
+  const qc = CAM_QUALITY[camQuality] || CAM_QUALITY.mid;
+  const constraints = [
+    { video: { facingMode: { ideal: facingMode }, ...qc } },
+    { video: { facingMode: { ideal: facingMode } } },
+    { video: { facingMode: facingMode } },
+    { video: true },
+  ];
+  let stream = null;
+  for (const c of constraints) {
+    try {
+      if (camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+      stream = await navigator.mediaDevices.getUserMedia(c);
+      break;
+    } catch(e) {
+      if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+        showCamError('E002', 'カメラの許可が必要です。ブラウザのアドレスバー左端 🔒 → カメラ → 許可 → ページを再読み込み');
+        return;
+      }
+    }
+  }
+  if (!stream) { showCamError('E001', 'カメラが見つかりません。'); return; }
+  camStream = stream; camTrack = stream.getVideoTracks()[0];
+  try {
+    const caps = camTrack.getCapabilities?.() ?? {};
+    const adv = {};
+    if ('videoStabilization' in caps) adv.videoStabilization = true;
+    if (Object.keys(adv).length > 0) await camTrack.applyConstraints({ advanced: [adv] });
+  } catch(e) {}
+  const v = $('cam-video');
+  v.setAttribute('playsinline', ''); v.setAttribute('muted', ''); v.setAttribute('autoplay', '');
+  v.muted = true; v.srcObject = stream;
+  try {
+    await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = rej; setTimeout(res, 4000); });
+    await v.play();
+    setCamActive(true);
+    $('zoom-slider').value = 1; applyZoom(1);
+    updateThumbStrip(); updateStabUI();
+  } catch(e) { showCamError('E005', 'カメラの再生に失敗: ' + e.message); }
+}
+
+function updateStabUI() {
+  if (!camTrack) return;
+  try {
+    const settings = camTrack.getSettings?.() ?? {};
+    const on = settings.videoStabilization === true;
+    const ind = $('stab-ind');
+    if (ind) { ind.textContent = on ? '🔧 手ブレ補正 ON' : '手ブレ補正 OFF'; ind.style.color = on ? '#00ff88' : '#4a6a8a'; }
+  } catch(e) {}
+}
+
+function applyZoom(z) {
+  const v = $('cam-video');
+  $('zoom-lbl').textContent = z.toFixed(1) + '×';
+  if (!v) return;
+  if (z < 1) {
+    v.style.transform = `scale(${z})`; v.style.transformOrigin = 'center center';
+    if (camTrack) { try { camTrack.applyConstraints({ advanced: [{ zoom: 1 }] }).catch(()=>{}); } catch(e){} }
+    return;
+  }
+  v.style.transform = '';
+  if (!camTrack) return;
+  try {
+    const caps = camTrack.getCapabilities?.();
+    if (caps?.zoom) {
+      const zc = Math.min(Math.max(z, caps.zoom.min || 1), caps.zoom.max || 8);
+      camTrack.applyConstraints({ advanced: [{ zoom: zc }] }).catch(()=>{});
+    }
+  } catch(e) {}
+}
+
+async function compressIfNeeded(blob, maxBytes = 1024 * 1024) {
+  if (!blob || blob.size <= maxBytes) return blob;
+  const bmp = await createImageBitmap(blob).catch(() => null);
+  if (!bmp) return blob;
+  const c = document.createElement('canvas');
+  const scale = Math.min(1, Math.sqrt(maxBytes / blob.size) * 0.92);
+  c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+  c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); bmp.close();
+  for (const q of [0.82, 0.72, 0.60, 0.48, 0.36]) {
+    const out = await new Promise(res => c.toBlob(b => res(b), 'image/jpeg', q));
+    if (out && out.size <= maxBytes) return out;
+  }
+  return blob;
+}
+
+async function takePhoto() {
+  if (!camActive) return;
+  const v = $('cam-video');
+  const vw = v.videoWidth, vh = v.videoHeight;
+  if (!vw || !vh) return;
+
+  const corrAngle = (360 - sensorAngle) % 360;
+  const swap = corrAngle === 90 || corrAngle === 270;
+  const c = document.createElement('canvas');
+  c.width = swap ? vh : vw; c.height = swap ? vw : vh;
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  ctx.translate(c.width / 2, c.height / 2);
+  if (corrAngle) ctx.rotate(corrAngle * Math.PI / 180);
+  ctx.drawImage(v, -vw / 2, -vh / 2, vw, vh);
+
+  const tmpC = document.createElement('canvas');
+  const sc = Math.min(1, 200 / Math.max(c.width, c.height));
+  tmpC.width = c.width * sc; tmpC.height = c.height * sc;
+  tmpC.getContext('2d').drawImage(c, 0, 0, tmpC.width, tmpC.height);
+  const tempDataUrl = tmpC.toDataURL('image/jpeg', 0.5);
+
+  const grp = cfg.useGroup ? cfg.currentGroup : '';
+  const pid = Date.now() + Math.random();
+  const photo = {
+    id: pid, dataUrl: tempDataUrl, thumbDataUrl: tempDataUrl,
+    timestamp: Date.now(), facingMode, rotation: 0, group: grp,
+    scannedCode: lastScannedValue
+  };
+
+  // Flash effect
+  const fl = $('flash');
+  fl.classList.add('on');
+  setTimeout(() => fl.classList.remove('on'), 120);
+
+  photos.unshift(photo);
+  updateCounts(); updateThumbStrip();
+  if (activeTab === 'photos') renderPhotoGrid();
+
+  setTimeout(async () => {
+    try {
+      let blob;
+      if ('ImageCapture' in window && camTrack) {
+        try {
+          const ic = new ImageCapture(camTrack);
+          const icBlob = await ic.takePhoto();
+          if (icBlob && icBlob.size > 0) blob = icBlob;
+        } catch(e) {}
+      }
+      if (!blob) {
+        const quality = { low: 0.62, mid: 0.82, high: 0.92, max: 0.98 }[camQuality] || 0.82;
+        blob = await new Promise(res => c.toBlob(b => res(b), 'image/jpeg', quality));
+      }
+      if (blob && blob.size > 1024 * 1024) blob = await compressIfNeeded(blob, 1024 * 1024);
+      if (!blob || blob.size === 0) return;
+
+      const finalDataUrl = await blobToDataUrl(blob);
+      const finalThumbDataUrl = await createThumbnail(finalDataUrl, 400);
+      photo.dataUrl = finalDataUrl; photo.thumbDataUrl = finalThumbDataUrl;
+
+      autoSaveToDevice(photo, blob);
+
+      await dbPut(photo);
+      await dbPrune(MAX_PH);
+      photos = (await dbAll()).reverse();
+      updateThumbStrip();
+      if (activeTab === 'photos') renderPhotoGrid();
+    } catch(err) { console.error('Photo save error:', err); }
+  }, 10);
+}
+
+/* ════ photos.js ════ */
 function getFilteredPh() {
-  let filtered = photos.slice(); 
+  let filtered = photos.slice();
   if (cfg.useGroup) {
     const g = $('hist-ph-group-select').value;
     if (g !== 'all') filtered = filtered.filter(x => x.group === g);
@@ -1751,54 +1609,38 @@ function getFilteredPh() {
 function renderPhotoGrid() {
   const grid = $('photo-grid'), empty = $('photo-empty');
   if (!photos.length) { grid.style.display = 'none'; empty.style.display = ''; return; }
-  empty.style.display = 'none';
-  grid.style.display = '';
+  empty.style.display = 'none'; grid.style.display = '';
   grid.className = 'photo-list' + (mergeMode ? ' merge-mode' : multiSelModePh ? ' multi-mode-ph' : '');
   grid.innerHTML = '';
-  
   const filtered = getFilteredPh();
   let lastDayStr = '';
-
   filtered.forEach(p => {
     const dayStr = getDayString(p.timestamp);
     if (dayStr !== lastDayStr) {
       const header = document.createElement('div');
-      header.className = 'photo-section-header';
-      header.textContent = dayStr;
-      grid.appendChild(header);
-      lastDayStr = dayStr;
+      header.className = 'photo-section-header'; header.textContent = dayStr;
+      grid.appendChild(header); lastDayStr = dayStr;
     }
-
     const item = document.createElement('div');
     const isSel = (mergeMode && mergeSelected.includes(p.id)) || (multiSelModePh && multiSelectedPh.includes(p.id));
     item.className = 'photo-card photo-item' + (isSel ? ' selected' : '');
-    
     const imgWrap = document.createElement('div');
     imgWrap.className = 'photo-card-img';
-    
     if (cfg.useGroup && p.group) {
       const gb = document.createElement('div');
-      gb.className = 'card-group-badge';
-      gb.textContent = p.group;
+      gb.className = 'card-group-badge'; gb.textContent = p.group;
       imgWrap.appendChild(gb);
     }
-
     const img = document.createElement('img');
-    img.src = p.thumbDataUrl || p.dataUrl; 
-    img.loading = 'lazy';
+    img.src = p.thumbDataUrl || p.dataUrl; img.loading = 'lazy';
     imgWrap.appendChild(img);
-
     const selOv = document.createElement('div');
     selOv.className = 'photo-select-overlay';
     const chk = document.createElement('div');
-    chk.className = 'photo-select-check';
-    chk.textContent = '✓';
-    selOv.appendChild(chk);
-    imgWrap.appendChild(selOv);
-
+    chk.className = 'photo-select-check'; chk.textContent = '✓';
+    selOv.appendChild(chk); imgWrap.appendChild(selOv);
     item.appendChild(imgWrap);
-
-    item.addEventListener('click', (e) => {
+    item.addEventListener('click', () => {
       if (mergeMode) toggleMergeSelect(p.id, item);
       else if (multiSelModePh) toggleMultiSelectPh(p.id, item);
       else openLightbox(p);
@@ -1811,21 +1653,18 @@ function updateThumbStrip() {
   const wrap = $('thumb-strip-wrap');
   if (!thumbStripVisible || !photos.length) { wrap.style.display = 'none'; return; }
   wrap.style.display = '';
-  const strip = $('thumb-strip');
-  strip.innerHTML = '';
+  const strip = $('thumb-strip'); strip.innerHTML = '';
   photos.slice(0, 10).forEach(p => {
     const d = document.createElement('div');
     d.className = 'mini-thumb';
     const img = document.createElement('img');
     img.src = p.thumbDataUrl || p.dataUrl;
-    d.appendChild(img);
-    d.onclick = () => openLightbox(p);
+    d.appendChild(img); d.onclick = () => openLightbox(p);
     strip.appendChild(d);
   });
   if (photos.length > 10) {
     const m = document.createElement('button');
-    m.className = 'more-btn';
-    m.textContent = '+' + (photos.length - 10);
+    m.className = 'more-btn'; m.textContent = '+' + (photos.length - 10);
     m.onclick = () => document.querySelector('[data-tab="photos"]').click();
     strip.appendChild(m);
   }
@@ -1845,48 +1684,31 @@ function deletePhoto(id) {
   if (!confirm('この写真を削除しますか？')) return;
   dbDel(id).then(async () => {
     photos = photos.filter(p => p.id !== id);
-    if(typeof updateCounts === 'function') updateCounts();
-    renderPhotoGrid();
-    updateThumbStrip();
+    updateCounts(); renderPhotoGrid(); updateThumbStrip();
     if (currentLightbox?.id === id) closeLightbox();
   });
 }
 
-/* ════ 写真一括選択モード ════ */
 function enterMultiSelModePh(initialId = null) {
-  multiSelModePh = true;
-  multiSelectedPh = initialId ? [initialId] : [];
+  multiSelModePh = true; multiSelectedPh = initialId ? [initialId] : [];
   $('btn-ph-select-mode').classList.add('on');
   $('multi-sel-bar').classList.add('on');
-  updateMultiSelTxtPh();
-  renderPhotoGrid();
+  updateMultiSelTxtPh(); renderPhotoGrid();
 }
-
 function exitMultiSelModePh() {
-  multiSelModePh = false;
-  multiSelectedPh = [];
+  multiSelModePh = false; multiSelectedPh = [];
   $('btn-ph-select-mode').classList.remove('on');
   $('multi-sel-bar').classList.remove('on');
   renderPhotoGrid();
 }
-
 function toggleMultiSelectPh(id, itemEl) {
   const idx = multiSelectedPh.indexOf(id);
-  if (idx >= 0) { 
-    multiSelectedPh.splice(idx, 1); 
-    itemEl.classList.remove('selected'); 
-  } else { 
-    multiSelectedPh.push(id); 
-    itemEl.classList.add('selected'); 
-  }
+  if (idx >= 0) { multiSelectedPh.splice(idx, 1); itemEl.classList.remove('selected'); }
+  else { multiSelectedPh.push(id); itemEl.classList.add('selected'); }
   updateMultiSelTxtPh();
 }
+function updateMultiSelTxtPh() { $('multi-sel-txt').textContent = multiSelectedPh.length + '枚 選択中'; }
 
-function updateMultiSelTxtPh() {
-  $('multi-sel-txt').textContent = multiSelectedPh.length + '枚 選択中';
-}
-
-/* ════ Lightbox表示と回転・スワイプ ════ */
 function openLightbox(p) {
   currentLightbox = p;
   $('lb-img').src = p.dataUrl;
@@ -1894,84 +1716,46 @@ function openLightbox(p) {
   $('lb-ttl').textContent = fmtTime(p.timestamp) + ' · ' + (p.facingMode === 'user' ? 'フロント' : p.facingMode === 'merged' ? '結合' : 'リア');
   $('lightbox').style.display = '';
 }
+function closeLightbox() { $('lightbox').style.display = 'none'; currentLightbox = null; }
 
-function closeLightbox() {
-  $('lightbox').style.display = 'none';
-  currentLightbox = null;
-}
-
-// Lightboxでのタッチスワイプ処理
-let lbTouchStartX = 0;
-let lbTouchStartY = 0;
-
+let lbTouchStartX = 0, lbTouchStartY = 0;
 function initLightboxTouch() {
   const lb = $('lightbox');
   lb.addEventListener('touchstart', e => {
     lbTouchStartX = e.changedTouches[0].screenX;
     lbTouchStartY = e.changedTouches[0].screenY;
   }, { passive: true });
-
   lb.addEventListener('touchend', e => {
-    const lbTouchEndX = e.changedTouches[0].screenX;
-    const lbTouchEndY = e.changedTouches[0].screenY;
-    handleLightboxSwipe(lbTouchEndX, lbTouchEndY);
-  }, { passive: true });
-}
-
-function handleLightboxSwipe(endX, endY) {
-  if (!currentLightbox) return;
-  const dx = endX - lbTouchStartX;
-  const dy = endY - lbTouchStartY;
-
-  // 下スワイプで閉じる
-  if (dy > 80 && Math.abs(dy) > Math.abs(dx)) {
-    closeLightbox();
-    return;
-  }
-
-  // 左右スワイプで前後移動
-  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
-    const filtered = getFilteredPh();
-    const currentIndex = filtered.findIndex(p => p.id === currentLightbox.id);
-    if (currentIndex === -1) return;
-
-    if (dx < 0) {
-      // 左スワイプ -> 次の写真
-      if (currentIndex < filtered.length - 1) {
-        openLightbox(filtered[currentIndex + 1]);
-      }
-    } else {
-      // 右スワイプ -> 前の写真
-      if (currentIndex > 0) {
-        openLightbox(filtered[currentIndex - 1]);
-      }
+    const ex = e.changedTouches[0].screenX, ey = e.changedTouches[0].screenY;
+    const dx = ex - lbTouchStartX, dy = ey - lbTouchStartY;
+    if (dy > 80 && Math.abs(dy) > Math.abs(dx)) { closeLightbox(); return; }
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+      const filtered = getFilteredPh();
+      const ci = filtered.findIndex(p => p.id === currentLightbox?.id);
+      if (ci === -1) return;
+      if (dx < 0 && ci < filtered.length - 1) openLightbox(filtered[ci + 1]);
+      else if (dx > 0 && ci > 0) openLightbox(filtered[ci - 1]);
     }
-  }
+  }, { passive: true });
 }
 
 async function rotateLightboxPhoto() {
   if (!currentLightbox) return;
-  const img = new Image();
-  img.src = currentLightbox.dataUrl;
+  const img = new Image(); img.src = currentLightbox.dataUrl;
   await new Promise(r => { img.onload = r; });
   const c = document.createElement('canvas');
-  c.width = img.height;
-  c.height = img.width;
+  c.width = img.height; c.height = img.width;
   const ctx = c.getContext('2d');
   ctx.translate(c.width / 2, c.height / 2);
   ctx.rotate(90 * Math.PI / 180);
   ctx.drawImage(img, -img.width / 2, -img.height / 2);
-  
   const newUrl = c.toDataURL('image/jpeg', 0.9);
-  const newThumbUrl = await createThumbnail(newUrl, 400); 
-  
+  const newThumbUrl = await createThumbnail(newUrl, 400);
   currentLightbox = { ...currentLightbox, dataUrl: newUrl, thumbDataUrl: newThumbUrl, rotation: 0 };
   await dbPut(currentLightbox);
   photos = (await dbAll()).reverse();
-  $('lb-img').src = newUrl;
-  $('lb-img').style.transform = '';
-  renderPhotoGrid();
-  updateThumbStrip();
+  $('lb-img').src = newUrl; $('lb-img').style.transform = '';
+  renderPhotoGrid(); updateThumbStrip();
   showToast('↻ 回転しました', 'ok');
 }
 
@@ -1985,46 +1769,32 @@ async function savePhotoToDevice(photo) {
       if (blob) {
         const file = new File([blob], name, { type: 'image/jpeg' });
         if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: '写真を保存' });
-          return;
+          await navigator.share({ files: [file], title: '写真を保存' }); return;
         }
       }
-    } catch (e) {
-      if (e.name === 'AbortError') return;
-    }
+    } catch(e) { if (e.name === 'AbortError') return; }
   }
   fallbackDownload(photo.dataUrl, name);
 }
 
-/* ════ 画像結合モード ════ */
 function enterMergeMode() {
-  exitMultiSelModePh();
-  mergeMode = true;
-  mergeSelected = [];
+  exitMultiSelModePh(); mergeMode = true; mergeSelected = [];
   $('btn-merge-mode').classList.add('on');
   $('merge-bar').classList.add('on');
   $('merge-bar-txt').textContent = '写真をタップして選択（2枚以上）';
   $('btn-merge-exec').disabled = true;
   renderPhotoGrid();
 }
-
 function exitMergeMode() {
-  mergeMode = false;
-  mergeSelected = [];
+  mergeMode = false; mergeSelected = [];
   $('btn-merge-mode').classList.remove('on');
   $('merge-bar').classList.remove('on');
   renderPhotoGrid();
 }
-
 function toggleMergeSelect(id, itemEl) {
   const idx = mergeSelected.indexOf(id);
-  if (idx >= 0) {
-    mergeSelected.splice(idx, 1);
-    itemEl.classList.remove('selected');
-  } else {
-    mergeSelected.push(id);
-    itemEl.classList.add('selected');
-  }
+  if (idx >= 0) { mergeSelected.splice(idx, 1); itemEl.classList.remove('selected'); }
+  else { mergeSelected.push(id); itemEl.classList.add('selected'); }
   const n = mergeSelected.length;
   $('merge-bar-txt').textContent = n === 0 ? '写真をタップして選択（2枚以上）' : n + '枚 選択中';
   $('btn-merge-exec').disabled = n < 2;
@@ -2034,43 +1804,26 @@ async function mergeImages(sel, layout) {
   showToast('結合中...', '', 5000);
   try {
     const imgs = await Promise.all(sel.map(p => new Promise((res, rej) => {
-      const img = new Image();
-      img.onload = () => res(img);
-      img.onerror = rej;
-      img.src = p.dataUrl;
+      const img = new Image(); img.onload = () => res(img); img.onerror = rej; img.src = p.dataUrl;
     })));
-    
     const c = document.createElement('canvas');
     const ctx = c.getContext('2d');
     const n = imgs.length;
-    
     if (layout === 'h') {
       const H = Math.max(...imgs.map(i => i.height));
       const W = imgs.reduce((s, i) => s + Math.round(i.width * (H / i.height)), 0);
-      c.width = W; c.height = H;
-      let x = 0;
-      imgs.forEach(img => {
-        const w = Math.round(img.width * (H / img.height));
-        ctx.drawImage(img, x, 0, w, H);
-        x += w;
-      });
+      c.width = W; c.height = H; let x = 0;
+      imgs.forEach(img => { const w = Math.round(img.width * (H / img.height)); ctx.drawImage(img, x, 0, w, H); x += w; });
     } else if (layout === 'v') {
       const W = Math.max(...imgs.map(i => i.width));
       const H = imgs.reduce((s, i) => s + Math.round(i.height * (W / i.width)), 0);
-      c.width = W; c.height = H;
-      let y = 0;
-      imgs.forEach(img => {
-        const h = Math.round(img.height * (W / img.width));
-        ctx.drawImage(img, 0, y, W, h);
-        y += h;
-      });
+      c.width = W; c.height = H; let y = 0;
+      imgs.forEach(img => { const h = Math.round(img.height * (W / img.width)); ctx.drawImage(img, 0, y, W, h); y += h; });
     } else if (layout === 'grid') {
       const cols = 2, rows = Math.ceil(n / cols);
-      const cW = Math.max(...imgs.map(i => i.width));
-      const cH = Math.max(...imgs.map(i => i.height));
+      const cW = Math.max(...imgs.map(i => i.width)), cH = Math.max(...imgs.map(i => i.height));
       c.width = cW * cols; c.height = cH * rows;
-      ctx.fillStyle = '#111';
-      ctx.fillRect(0, 0, c.width, c.height);
+      ctx.fillStyle = '#111'; ctx.fillRect(0, 0, c.width, c.height);
       imgs.forEach((img, i) => {
         const col = i % cols, row = Math.floor(i / cols);
         const sc = Math.min(cW / img.width, cH / img.height);
@@ -2080,46 +1833,21 @@ async function mergeImages(sel, layout) {
     } else {
       const H = 320;
       const W = imgs.reduce((s, i) => s + Math.round(i.width * (H / i.height)), 0);
-      c.width = W; c.height = H;
-      let x = 0;
-      imgs.forEach(img => {
-        const w = Math.round(img.width * (H / img.height));
-        ctx.drawImage(img, x, 0, w, H);
-        x += w;
-      });
+      c.width = W; c.height = H; let x = 0;
+      imgs.forEach(img => { const w = Math.round(img.width * (H / img.height)); ctx.drawImage(img, x, 0, w, H); x += w; });
     }
-    
     const dataUrl = c.toDataURL('image/jpeg', 0.88);
-    const thumbDataUrl = await createThumbnail(dataUrl, 400); 
-    const merged = { 
-      id: Date.now() + Math.random(), 
-      dataUrl, 
-      thumbDataUrl, 
-      timestamp: Date.now(), 
-      facingMode: 'merged', 
-      rotation: 0, 
-      merged: true, 
-      group: (cfg.useGroup ? cfg.currentGroup : '') 
-    };
-    
-    await dbPut(merged);
-    await dbPrune(MAX_PH);
+    const thumbDataUrl = await createThumbnail(dataUrl, 400);
+    const merged = { id: Date.now() + Math.random(), dataUrl, thumbDataUrl, timestamp: Date.now(), facingMode: 'merged', rotation: 0, merged: true, group: (cfg.useGroup ? cfg.currentGroup : '') };
+    await dbPut(merged); await dbPrune(MAX_PH);
     photos = (await dbAll()).reverse();
-    if(typeof updateCounts === 'function') updateCounts();
-    exitMergeMode();
-    renderPhotoGrid();
-    updateThumbStrip();
+    updateCounts(); exitMergeMode(); renderPhotoGrid(); updateThumbStrip();
     showToast('✓ ' + n + '枚を結合しました', 'ok');
     openLightbox(merged);
-  } catch (e) {
-    showToast('[E020] 結合失敗: ' + e.message, 'err', 4000);
-  }
+  } catch(e) { showToast('[E020] 結合失敗: ' + e.message, 'err', 4000); }
 }
---- START OF FILE main.js ---
 
-'use strict';
-
-/* ════ UIへの設定適用とグループ管理UI ════ */
+/* ════ main.js ════ */
 function updateGroupUI() {
   const gOn = cfg.useGroup;
   $('scan-group-bar').style.display = gOn ? 'flex' : 'none';
@@ -2127,39 +1855,22 @@ function updateGroupUI() {
   $('hist-bc-group-sel').style.display = gOn ? 'flex' : 'none';
   $('hist-ph-group-sel').style.display = gOn ? 'flex' : 'none';
   $('group-mgr-area').style.display = gOn ? 'block' : 'none';
-
   $('btn-bc-select-mode').style.display = bcHistory.length ? '' : 'none';
   $('btn-ph-select-mode').style.display = photos.length ? '' : 'none';
-
-  if (!cfg.groups.includes(cfg.currentGroup)) {
-    cfg.currentGroup = cfg.groups.length ? cfg.groups[0] : '';
-  }
-
+  if (!cfg.groups.includes(cfg.currentGroup)) cfg.currentGroup = cfg.groups.length ? cfg.groups[0] : '';
   const opts = cfg.groups.map(g => `<option value="${g}">${g}</option>`).join('');
   const addOpts = `<option value="all">全グループ</option>` + opts;
   const noneOpt = `<option value="">未分類 (空白)</option>`;
-
-  const ss = $('scan-group-select'); 
-  if(ss) { ss.innerHTML = opts; ss.value = cfg.currentGroup; }
-  
-  const cs = $('cam-group-select');  
-  if(cs) { cs.innerHTML = opts; cs.value = cfg.currentGroup; }
-  
-  const hbs = $('hist-bc-group-select'); 
-  if(hbs) { const v = hbs.value; hbs.innerHTML = addOpts; hbs.value = v || 'all'; }
-  
-  const hps = $('hist-ph-group-select'); 
-  if(hps) { const v = hps.value; hps.innerHTML = addOpts; hps.value = v || 'all'; }
-
-  const ms = $('group-move-select'); 
-  if(ms) ms.innerHTML = noneOpt + opts;
-
+  const ss = $('scan-group-select'); if(ss) { ss.innerHTML = opts; ss.value = cfg.currentGroup; }
+  const cs = $('cam-group-select'); if(cs) { cs.innerHTML = opts; cs.value = cfg.currentGroup; }
+  const hbs = $('hist-bc-group-select'); if(hbs) { const v = hbs.value; hbs.innerHTML = addOpts; hbs.value = v || 'all'; }
+  const hps = $('hist-ph-group-select'); if(hps) { const v = hps.value; hps.innerHTML = addOpts; hps.value = v || 'all'; }
+  const ms = $('group-move-select'); if(ms) ms.innerHTML = noneOpt + opts;
   renderSettingsGroupList();
 }
 
 function renderSettingsGroupList() {
-  const list = $('grp-list-el'); 
-  list.innerHTML = '';
+  const list = $('grp-list-el'); list.innerHTML = '';
   cfg.groups.forEach((g, i) => {
     const item = document.createElement('div');
     item.className = 'grp-item';
@@ -2169,221 +1880,255 @@ function renderSettingsGroupList() {
   list.querySelectorAll('.btn-del').forEach(btn => {
     btn.addEventListener('click', e => {
       const idx = e.target.dataset.idx;
-      if (cfg.groups.length <= 1) { 
-        showToast('[E030] 最低1つのグループが必要です', 'warn'); 
-        return; 
-      }
-      cfg.groups.splice(idx, 1);
-      saveCfg(); 
-      updateGroupUI();
+      if (cfg.groups.length <= 1) { showToast('[E030] 最低1つのグループが必要です', 'warn'); return; }
+      cfg.groups.splice(idx, 1); saveCfg(); updateGroupUI();
     });
   });
 }
 
 function applyCfgToUI() {
-  const as = $('set-auto-scan'); 
-  if(as) as.checked = cfg.autoStartScan;
-  
+  const as = $('set-auto-scan'); if(as) as.checked = cfg.autoStartScan;
   $('set-cont-scan').checked = cfg.continuousScan;
   $('set-vibration').checked = cfg.useVibration;
   $('set-use-group').checked = cfg.useGroup;
-
   document.querySelectorAll('[data-sf]').forEach(b => b.classList.toggle('on', b.dataset.sf === cfg.scanFormat));
-  document.querySelectorAll('[data-cq]').forEach(b => b.classList.toggle('on', b.dataset.cq === cfg.camQuality));
   document.querySelectorAll('.quality-btn').forEach(b => b.classList.toggle('on', b.dataset.q === cfg.camQuality));
   document.querySelectorAll('[data-mp]').forEach(b => b.classList.toggle('on', b.dataset.mp === String(cfg.maxPhotos)));
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('on', b.dataset.mode === cfg.scanFormat));
-  
-  scanMode = cfg.scanFormat;
-  camQuality = cfg.camQuality;
-
+  scanMode = cfg.scanFormat; camQuality = cfg.camQuality;
   const ps = $('set-photo-size');
   if(ps) {
     ps.value = cfg.photoSize || 80;
     $('val-photo-size').textContent = (cfg.photoSize || 80) + 'px';
     document.documentElement.style.setProperty('--photo-size', (cfg.photoSize || 80) + 'px');
   }
-
   const bcCompactBtn = $('btn-bc-compact');
-  if(bcCompactBtn) {
-    if(cfg.bcCompactMode) bcCompactBtn.classList.add('on');
-    else bcCompactBtn.classList.remove('on');
-  }
-
+  if(bcCompactBtn) { if(cfg.bcCompactMode) bcCompactBtn.classList.add('on'); else bcCompactBtn.classList.remove('on'); }
   updateGroupUI();
 }
 
-/* ════ イベントリスナー登録 (全体・設定・一括操作等) ════ */
+function switchTab(t) {
+  if (t === activeTab) return;
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  document.querySelector(`[data-tab="${t}"]`).classList.add('on');
+  $('pg-' + t).classList.add('on');
+  activeTab = t;
+  if (t !== 'scan') stopScan();
+  if (t !== 'camera') stopCam();
+  if (t === 'scan' && cfg.autoStartScan) setTimeout(startScan, 100);
+  if (t === 'camera') setTimeout(startCam, 80);
+  if (t === 'history') { exitMultiSelModeBc(); renderBcList(); }
+  if (t === 'photos') { exitMergeMode(); exitMultiSelModePh(); renderPhotoGrid(); }
+}
+
 function bindEvents() {
-  // --- タブ切り替え ---
   document.querySelectorAll('.tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const t = btn.dataset.tab;
-      if (t === activeTab) return;
-      document.querySelectorAll('.tab').forEach(b => b.classList.remove('on'));
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
-      btn.classList.add('on');
-      $('pg-' + t).classList.add('on');
-      activeTab = t;
-      
-      if (t !== 'scan') stopScan();
-      if (t !== 'camera') stopCam();
-      if (t === 'scan' && cfg.autoStartScan) setTimeout(startScan, 100);
-      if (t === 'camera') setTimeout(startCam, 80);
-      if (t === 'history') { exitMultiSelModeBc(); renderBcList(); }
-      if (t === 'photos') { exitMergeMode(); exitMultiSelModePh(); renderPhotoGrid(); }
-    });
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
 
-  // --- タブ間ワープボタン ---
-  $('btn-goto-cam')?.addEventListener('click', () => { document.querySelector('[data-tab="camera"]').click(); });
-  $('btn-goto-scan')?.addEventListener('click', () => { document.querySelector('[data-tab="scan"]').click(); });
+  $('btn-goto-scan')?.addEventListener('click', () => switchTab('scan'));
+  $('btn-warp-cam')?.addEventListener('click', () => switchTab('camera'));
 
-  // --- カメラ切替 ---
+  $('btn-scan').addEventListener('click', () => { if (scanning) stopScan(); else startScan(); });
+
   $('btn-cam-switch')?.addEventListener('click', () => {
     facingMode = facingMode === 'environment' ? 'user' : 'environment';
-    if (camActive) { startCam(); }
+    if (camActive) startCam();
   });
+  $('btn-torch')?.addEventListener('click', toggleTorch);
+  $('btn-shutter')?.addEventListener('click', takePhoto);
+  $('cam-retry')?.addEventListener('click', startCam);
 
-  // --- 設定UI (UI設定) ---
-  $('set-photo-size').addEventListener('input', e => {
-    const v = e.target.value; 
-    $('val-photo-size').textContent = v + 'px'; 
-    document.documentElement.style.setProperty('--photo-size', v + 'px');
-  });
-  $('set-photo-size').addEventListener('change', e => { cfg.photoSize = parseInt(e.target.value, 10); saveCfg(); });
+  $('zoom-slider')?.addEventListener('input', e => applyZoom(parseFloat(e.target.value)));
 
-  // --- 設定UI (スキャン設定) ---
-  $('set-cont-scan').addEventListener('change', e => {
-    cfg.continuousScan = e.target.checked;
-    saveCfg();
-    showToast('連続スキャン: ' + (cfg.continuousScan ? 'ON' : 'OFF'), cfg.continuousScan ? 'ok' : '');
-  });
-  $('set-auto-scan').addEventListener('change', e => { cfg.autoStartScan = e.target.checked; saveCfg(); });
+  document.querySelectorAll('.quality-btn').forEach(btn => btn.addEventListener('click', () => {
+    camQuality = btn.dataset.q; cfg.camQuality = camQuality; saveCfg(); applyCfgToUI();
+    if (camActive) startCam();
+    showToast('画質: ' + ({ low: '低', mid: '標準', high: '高', max: '最高' })[camQuality], 'ok');
+  }));
 
-  document.querySelectorAll('[data-sf]').forEach(btn => btn.addEventListener('click', () => {
-    cfg.scanFormat = btn.dataset.sf;
-    saveCfg();
-    applyCfgToUI();
+  document.querySelectorAll('.mode-btn').forEach(btn => btn.addEventListener('click', () => {
+    scanMode = btn.dataset.mode; cfg.scanFormat = scanMode; saveCfg(); applyCfgToUI();
     if (scanning) { stopScan(); setTimeout(startScan, 200); }
-    showToast('フォーマット: ' + (cfg.scanFormat === 'ean13' ? 'EAN-13' : '全て'), 'ok');
   }));
 
-  // --- 設定UI (カメラ設定) ---
-  document.querySelectorAll('[data-cq]').forEach(btn => btn.addEventListener('click', () => {
-    cfg.camQuality = btn.dataset.cq;
-    saveCfg();
-    applyCfgToUI();
-    showToast('デフォルト画質: ' + ({ low: '低', mid: '標準', high: '高', max: '最高' })[cfg.camQuality], 'ok');
-  }));
-
-  // --- グループ機能 ---
-  $('set-use-group').addEventListener('change', e => {
-    cfg.useGroup = e.target.checked;
-    saveCfg();
-    updateGroupUI();
+  $('btn-bc-compact')?.addEventListener('click', () => {
+    cfg.bcCompactMode = !cfg.bcCompactMode; saveCfg(); applyCfgToUI(); renderBcList();
+    showToast(cfg.bcCompactMode ? '1行表示ON' : '1行表示OFF');
+  });
+  $('btn-bc-sort')?.addEventListener('click', e => {
+    sortOrderBc = sortOrderBc === 'desc' ? 'asc' : 'desc';
+    e.target.textContent = sortOrderBc === 'desc' ? '↓ 新しい順' : '↑ 古い順';
     renderBcList();
-    renderPhotoGrid();
   });
-  
-  $('scan-group-select').addEventListener('change', e => { cfg.currentGroup = e.target.value; saveCfg(); const c = $('cam-group-select'); if (c) c.value = cfg.currentGroup; });
-  $('cam-group-select').addEventListener('change', e => { cfg.currentGroup = e.target.value; saveCfg(); const s = $('scan-group-select'); if (s) s.value = cfg.currentGroup; });
-  $('hist-bc-group-select').addEventListener('change', renderBcList);
-  $('hist-ph-group-select').addEventListener('change', renderPhotoGrid);
-
-  $('grp-add-btn').addEventListener('click', () => {
-    const val = $('grp-add-input').value.trim(); 
-    if (!val) return;
-    if (cfg.groups.includes(val)) { showToast('[E031] 既に存在します', 'warn'); return; }
-    cfg.groups.push(val); 
-    $('grp-add-input').value = ''; 
-    saveCfg(); 
-    updateGroupUI();
-  });
-
-  // --- システム・保存設定 ---
-  $('set-vibration').addEventListener('change', e => {
-    cfg.useVibration = e.target.checked;
-    saveCfg();
-    if (cfg.useVibration) vibrate([50]);
-  });
-
-  document.querySelectorAll('[data-mp]').forEach(btn => btn.addEventListener('click', () => {
-    MAX_PH = parseInt(btn.dataset.mp);
-    cfg.maxPhotos = MAX_PH;
-    saveCfg();
-    applyCfgToUI();
-    updateCounts();
-    showToast('最大保存枚数: ' + MAX_PH + '枚', 'ok');
-  }));
-
-  // --- データ管理 ---
-  $('set-export-csv').addEventListener('click', exportCSV);
-  $('set-clear-bc').addEventListener('click', () => {
-    if (confirm('全てのバーコード履歴を完全に削除しますか？')) {
-      bcHistory = [];
-      localStorage.setItem(BC_KEY, '[]');
-      updateCounts();
-      renderBcList();
+  $('btn-bc-select-mode')?.addEventListener('click', () => { if (multiSelModeBc) exitMultiSelModeBc(); else enterMultiSelModeBc(); });
+  $('btn-bc-csv')?.addEventListener('click', exportCSV);
+  $('btn-bc-clear')?.addEventListener('click', () => {
+    if (confirm('全てのバーコード履歴を削除しますか？')) {
+      bcHistory = []; localStorage.setItem(BC_KEY, '[]'); updateCounts(); renderBcList();
       showToast('BC履歴を削除しました');
     }
   });
 
-  $('set-clear-photos').addEventListener('click', () => {
-    if (confirm('保存されている全ての写真を完全に削除しますか？')) {
-      dbClear().then(() => {
-        photos = [];
-        updateCounts();
-        renderPhotoGrid();
-        updateThumbStrip();
-        showToast('写真を全削除しました');
-      });
-    }
+  $('btn-multi-all-bc')?.addEventListener('click', () => {
+    const filtered = getFilteredBc();
+    if (multiSelectedBc.length === filtered.length && filtered.length > 0) multiSelectedBc = [];
+    else multiSelectedBc = filtered.map(x => x.id);
+    updateMultiSelTxtBc(); renderBcList();
+  });
+  $('btn-multi-cancel-bc')?.addEventListener('click', exitMultiSelModeBc);
+  $('btn-multi-del-bc')?.addEventListener('click', () => {
+    if (!multiSelectedBc.length) { showToast('[E023] 選択なし', 'warn'); return; }
+    if (!confirm(multiSelectedBc.length + '件を削除しますか？')) return;
+    bcHistory = bcHistory.filter(x => !multiSelectedBc.includes(x.id));
+    localStorage.setItem(BC_KEY, JSON.stringify(bcHistory));
+    updateCounts(); exitMultiSelModeBc(); showToast('削除しました');
+  });
+  $('btn-multi-move-bc')?.addEventListener('click', () => {
+    if (!multiSelectedBc.length) { showToast('[E024] 選択なし', 'warn'); return; }
+    groupMoveTarget = 'bc'; $('group-move-popup').style.display = '';
   });
 
-  // --- 写真関連のイベント ---
-  $('btn-ph-sort').addEventListener('click', e => {
+  $('search-box')?.addEventListener('input', renderBcList);
+
+  document.querySelectorAll('.flt-btn').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.flt-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on'); histFilter = btn.dataset.filter; renderBcList();
+  }));
+
+  $('scan-bc-copy')?.addEventListener('click', () => {
+    const v = $('scan-bc-val').textContent;
+    navigator.clipboard?.writeText(v).then(() => showToast('✓ コピーしました', 'ok')).catch(() => showToast('コピー失敗', 'err'));
+  });
+
+  $('modal-close')?.addEventListener('click', closeBcModal);
+  $('bc-modal')?.addEventListener('click', e => { if (e.target === $('bc-modal')) closeBcModal(); });
+  $('btn-copy')?.addEventListener('click', () => {
+    if (!currentDetail) return;
+    navigator.clipboard?.writeText(currentDetail.value).then(() => {
+      $('copied-msg').style.display = ''; setTimeout(() => $('copied-msg').style.display = 'none', 2000);
+    });
+  });
+  $('btn-png')?.addEventListener('click', () => {
+    if (!currentDetail) return;
+    const cv = $('modal-canvas'); if (!cv) return;
+    const url = cv.toDataURL('image/png');
+    fallbackDownload(url, 'barcode_' + currentDetail.value + '.png');
+  });
+
+  $('btn-thumb-toggle')?.addEventListener('click', () => setThumbVisible(!thumbStripVisible));
+  $('btn-thumb-toggle2')?.addEventListener('click', () => setThumbVisible(!thumbStripVisible));
+
+  $('btn-folder-toggle')?.addEventListener('click', () => {
+    const row = $('save-folder-row');
+    row.style.display = row.style.display === 'none' ? '' : 'none';
+  });
+  $('btn-folder-pick')?.addEventListener('click', pickSaveFolder);
+  $('btn-folder-clear')?.addEventListener('click', clearSaveFolder);
+
+  $('set-photo-size')?.addEventListener('input', e => {
+    const v = e.target.value;
+    $('val-photo-size').textContent = v + 'px';
+    document.documentElement.style.setProperty('--photo-size', v + 'px');
+  });
+  $('set-photo-size')?.addEventListener('change', e => { cfg.photoSize = parseInt(e.target.value, 10); saveCfg(); });
+
+  $('set-cont-scan')?.addEventListener('change', e => {
+    cfg.continuousScan = e.target.checked; saveCfg();
+    showToast('連続スキャン: ' + (cfg.continuousScan ? 'ON' : 'OFF'), cfg.continuousScan ? 'ok' : '');
+  });
+  $('set-auto-scan')?.addEventListener('change', e => { cfg.autoStartScan = e.target.checked; saveCfg(); });
+
+  document.querySelectorAll('[data-sf]').forEach(btn => btn.addEventListener('click', () => {
+    cfg.scanFormat = btn.dataset.sf; saveCfg(); applyCfgToUI();
+    if (scanning) { stopScan(); setTimeout(startScan, 200); }
+    showToast('フォーマット: ' + (cfg.scanFormat === 'ean13' ? 'EAN-13' : '全て'), 'ok');
+  }));
+
+  $('set-use-group')?.addEventListener('change', e => {
+    cfg.useGroup = e.target.checked; saveCfg(); updateGroupUI(); renderBcList(); renderPhotoGrid();
+  });
+  $('scan-group-select')?.addEventListener('change', e => {
+    cfg.currentGroup = e.target.value; saveCfg();
+    const c = $('cam-group-select'); if (c) c.value = cfg.currentGroup;
+  });
+  $('cam-group-select')?.addEventListener('change', e => {
+    cfg.currentGroup = e.target.value; saveCfg();
+    const s = $('scan-group-select'); if (s) s.value = cfg.currentGroup;
+  });
+  $('hist-bc-group-select')?.addEventListener('change', renderBcList);
+  $('hist-ph-group-select')?.addEventListener('change', renderPhotoGrid);
+
+  $('grp-add-btn')?.addEventListener('click', () => {
+    const val = $('grp-add-input').value.trim(); if (!val) return;
+    if (cfg.groups.includes(val)) { showToast('[E031] 既に存在します', 'warn'); return; }
+    cfg.groups.push(val); $('grp-add-input').value = ''; saveCfg(); updateGroupUI();
+  });
+
+  $('set-vibration')?.addEventListener('change', e => {
+    cfg.useVibration = e.target.checked; saveCfg(); if (cfg.useVibration) vibrate([50]);
+  });
+
+  document.querySelectorAll('[data-mp]').forEach(btn => btn.addEventListener('click', () => {
+    MAX_PH = parseInt(btn.dataset.mp); cfg.maxPhotos = MAX_PH; saveCfg(); applyCfgToUI(); updateCounts();
+    showToast('最大保存枚数: ' + MAX_PH + '枚', 'ok');
+  }));
+
+  $('set-export-csv')?.addEventListener('click', exportCSV);
+  $('set-clear-bc')?.addEventListener('click', () => {
+    if (confirm('全てのバーコード履歴を完全に削除しますか？')) {
+      bcHistory = []; localStorage.setItem(BC_KEY, '[]'); updateCounts(); renderBcList();
+      showToast('BC履歴を削除しました');
+    }
+  });
+  $('set-clear-photos')?.addEventListener('click', () => {
+    if (confirm('保存されている全ての写真を完全に削除しますか？')) {
+      dbClear().then(() => { photos = []; updateCounts(); renderPhotoGrid(); updateThumbStrip(); showToast('写真を全削除しました'); });
+    }
+  });
+  $('set-folder-pick-btn')?.addEventListener('click', pickSaveFolder);
+  $('set-folder-clear-btn')?.addEventListener('click', clearSaveFolder);
+
+  $('btn-ph-sort')?.addEventListener('click', e => {
     sortOrderPh = sortOrderPh === 'desc' ? 'asc' : 'desc';
     e.target.textContent = sortOrderPh === 'desc' ? '↓ 新しい順' : '↑ 古い順';
     renderPhotoGrid();
   });
-
-  $('btn-multi-all').addEventListener('click', () => {
-    const filtered = getFilteredPh();
-    if (multiSelectedPh.length === filtered.length && filtered.length > 0) {
-      multiSelectedPh = []; 
-    } else {
-      multiSelectedPh = filtered.map(x => x.id); 
+  $('btn-ph-select-mode')?.addEventListener('click', () => { if (multiSelModePh) exitMultiSelModePh(); else enterMultiSelModePh(); });
+  $('btn-merge-mode')?.addEventListener('click', () => {
+    if (mergeMode) exitMergeMode();
+    else { if (photos.length < 2) { showToast('[E026] 2枚以上の写真が必要です', 'warn'); return; } enterMergeMode(); }
+  });
+  $('btn-photo-clear')?.addEventListener('click', () => {
+    if (confirm('全ての写真を削除しますか？')) {
+      dbClear().then(() => { photos = []; updateCounts(); renderPhotoGrid(); updateThumbStrip(); showToast('写真を全削除しました'); });
     }
-    updateMultiSelTxtPh();
-    renderPhotoGrid();
   });
 
-  $('btn-multi-cancel').addEventListener('click', exitMultiSelModePh);
-  $('btn-multi-del').addEventListener('click', () => {
-    if (multiSelectedPh.length === 0) { showToast('[E023] 項目が選択されていません', 'warn'); return; }
-    if (!confirm(multiSelectedPh.length + '枚の写真を削除しますか？')) return;
-    const promises = multiSelectedPh.map(id => dbDel(id));
-    Promise.all(promises).then(async () => {
+  $('btn-multi-all')?.addEventListener('click', () => {
+    const filtered = getFilteredPh();
+    if (multiSelectedPh.length === filtered.length && filtered.length > 0) multiSelectedPh = [];
+    else multiSelectedPh = filtered.map(x => x.id);
+    updateMultiSelTxtPh(); renderPhotoGrid();
+  });
+  $('btn-multi-cancel')?.addEventListener('click', exitMultiSelModePh);
+  $('btn-multi-del')?.addEventListener('click', () => {
+    if (!multiSelectedPh.length) { showToast('[E023] 選択なし', 'warn'); return; }
+    if (!confirm(multiSelectedPh.length + '枚を削除しますか？')) return;
+    Promise.all(multiSelectedPh.map(id => dbDel(id))).then(async () => {
       photos = photos.filter(p => !multiSelectedPh.includes(p.id));
-      updateCounts(); 
-      updateThumbStrip(); 
-      exitMultiSelModePh();
-      showToast('削除しました');
+      updateCounts(); updateThumbStrip(); exitMultiSelModePh(); showToast('削除しました');
     });
   });
-
-  $('btn-multi-move').addEventListener('click', () => {
-    if (multiSelectedPh.length === 0) { showToast('[E024] 項目が選択されていません', 'warn'); return; }
-    groupMoveTarget = 'ph';
-    $('group-move-popup').style.display = '';
+  $('btn-multi-move')?.addEventListener('click', () => {
+    if (!multiSelectedPh.length) { showToast('[E024] 選択なし', 'warn'); return; }
+    groupMoveTarget = 'ph'; $('group-move-popup').style.display = '';
   });
-
-  $('btn-multi-dl').addEventListener('click', async () => {
-    if (multiSelectedPh.length === 0) { showToast('[E025] 項目が選択されていません', 'warn'); return; }
+  $('btn-multi-dl')?.addEventListener('click', async () => {
+    if (!multiSelectedPh.length) { showToast('[E025] 選択なし', 'warn'); return; }
     showToast('準備中...', '', 2000);
     const selPhotos = multiSelectedPh.map(id => photos.find(p => p.id === id)).filter(Boolean);
-    
     if (navigator.share && navigator.canShare) {
       try {
         const files = [];
@@ -2395,120 +2140,74 @@ function bindEvents() {
             files.push(new File([blob], `${prefix}_${ts}.jpg`, { type: 'image/jpeg' }));
           }
         }
-        if (navigator.canShare({ files })) {
-          await navigator.share({ files, title: '写真を保存' });
-          exitMultiSelModePh();
-          return;
-        }
-      } catch(e) { 
-        if (e.name !== 'AbortError') console.error(e); 
-      }
+        if (navigator.canShare({ files })) { await navigator.share({ files, title: '写真を保存' }); exitMultiSelModePh(); return; }
+      } catch(e) { if (e.name !== 'AbortError') console.error(e); }
     }
-    showToast('連続ダウンロードを開始します');
     for (let i = 0; i < selPhotos.length; i++) {
       const p = selPhotos[i];
       const ts = fmtTime(p.timestamp).replace(/[/:\s]/g, '-');
       const prefix = p.scannedCode ? p.scannedCode.slice(-5) : 'photo';
       fallbackDownload(p.dataUrl, `${prefix}_${ts}.jpg`);
-      await new Promise(r => setTimeout(r, 600)); 
+      await new Promise(r => setTimeout(r, 600));
     }
     exitMultiSelModePh();
   });
 
-  $('lb-close').addEventListener('click', closeLightbox);
-  $('lb-rotate').addEventListener('click', rotateLightboxPhoto);
-  $('lb-dl').addEventListener('click', () => { if (currentLightbox) savePhotoToDevice(currentLightbox); });
-  $('lb-del').addEventListener('click', () => { if (currentLightbox) deletePhoto(currentLightbox.id); });
-  $('btn-photo-clear').addEventListener('click', () => {
-    if (confirm('保存されている全ての写真を削除しますか？')) {
-      dbClear().then(() => {
-        photos = [];
-        updateCounts();
-        renderPhotoGrid();
-        updateThumbStrip();
-        showToast('写真を全て削除しました');
-      });
-    }
-  });
+  $('lb-close')?.addEventListener('click', closeLightbox);
+  $('lb-rotate')?.addEventListener('click', rotateLightboxPhoto);
+  $('lb-dl')?.addEventListener('click', () => { if (currentLightbox) savePhotoToDevice(currentLightbox); });
+  $('lb-del')?.addEventListener('click', () => { if (currentLightbox) deletePhoto(currentLightbox.id); });
 
-  $('btn-merge-mode').addEventListener('click', () => {
-    if (mergeMode) exitMergeMode();
-    else {
-      if (photos.length < 2) { showToast('[E026] 2枚以上の写真が必要です', 'warn'); return; }
-      enterMergeMode();
-    }
-  });
-  $('btn-merge-cancel').addEventListener('click', exitMergeMode);
-  $('btn-merge-exec').addEventListener('click', () => { if (mergeSelected.length >= 2) $('merge-modal').style.display = ''; });
-  $('merge-modal-cancel').addEventListener('click', () => { $('merge-modal').style.display = 'none'; });
+  $('btn-merge-cancel')?.addEventListener('click', exitMergeMode);
+  $('btn-merge-exec')?.addEventListener('click', () => { if (mergeSelected.length >= 2) $('merge-modal').style.display = ''; });
+  $('merge-modal-cancel')?.addEventListener('click', () => { $('merge-modal').style.display = 'none'; });
 
   document.querySelectorAll('.merge-layout-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       $('merge-modal').style.display = 'none';
-      const layout = btn.dataset.layout;
       const sel = mergeSelected.map(id => photos.find(p => p.id === id)).filter(Boolean);
-      mergeImages(sel, layout);
+      mergeImages(sel, btn.dataset.layout);
     });
   });
 
-  // --- iOS ポップアップ関連 ---
-  $('ios-popup-close').addEventListener('click', () => { $('ios-popup').style.display = 'none'; });
-  $('ios-popup').addEventListener('click', e => { if (e.target === $('ios-popup')) $('ios-popup').style.display = 'none'; });
-  
-  // --- グループ移動処理 ---
-  $('group-move-cancel').addEventListener('click', () => { $('group-move-popup').style.display = 'none'; });
-  $('group-move-exec').addEventListener('click', async () => {
+  $('ios-popup-close')?.addEventListener('click', () => { $('ios-popup').style.display = 'none'; });
+  $('ios-popup')?.addEventListener('click', e => { if (e.target === $('ios-popup')) $('ios-popup').style.display = 'none'; });
+
+  $('group-move-cancel')?.addEventListener('click', () => { $('group-move-popup').style.display = 'none'; });
+  $('group-move-exec')?.addEventListener('click', async () => {
     const g = $('group-move-select').value;
     $('group-move-popup').style.display = 'none';
-
     if (groupMoveTarget === 'ph') {
-      if (multiSelectedPh.length === 0) return;
-      const promises = multiSelectedPh.map(id => {
-        const p = photos.find(x => x.id === id);
-        if (p) { p.group = g; return dbPut(p); }
-      });
+      if (!multiSelectedPh.length) return;
+      const promises = multiSelectedPh.map(id => { const p = photos.find(x => x.id === id); if (p) { p.group = g; return dbPut(p); } });
       await Promise.all(promises);
       photos = (await dbAll()).reverse();
-      exitMultiSelModePh();
-      showToast('✓ グループを移動しました', 'ok');
-    } 
-    else if (groupMoveTarget === 'bc') {
-      if (multiSelectedBc.length === 0) return;
-      multiSelectedBc.forEach(id => {
-        const b = bcHistory.find(x => x.id === id);
-        if (b) b.group = g;
-      });
+      exitMultiSelModePh(); showToast('✓ グループを移動しました', 'ok');
+    } else if (groupMoveTarget === 'bc') {
+      if (!multiSelectedBc.length) return;
+      multiSelectedBc.forEach(id => { const b = bcHistory.find(x => x.id === id); if (b) b.group = g; });
       localStorage.setItem(BC_KEY, JSON.stringify(bcHistory));
-      exitMultiSelModeBc();
-      showToast('✓ グループを移動しました', 'ok');
+      exitMultiSelModeBc(); showToast('✓ グループを移動しました', 'ok');
     }
   });
 }
 
-/* ════ 初期化処理 ════ */
 async function init() {
   loadCfg();
   MAX_PH = cfg.maxPhotos || 200;
-  
-  try { 
-    bcHistory = JSON.parse(localStorage.getItem(BC_KEY) || '[]'); 
-  } catch(e) { bcHistory = []; }
+  try { bcHistory = JSON.parse(localStorage.getItem(BC_KEY) || '[]'); } catch(e) { bcHistory = []; }
   bcHistory = bcHistory.map(x => ({ checked: false, ...x }));
-  
-  try { 
-    photos = (await dbAll()).reverse(); 
-  } catch(e) { photos = []; }
-  
+  try { photos = (await dbAll()).reverse(); } catch(e) { photos = []; }
   applyCfgToUI();
   setThumbVisible(thumbStripVisible);
   updateCounts();
   restoreFolderHandle();
-  
   bindEvents();
   initLightboxTouch();
-  
   if (cfg.autoStartScan) setTimeout(startScan, 400);
 }
 
-// 読み込み完了後に初期化
 document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
