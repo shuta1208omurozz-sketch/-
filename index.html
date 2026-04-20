@@ -3,16 +3,13 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
-  <title>Scanner + Camera Ultra-Wide</title>
-  
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
+  <title>Ultra Wide Pro Camera</title>
   
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
 
     :root {
       --accent: #00d4ff;
-      --accent-10: rgba(0,212,255,.1);
       --bg: #0a0c0f;
     }
 
@@ -21,93 +18,105 @@
     #app { height: 100dvh; display: flex; flex-direction: column; }
 
     /* Header */
-    .hdr { display: flex; align-items: center; padding: 10px 15px; background: #0d1117; border-bottom: 1px solid #1e2a38; flex-shrink: 0; }
+    .hdr { display: flex; align-items: center; padding: 12px 15px; background: #0d1117; border-bottom: 1px solid #1e2a38; flex-shrink: 0; }
     .hdr-title { font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--accent); }
+    .hdr-count { margin-left: auto; font-family: 'Share Tech Mono', monospace; font-size: 10px; opacity: 0.7; }
 
     /* Tabs */
     .tabs { display: flex; background: #0d1117; border-bottom: 1px solid #1e2a38; flex-shrink: 0; }
-    .tab { flex: 1; padding: 12px 2px; text-align: center; font-size: 10px; font-weight: 700; cursor: pointer; color: #4a6a8a; background: none; border: none; border-bottom: 2px solid transparent; }
-    .tab.on { color: var(--accent); border-bottom-color: var(--accent); background: var(--accent-10); }
+    .tab { flex: 1; padding: 14px 2px; text-align: center; font-size: 10px; font-weight: 700; cursor: pointer; color: #4a6a8a; background: none; border: none; border-bottom: 2px solid transparent; }
+    .tab.on { color: var(--accent); border-bottom-color: var(--accent); }
 
-    .page { flex: 1; overflow: hidden; display: none; flex-direction: column; }
+    .page { flex: 1; overflow: hidden; display: none; flex-direction: column; position: relative; }
     .page.on { display: flex; }
 
-    /* --- Camera Viewfinder: 端まで映像を詰める設定 --- */
-    .vf-container {
-      width: 100%;
-      background: #000;
+    /* --- Camera Viewfinder: フルワイド・ラグなし --- */
+    .vf-wrapper {
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
+      background: #000;
+      overflow: hidden;
+    }
+    .vf-container {
+      width: 100%;
+      aspect-ratio: 16 / 9; /* 初期値 */
       position: relative;
       overflow: hidden;
-      /* ここで横長の比率を固定 */
-      aspect-ratio: 16 / 9; 
-      margin: auto 0;
       border-top: 1px solid #1e2a38;
       border-bottom: 1px solid #1e2a38;
+      transition: aspect-ratio 0.3s ease;
     }
     #cam-video {
       width: 100%;
       height: 100%;
-      /* FIX: containをcoverに変更して隙間をなくす */
-      object-fit: cover; 
+      object-fit: cover; /* 隙間なく埋める */
     }
 
-    /* アスペクト比切り替え */
-    .ratio-bar {
+    /* Controls: 下部ボタン配置 */
+    .cam-controls {
+      padding: 15px 15px calc(20px + env(safe-area-inset-bottom));
+      background: #0d1117;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr; /* 左・中・右の3分割 */
+      align-items: center;
+    }
+
+    /* 左側: 比率切り替えボタン */
+    .ratio-ctrls {
       display: flex;
-      justify-content: center;
-      gap: 6px;
-      padding: 10px;
-      background: #0a0c0f;
+      flex-direction: column;
+      gap: 5px;
     }
     .ratio-btn {
-      padding: 5px 12px;
+      width: 50px;
+      padding: 4px 0;
       background: #1a1f26;
       border: 1px solid #333;
       color: #666;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       cursor: pointer;
       border-radius: 3px;
+      text-align: center;
     }
     .ratio-btn.on {
       border-color: var(--accent);
       color: var(--accent);
-      background: var(--accent-10);
+      background: rgba(0, 212, 255, 0.1);
     }
 
-    /* Controls: 下部に配置 */
-    .cam-controls {
-      padding: 20px 0 calc(20px + env(safe-area-inset-bottom));
-      background: #0d1117;
-      flex-shrink: 0;
-    }
-    .btn-row {
+    /* 中央: シャッター */
+    .shutter-wrap {
       display: flex;
-      align-items: center;
-      justify-content: space-around;
-      max-width: 400px;
-      margin: 0 auto;
+      justify-content: center;
     }
     .btn-shutter {
-      width: 80px;
-      height: 80px;
+      width: 76px;
+      height: 76px;
       border-radius: 50%;
       background: #fff;
-      border: 8px solid rgba(255,255,255,0.2);
+      border: 6px solid rgba(255,255,255,0.2);
       cursor: pointer;
       transition: transform 0.05s;
     }
-    .btn-shutter:active { transform: scale(0.9); background: #ddd; }
-    .btn-sub {
-      width: 48px;
-      height: 48px;
+    .btn-shutter:active { transform: scale(0.9); background: #ccc; }
+
+    /* 右側: SCAN切り替え */
+    .side-right {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .btn-scan-link {
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       background: #1e2a38;
-      color: #fff;
       border: 1px solid #2a3a4a;
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -116,14 +125,14 @@
 
     /* Photos List */
     .photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 2px; overflow-y: auto; }
-    .photo-item { width: 100%; aspect-ratio: 16/9; background: #111; overflow: hidden; border: 1px solid #1e2a38; }
+    .photo-item { width: 100%; aspect-ratio: 1; background: #111; overflow: hidden; }
     .photo-item img { width: 100%; height: 100%; object-fit: cover; }
 
-    /* Toast Notifications */
+    /* Toast */
     .toast {
-      position: fixed; bottom: 120px; left: 50%; transform: translateX(-50%);
-      background: var(--accent); color: #000; padding: 8px 20px;
-      font-weight: bold; font-size: 12px; border-radius: 2px; pointer-events: none; opacity: 0; transition: 0.2s;
+      position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%);
+      background: var(--accent); color: #000; padding: 10px 20px;
+      font-weight: bold; border-radius: 2px; pointer-events: none; opacity: 0; transition: 0.15s; z-index: 1000;
     }
     .toast.show { opacity: 1; }
   </style>
@@ -132,8 +141,8 @@
 
 <div id="app">
   <div class="hdr">
-    <div class="hdr-title">ULTRA-WIDE CAMERA</div>
-    <div id="hdr-count" style="margin-left:auto; font-size:10px; font-family:monospace; color:var(--accent);">0 BC / 0 📷</div>
+    <div class="hdr-title">WIDE CAMERA PRO</div>
+    <div id="hdr-count" class="hdr-count">0 BC / 0 📷</div>
   </div>
 
   <div class="tabs">
@@ -144,56 +153,59 @@
     <div class="tab" data-tab="settings">⚙</div>
   </div>
 
-  <!-- カメラ画面 -->
+  <!-- カメラページ -->
   <div class="page on" id="pg-camera">
-    <div class="ratio-bar">
-      <button class="ratio-btn" data-ratio="4/3">4:3 標準</button>
-      <button class="ratio-btn on" data-ratio="16/9">16:9 ワイド</button>
-      <button class="ratio-btn" data-ratio="21/9">21:9 シネマ</button>
+    <div class="vf-wrapper">
+      <div class="vf-container" id="vf-container">
+        <video id="cam-video" muted playsinline autoplay></video>
+      </div>
     </div>
 
-    <!-- 映像が端まで詰まるコンテナ -->
-    <div class="vf-container" id="vf-container">
-      <video id="cam-video" muted playsinline autoplay></video>
-    </div>
-
+    <!-- 下部コントロールエリア -->
     <div class="cam-controls">
-      <div class="btn-row">
-        <button id="btn-cam-switch" class="btn-sub">🔄</button>
+      <!-- 左下: 比率切り替え -->
+      <div class="ratio-ctrls">
+        <button class="ratio-btn" data-ratio="4/3">4:3</button>
+        <button class="ratio-btn on" data-ratio="16/9">16:9</button>
+        <button class="ratio-btn" data-ratio="21/9">21:9</button>
+      </div>
+
+      <!-- 中央: シャッター -->
+      <div class="shutter-wrap">
         <button id="btn-shutter" class="btn-shutter"></button>
-        <button id="btn-goto-scan" class="btn-sub" style="font-size:10px; font-weight:bold;">SCAN</button>
+      </div>
+
+      <!-- 右下: SCANへのショートカット -->
+      <div class="side-right">
+        <button id="btn-goto-scan" class="btn-scan-link">SCAN</button>
       </div>
     </div>
   </div>
 
-  <!-- 写真一覧 -->
+  <!-- 他のページ（シンプル版） -->
+  <div class="page" id="pg-scan">
+    <div style="flex:1; background:#000; display:flex; align-items:center; justify-content:center; color:#4a6a8a;">SCAN MODE ACTIVE</div>
+  </div>
+
   <div class="page" id="pg-photos">
     <div class="photo-grid" id="photo-grid"></div>
   </div>
 
-  <!-- その他 (スキャン等は枠組みのみ) -->
-  <div class="page" id="pg-scan">
-    <div style="flex:1; background:#000; display:flex; align-items:center; justify-content:center;">
-      <p style="color:#4a6a8a; font-size:12px;">SCANNER MODE</p>
-    </div>
-  </div>
-
-  <div class="page" id="pg-history">
-    <div style="padding:20px; font-size:12px; color:#4a6a8a;">バーコード履歴はここに表示されます</div>
-  </div>
-
+  <div class="page" id="pg-history"><div style="padding:20px; color:#4a6a8a;">History empty</div></div>
   <div class="page" id="pg-settings">
     <div style="padding:20px;">
-      <button onclick="localStorage.clear(); location.reload();" style="color:red; border:1px solid red; background:none; padding:10px; width:100%;">データ全消去</button>
+      <button onclick="localStorage.clear(); location.reload();" style="color:red; border:1px solid red; background:none; padding:12px; width:100%; border-radius:4px;">全データをリセット</button>
     </div>
   </div>
 </div>
 
-<div id="toast" class="toast">SHOT!</div>
+<div id="toast" class="toast">CAPTURED</div>
 
 <script>
+/**
+ * 状態管理 (自撮りなし・アウトカメラ固定)
+ */
 const state = {
-  facingMode: 'environment',
   aspectRatio: 16/9,
   photos: []
 };
@@ -202,15 +214,15 @@ window.addEventListener('load', () => {
   initTabs();
   startCamera();
   
-  // 保存された写真の読み込み
-  const saved = localStorage.getItem('ultra_wide_photos');
+  // データ復元
+  const saved = localStorage.getItem('pro_cam_photos');
   if (saved) state.photos = JSON.parse(saved);
   updateCount();
 
-  // シャッターボタン (ラグなし)
+  // シャッターイベント
   document.getElementById('btn-shutter').addEventListener('click', takePhoto);
   
-  // 比率切り替え
+  // 比率切り替え (左下ボタン)
   document.querySelectorAll('.ratio-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('on'));
@@ -220,19 +232,90 @@ window.addEventListener('load', () => {
       const parts = rStr.split('/');
       state.aspectRatio = parts[0] / parts[1];
       
-      // プレビュー枠の形を変える
+      // プレビュー枠の形状を変更
       document.getElementById('vf-container').style.aspectRatio = rStr;
       
-      startCamera();
+      startCamera(); // 新しい比率でカメラ再起動
     });
   });
 
-  document.getElementById('btn-cam-switch').addEventListener('click', () => {
-    state.facingMode = state.facingMode === 'user' ? 'environment' : 'user';
-    startCamera();
+  // SCANボタンリンク
+  document.getElementById('btn-goto-scan').addEventListener('click', () => {
+    document.querySelector('[data-tab="scan"]').click();
   });
 });
 
+/**
+ * カメラ起動（アウトカメラ固定）
+ */
+async function startCamera() {
+  const video = document.getElementById('cam-video');
+  if (video.srcObject) {
+    video.srcObject.getTracks().forEach(t => t.stop());
+  }
+
+  const constraints = {
+    video: {
+      facingMode: { exact: "environment" }, // 背面カメラを強制
+      width: { ideal: 1920 },
+      height: { ideal: 1080 },
+      aspectRatio: { ideal: state.aspectRatio }
+    }
+  };
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    video.srcObject = stream;
+  } catch (err) {
+    // exactで失敗した場合は通常のenvironmentで試行
+    try {
+      const fallback = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      video.srcObject = fallback;
+    } catch(e) {
+      console.error("Camera access denied.");
+    }
+  }
+}
+
+/**
+ * 撮影処理 (ラグなし・非同期保存)
+ */
+function takePhoto() {
+  const video = document.getElementById('cam-video');
+  const canvas = document.createElement('canvas');
+  
+  // 表示されている比率に合わせて切り出しサイズを計算
+  const w = video.videoWidth;
+  const h = w / state.aspectRatio;
+  
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d', { alpha: false });
+  
+  // 中央部分をクロップして描画
+  const sy = (video.videoHeight - h) / 2;
+  ctx.drawImage(video, 0, sy, w, h, 0, 0, w, h);
+
+  // 反応速度重視: 撮影合図を即座に出す
+  if (navigator.vibrate) navigator.vibrate(10);
+  showToast("CAPTURED");
+
+  // 重いエンコードと保存は後回し
+  setTimeout(() => {
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    state.photos.unshift({ src: dataUrl, id: Date.now() });
+    
+    // 容量管理 (最新40枚)
+    if (state.photos.length > 40) state.photos.pop();
+    
+    localStorage.setItem('pro_cam_photos', JSON.stringify(state.photos));
+    updateCount();
+  }, 0);
+}
+
+/**
+ * UI管理
+ */
 function initTabs() {
   document.querySelectorAll('.tab').forEach(t => {
     t.addEventListener('click', () => {
@@ -245,71 +328,10 @@ function initTabs() {
   });
 }
 
-async function startCamera() {
-  const video = document.getElementById('cam-video');
-  if (video.srcObject) {
-    video.srcObject.getTracks().forEach(track => track.stop());
-  }
-
-  const constraints = {
-    video: {
-      facingMode: state.facingMode,
-      width: { ideal: 1920 },
-      height: { ideal: 1080 },
-      aspectRatio: { ideal: state.aspectRatio }
-    }
-  };
-
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    video.srcObject = stream;
-  } catch (err) {
-    console.error("Camera error:", err);
-  }
-}
-
-/**
- * 撮影処理：
- * 画面で見えている「横長」の部分だけを正確に切り取って保存します
- */
-function takePhoto() {
-  const video = document.getElementById('cam-video');
-  const canvas = document.createElement('canvas');
-  
-  // 目標の横長サイズを計算
-  const targetW = video.videoWidth;
-  const targetH = targetW / state.aspectRatio;
-  
-  canvas.width = targetW;
-  canvas.height = targetH;
-  
-  const ctx = canvas.getContext('2d', { alpha: false });
-  
-  // 縦長の元映像から、中央の横長部分だけを抽出して描画
-  const offsetY = (video.videoHeight - targetH) / 2;
-  ctx.drawImage(video, 0, offsetY, targetW, targetH, 0, 0, targetW, targetH);
-
-  // フィードバック
-  if (navigator.vibrate) navigator.vibrate(10);
-  showToast("SAVED");
-
-  // 保存処理を非同期にしてラグをゼロにする
-  setTimeout(() => {
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-    state.photos.unshift({ src: dataUrl, id: Date.now() });
-    
-    // 容量制限のため最新30枚程度に維持
-    if (state.photos.length > 30) state.photos.pop();
-    
-    localStorage.setItem('ultra_wide_photos', JSON.stringify(state.photos));
-    updateCount();
-  }, 0);
-}
-
 function renderPhotos() {
   const grid = document.getElementById('photo-grid');
   grid.innerHTML = state.photos.map(p => `
-    <div class="photo-item"><img src="${p.src}"></div>
+    <div class="photo-item"><img src="${p.src}" loading="lazy"></div>
   `).join('');
 }
 
@@ -321,7 +343,7 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 800);
+  setTimeout(() => t.classList.remove('show'), 600);
 }
 </script>
 </body>
