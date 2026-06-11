@@ -1,11 +1,57 @@
 'use strict';
 
+
+function normalizeAspectRatioSetting() {
+  // FIX21: 旧4:3設定は「デフォルト」へ移行。4:3固定ではなく広めの標準カメラ風にする。
+  if (!cfg.aspectRatio || cfg.aspectRatio === '4/3') cfg.aspectRatio = 'default';
+}
+
+function updateDeviceClassUI() {
+  document.body.classList.toggle('ios-like', !!(typeof IS_IOS_LIKE !== 'undefined' && IS_IOS_LIKE));
+}
+
+function updateAppVersionUI() {
+  const el = $('app-version-text');
+  if (el) el.textContent = 'VERSION ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : 'UNKNOWN');
+}
+
+function updateJumpButtonUI() {
+  const place = cfg.jumpButtonPlace || 'barcode';
+  document.body.classList.toggle('jump-place-barcode', place === 'barcode');
+  document.body.classList.toggle('jump-place-toolbar', place === 'toolbar');
+  document.body.classList.toggle('jump-toolbar-fixed', !!cfg.jumpButtonFixed);
+  document.querySelectorAll('[data-jump-place]').forEach(b => b.classList.toggle('on', b.dataset.jumpPlace === place));
+  const fixed = $('set-jump-fixed');
+  if (fixed) fixed.checked = !!cfg.jumpButtonFixed;
+}
+
+async function forceAppUpdate() {
+  try {
+    showToast('更新準備中...', '', 1500);
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.update().catch(() => null)));
+    }
+    if ('caches' in window) {
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
+    }
+  } catch (e) {
+    console.warn('[ForceUpdate]', e);
+  } finally {
+    const base = location.href.split('?')[0].split('#')[0];
+    location.href = base + '?v=' + encodeURIComponent(typeof APP_VERSION !== 'undefined' ? APP_VERSION : Date.now()) + '#settings';
+  }
+}
+
+
 /* ════ グループUI ════ */
 function updateGroupUI() {
   const gOn  = cfg.useGroup;
   const show = (id, v) => { const el = $(id); if (el) el.style.display = v ? (el.tagName === 'SELECT' || el.tagName === 'DIV' ? 'flex' : '') : 'none'; };
   show('scan-group-bar',     gOn);
-  show('cam-group-bar',      gOn);
+  // FIX25: カメラ画面ではグループUIを常に非表示（設定/履歴側のON/OFFは維持）
+  show('cam-group-bar',      false);
   show('hist-bc-group-sel',  gOn);
   show('hist-ph-group-sel',  gOn);
   $('group-mgr-area').style.display = gOn ? 'block' : 'none';
@@ -50,11 +96,14 @@ function renderSettingsGroupList() {
 
 /* ════ UI反映 ════ */
 function applyCfgToUI() {
+  if (typeof normalizeAspectRatioSetting === 'function') normalizeAspectRatioSetting();
   const setChk = (id, v) => { const el = $(id); if (el) el.checked = v; };
   setChk('set-auto-scan',    cfg.autoStartScan);
   setChk('set-cont-scan',    cfg.continuousScan);
   setChk('set-use-group',    cfg.useGroup);
   setChk('set-outdoor-mode', cfg.outdoorMode);
+  setChk('set-android-auto-download', !!cfg.androidAutoDownload);
+  setChk('set-jump-fixed', !!cfg.jumpButtonFixed);
   // 屋外モードをbodyクラスに反映
   document.body.classList.toggle('outdoor-mode', !!cfg.outdoorMode);
 
@@ -65,18 +114,8 @@ function applyCfgToUI() {
   document.querySelectorAll('.mode-btn').forEach(b  => b.classList.toggle('on', b.dataset.mode === cfg.scanFormat));
   document.querySelectorAll('.ratio-btn').forEach(b => b.classList.toggle('on', b.dataset.r   === cfg.aspectRatio));
 
-  const camVf = $('cam-vf');
-  if (camVf) {
-    if (cfg.aspectRatio === 'full') {
-      camVf.style.aspectRatio = 'auto';
-      camVf.style.flex = '1';
-      camVf.style.maxHeight = 'calc(100% - 160px)';
-    } else {
-      camVf.style.aspectRatio = cfg.aspectRatio;
-      camVf.style.flex = 'none';
-      camVf.style.maxHeight = '';
-    }
-  }
+  if (typeof applyCameraViewportLayout === 'function') applyCameraViewportLayout();
+  if (typeof updateCameraModeClass === 'function') updateCameraModeClass();
   scanMode   = cfg.scanFormat;
   camQuality = cfg.camQuality;
 
@@ -87,6 +126,7 @@ function applyCfgToUI() {
     document.documentElement.style.setProperty('--photo-size', (cfg.photoSize || 80) + 'px');
   }
   $('btn-bc-compact')?.classList.toggle('on', cfg.bcCompactMode);
+  updateJumpButtonUI();
   updateGroupUI();
 }
 
@@ -100,6 +140,7 @@ function switchTab(newTab, pushHistory = true) {
 
   const prevTab = activeTab;
   activeTab = newTab;
+  if (typeof updateCameraModeClass === 'function') updateCameraModeClass();
 
   // 戻るボタン対策: タブ遷移を履歴に積む
   if (pushHistory) {
@@ -107,19 +148,21 @@ function switchTab(newTab, pushHistory = true) {
   }
 
   if (newTab === 'scan') {
+    // カメラ画面からの移動時は video だけ止め、共有ストリームは再利用する
+    if (typeof stopCam === 'function') stopCam();
     if (cfg.autoStartScan) startScan();
-    const cv = $('cam-video');
-    if (cv) cv.pause();
 
   } else if (newTab === 'camera') {
     stopScan();
     startCam();
     const sv = $('scan-video');
-    if (sv) sv.pause();
+    if (sv) { sv.pause(); sv.srcObject = null; }
 
   } else {
+    // 履歴・写真・設定では物理カメラも止める（電池・発熱対策）
     stopScan();
     if (typeof stopCam === 'function') stopCam();
+    if (typeof stopGlobalCamera === 'function') stopGlobalCamera();
     if (newTab === 'history') { exitMultiSelModeBc(); renderBcList(); }
     else if (newTab === 'photos') { exitMergeMode(); exitMultiSelModePh(); renderPhotoGrid(); }
   }
@@ -141,15 +184,58 @@ document.querySelectorAll('.tab').forEach(btn => {
   btn.onclick = () => switchTab(btn.dataset.tab);
 });
 
+function jumpListItems(containerId, itemSelector, count) {
+  const container = $(containerId);
+  if (!container) return;
+  const items = Array.from(container.querySelectorAll(itemSelector)).filter(el => el.offsetParent !== null);
+  if (!items.length) { showToast('移動できる項目がありません', 'warn'); return; }
+  const scroller = container.closest('.page') || document.scrollingElement || document.documentElement;
+  const currentTop = scroller.scrollTop || 0;
+  let currentIdx = items.findIndex(el => (el.offsetTop + el.offsetHeight) > currentTop + 12);
+  if (currentIdx < 0) currentIdx = 0;
+  const targetIdx = Math.min(items.length - 1, currentIdx + Math.max(1, count || 3));
+  const target = items[targetIdx];
+  scroller.scrollTo({ top: Math.max(0, target.offsetTop - 8), behavior: 'smooth' });
+}
+
+function jumpListItemsFromElement(containerId, itemSelector, fromEl, count) {
+  const container = $(containerId);
+  if (!container || !fromEl) return;
+  const items = Array.from(container.querySelectorAll(itemSelector)).filter(el => el.offsetParent !== null);
+  if (!items.length) { showToast('移動できる項目がありません', 'warn'); return; }
+  const currentIdx = Math.max(0, items.indexOf(fromEl));
+  const targetIdx = Math.min(items.length - 1, currentIdx + Math.max(1, count || 3));
+  const target = items[targetIdx];
+  const scroller = container.closest('.page') || document.scrollingElement || document.documentElement;
+  scroller.scrollTo({ top: Math.max(0, target.offsetTop - 8), behavior: 'smooth' });
+}
+
 /* ════ イベント登録 ════ */
 function bindEvents() {
   const on = (id, ev, fn) => $(id)?.addEventListener(ev, fn);
+  on('btn-force-update', 'click', forceAppUpdate);
+  on('btn-bc-jump-3', 'click', () => jumpListItems('bc-list', '.bc-card', 3));
+  on('btn-ph-jump-3', 'click', () => jumpListItems('photo-grid', '.photo-card', 3));
 
 
 
   // UI設定
   on('set-photo-size', 'input',  e => { $('val-photo-size').textContent = e.target.value + 'px'; document.documentElement.style.setProperty('--photo-size', e.target.value + 'px'); });
   on('set-photo-size', 'change', e => { cfg.photoSize = +e.target.value; saveCfg(); });
+
+  document.querySelectorAll('[data-jump-place]').forEach(btn => btn.addEventListener('click', () => {
+    cfg.jumpButtonPlace = btn.dataset.jumpPlace || 'barcode';
+    saveCfg();
+    updateJumpButtonUI();
+    renderBcList();
+    showToast('↓3位置: ' + (cfg.jumpButtonPlace === 'barcode' ? 'バーコード横' : '上部'), 'ok');
+  }));
+  on('set-jump-fixed', 'change', e => {
+    cfg.jumpButtonFixed = !!e.target.checked;
+    saveCfg();
+    updateJumpButtonUI();
+    showToast('↓3固定: ' + (cfg.jumpButtonFixed ? 'ON' : 'OFF'), cfg.jumpButtonFixed ? 'ok' : '');
+  });
 
   // スキャン設定
   on('set-cont-scan', 'change', e => { cfg.continuousScan = e.target.checked; saveCfg(); showToast('連続スキャン: ' + (cfg.continuousScan ? 'ON' : 'OFF'), cfg.continuousScan ? 'ok' : ''); });
@@ -185,6 +271,18 @@ function bindEvents() {
     saveCfg();
     document.body.classList.toggle('outdoor-mode', cfg.outdoorMode);
     showToast(cfg.outdoorMode ? '☀ 屋外モード ON' : '屋外モード OFF', cfg.outdoorMode ? 'ok' : '');
+  });
+  on('set-android-auto-download', 'change', e => {
+    if (typeof IS_IOS_LIKE !== 'undefined' && IS_IOS_LIKE) {
+      e.target.checked = false;
+      cfg.androidAutoDownload = false;
+      saveCfg();
+      showToast('iPhoneでは撮影ごとの自動保存はOFF固定です', 'warn', 3500);
+      return;
+    }
+    cfg.androidAutoDownload = !!e.target.checked;
+    saveCfg();
+    showToast('Android自動保存: ' + (cfg.androidAutoDownload ? 'ON' : 'OFF') + '（固定しました）', cfg.androidAutoDownload ? 'ok' : '');
   });
   document.querySelectorAll('[data-mp]').forEach(btn => btn.addEventListener('click', () => {
     MAX_PH = +btn.dataset.mp; cfg.maxPhotos = MAX_PH; saveCfg(); applyCfgToUI(); updateCounts();
@@ -360,21 +458,73 @@ async function startGlobalCamera(forceRestart = false) {
     }
 
     const qBase = CAM_QUALITY[cfg.camQuality] || CAM_QUALITY.mid;
-    const isFull = cfg.aspectRatio === 'full';
 
-    // FULL モード: aspectRatio 制約を渡さずセンサー本来の画角を使う
-    const videoConstraints = isFull
-      ? { facingMode, width: qBase.width, height: qBase.height }
-      : (() => {
-          const [arW, arH] = (cfg.aspectRatio || '16/9').split('/').map(Number);
-          return { facingMode, width: qBase.width, height: qBase.height, aspectRatio: { ideal: arW / arH } };
-        })();
+    // FIX25: デフォルトが狭い問題はCSSではなく、掴んでいる背面カメラ/zoomが原因になりやすい。
+    // 起動時に広角候補を探し、可能ならそのdeviceIdを使う。
+    if (cfg.preferUltraWide && !cfg.cameraDeviceId && typeof discoverWidestBackCamera === 'function') {
+      try {
+        const best = await discoverWidestBackCamera(qBase);
+        if (best?.deviceId) {
+          cfg.cameraDeviceId = best.deviceId;
+          cfg.cameraDeviceLabel = best.label || '';
+          cfg._wideMinZoom = best.minZoom || 1;
+          if (typeof saveCfg === 'function') saveCfg();
+          console.log('[Camera] wide candidate selected:', best);
+        }
+      } catch (e) {
+        console.warn('[Camera] wide discovery failed:', e);
+      }
+    }
 
-    globalStream = await navigator.mediaDevices.getUserMedia({
-      video: videoConstraints,
-      audio: false
-    });
+    // aspectRatioで縛らず、端末が出せる広い映像を取得する。
+    let videoConstraints = {
+      facingMode,
+      width: qBase.width,
+      height: qBase.height,
+      resizeMode: 'none'
+    };
+    if (cfg.cameraDeviceId) {
+      videoConstraints = {
+        deviceId: { exact: cfg.cameraDeviceId },
+        width: qBase.width,
+        height: qBase.height,
+        resizeMode: 'none'
+      };
+    }
+
+    try {
+      globalStream = await navigator.mediaDevices.getUserMedia({
+        video: videoConstraints,
+        audio: false
+      });
+    } catch (e) {
+      // 保存済みdeviceIdが無効になった場合は通常の背面カメラへフォールバック
+      if (cfg.cameraDeviceId) {
+        console.warn('[Camera] selected device failed, fallback environment:', e);
+        cfg.cameraDeviceId = '';
+        cfg.cameraDeviceLabel = '';
+        if (typeof saveCfg === 'function') saveCfg();
+        globalStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode, width: qBase.width, height: qBase.height, resizeMode: 'none' },
+          audio: false
+        });
+      } else {
+        throw e;
+      }
+    }
     globalCamTrack = globalStream.getVideoTracks()[0];
+    try {
+      const st = globalCamTrack.getSettings?.() || {};
+      const caps = globalCamTrack.getCapabilities?.() || {};
+      if (st.deviceId) cfg.cameraDeviceId = st.deviceId;
+      // FIX25: 0.5x/0.6x等に対応している場合は、商品撮影優先で自動的に最小倍率へ寄せる。
+      if (cfg.preferUltraWide && caps.zoom && typeof caps.zoom.min === 'number' && caps.zoom.min < 1) {
+        const z = caps.zoom.min;
+        await globalCamTrack.applyConstraints({ advanced: [{ zoom: z }] });
+        cfg.zoom = z;
+      }
+      if (typeof saveCfg === 'function') saveCfg();
+    } catch (e) { console.warn('[Camera] wide min zoom apply failed:', e); }
     return globalStream;
   } finally {
     _isStartingGlobal = false;
@@ -397,11 +547,16 @@ function stopGlobalCamera() {
 /* ════ 初期化 ════ */
 async function init() {
   loadCfg();
+  updateDeviceClassUI();
+  if (typeof normalizeAspectRatioSetting === 'function') normalizeAspectRatioSetting();
   MAX_PH = cfg.maxPhotos || 200;
   try { bcHistory = JSON.parse(localStorage.getItem(BC_KEY) || '[]'); } catch(_) { bcHistory = []; }
   bcHistory = bcHistory.map(x => ({ checked: false, ...x }));
   try { photos = (await dbAll()).reverse(); } catch(_) { photos = []; }
   applyCfgToUI();
+  updateAppVersionUI();
+  if (typeof updateUnsavedSaveButton === 'function') updateUnsavedSaveButton();
+  if (typeof updateSaveResultLogUI === 'function') updateSaveResultLogUI();
   setThumbVisible(thumbStripVisible);
   updateCounts();
   restoreFolderHandle();

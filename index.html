@@ -6,7 +6,7 @@
   <title>Scanner + Camera</title>
 
   <!-- PWA -->
-  <link rel="manifest" href="manifest.json"/>
+  <link rel="manifest" href="manifest.json?v=fix36"/>
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -19,6 +19,878 @@
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
   <link rel="stylesheet" href="style.css">
+
+  <!-- camera fixed/fullscreen overrides: UIは削らず、カメラ画面だけ固定配置 -->
+  <style id="camera-fixed-fullscreen-style">
+    /* カメラモードでは、アスペクト比変更で操作ボタン位置が上下しないよう固定レイアウト化 */
+    #pg-camera.cam-pg.on{
+      display:flex;
+      flex-direction:column;
+      height:calc(100dvh - 92px);
+      min-height:0;
+      overflow:hidden;
+      position:relative;
+    }
+    #pg-camera #cam-vf{
+      flex:1 1 auto !important;
+      min-height:0 !important;
+      width:100% !important;
+      max-height:none !important;
+      aspect-ratio:auto !important;
+      position:relative;
+    }
+    #pg-camera #cam-controls,
+    #pg-camera .cam-bottom-row{
+      flex:0 0 auto;
+      position:relative;
+      z-index:40;
+    }
+    #pg-camera #cam-controls{
+      padding-bottom:max(6px, env(safe-area-inset-bottom));
+    }
+    #btn-cam-scan-mode.cam-scan-jump{
+      font-family:'Share Tech Mono',monospace;
+      font-size:10px;
+      letter-spacing:.5px;
+      color:#00ff88;
+      border-color:#00ff88;
+      background:rgba(0,255,136,.10);
+    }
+    /* FULL選択時: ヘッダー/タブは隠すだけ。削除せず、SCANボタンで戻れる */
+    body.cam-full-mode .hdr,
+    body.cam-full-mode .tabs{
+      display:none !important;
+    }
+    body.cam-full-mode #app{
+      height:100dvh;
+      overflow:hidden;
+    }
+    body.cam-full-mode #pg-camera.cam-pg.on,
+    body.fullscreen #pg-camera.cam-pg.on{
+      height:100dvh;
+      padding-top:0;
+    }
+    body.cam-full-mode #pg-camera #cam-group-bar,
+    body.cam-full-mode #pg-camera .cam-settings-row{
+      position:absolute;
+      left:8px;
+      right:8px;
+      z-index:45;
+      background:rgba(5,10,16,.62);
+      backdrop-filter:blur(6px);
+      border-radius:10px;
+    }
+    body.cam-full-mode #pg-camera #cam-group-bar{ top:8px; }
+    body.cam-full-mode #pg-camera .cam-settings-row{ top:44px; }
+    body.cam-full-mode #pg-camera #cam-controls{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:44px;
+      z-index:55;
+      background:linear-gradient(to top, rgba(0,0,0,.72), rgba(0,0,0,0));
+      padding-top:28px;
+    }
+    body.cam-full-mode #pg-camera .cam-bottom-row{
+      position:absolute;
+      left:8px;
+      right:8px;
+      bottom:max(4px, env(safe-area-inset-bottom));
+      z-index:56;
+      background:rgba(5,10,16,.55);
+      border-radius:10px;
+    }
+    body.cam-full-mode #pg-camera #cam-vf{
+      height:100dvh !important;
+      flex:1 1 100% !important;
+    }
+    body.cam-full-mode #pg-camera #cam-video{
+      /* FIX9: FULL時は拡大クロップしない。センサー映像全体を表示する */
+      object-fit:contain !important;
+      width:100% !important;
+      height:100% !important;
+      background:#000 !important;
+    }
+    body.cam-full-mode #pg-camera #cam-vf{
+      background:#000 !important;
+    }
+
+
+    /* FIX3: 比率変更は下側シャッター周辺で操作。上側ASPECT行はタップ専用 */
+    #pg-camera #ratio-row{ touch-action:manipulation; }
+    #pg-camera #cam-controls .btn-row{
+      touch-action:pan-y;
+      user-select:none;
+      -webkit-user-select:none;
+    }
+    #pg-camera #cam-controls .btn-row::after{
+      content:'左右スワイプで比率変更';
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:-12px;
+      font-family:'Share Tech Mono',monospace;
+      font-size:8px;
+      letter-spacing:.8px;
+      color:rgba(0,212,255,.55);
+      pointer-events:none;
+      white-space:nowrap;
+    }
+    #pg-camera #cam-controls .btn-row{ position:relative; }
+
+    /* FIX3: 最近の写真を見やすくする。ボタンに埋もれないよう明るい枠と横スクロール */
+    #pg-camera #thumb-strip-wrap{
+      position:relative !important;
+      z-index:54 !important;
+      margin:6px 8px 4px !important;
+      padding:6px !important;
+      background:rgba(3,10,18,.82) !important;
+      border:1px solid rgba(0,212,255,.45) !important;
+      border-radius:10px !important;
+      backdrop-filter:blur(6px);
+      box-shadow:0 0 14px rgba(0,212,255,.12);
+    }
+    #pg-camera #thumb-strip-wrap .thumb-strip-hdr{
+      display:flex !important;
+      align-items:center !important;
+      justify-content:space-between !important;
+      margin-bottom:4px !important;
+      color:rgba(220,245,255,.92) !important;
+    }
+    #pg-camera #thumb-strip{
+      display:flex !important;
+      gap:7px !important;
+      overflow-x:auto !important;
+      overflow-y:hidden !important;
+      padding:2px 2px 4px !important;
+      -webkit-overflow-scrolling:touch;
+    }
+    #pg-camera #thumb-strip .mini-thumb{
+      flex:0 0 62px !important;
+      width:62px !important;
+      height:62px !important;
+      border:1px solid rgba(0,212,255,.55) !important;
+      border-radius:8px !important;
+      overflow:hidden !important;
+      background:#050a10 !important;
+    }
+    #pg-camera #thumb-strip .mini-thumb img{
+      width:100% !important;
+      height:100% !important;
+      object-fit:cover !important;
+      display:block !important;
+    }
+    body.cam-full-mode #pg-camera #thumb-strip-wrap{
+      position:absolute !important;
+      left:8px !important;
+      right:8px !important;
+      bottom:154px !important;
+      margin:0 !important;
+    }
+
+    /* FIX3: →だけだと意味が不明なので、横向きON時だけ「向き→」として表示 */
+    #pg-camera #btn-direction{
+      display:none;
+      min-width:48px;
+      font-size:10px !important;
+      letter-spacing:.2px !important;
+    }
+
+
+    /* FIX4: カメラ範囲ガイドを常時分かりやすく表示 */
+    #pg-camera #cam-range-guide{
+      position:absolute;
+      inset:0;
+      z-index:18;
+      pointer-events:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    #pg-camera #cam-range-box{
+      position:relative;
+      border:2px solid rgba(0,212,255,.95);
+      box-shadow:0 0 0 1px rgba(255,255,255,.18) inset, 0 0 18px rgba(0,212,255,.22);
+      border-radius:6px;
+      background:linear-gradient(to bottom, rgba(0,212,255,.02), rgba(0,212,255,.01));
+    }
+    #pg-camera #cam-range-box::before,
+    #pg-camera #cam-range-box::after{
+      content:'';
+      position:absolute;
+      background:rgba(0,212,255,.52);
+    }
+    #pg-camera #cam-range-box::before{
+      left:0; right:0; top:50%; height:1px; transform:translateY(-50%);
+    }
+    #pg-camera #cam-range-box::after{
+      top:0; bottom:0; left:50%; width:1px; transform:translateX(-50%);
+    }
+    #pg-camera .cam-range-third-v,
+    #pg-camera .cam-range-third-h{
+      position:absolute;
+      background:rgba(0,212,255,.20);
+    }
+    #pg-camera .cam-range-third-v{ top:0; bottom:0; width:1px; }
+    #pg-camera .cam-range-third-v.v1{ left:33.333%; }
+    #pg-camera .cam-range-third-v.v2{ left:66.666%; }
+    #pg-camera .cam-range-third-h{ left:0; right:0; height:1px; }
+    #pg-camera .cam-range-third-h.h1{ top:33.333%; }
+    #pg-camera .cam-range-third-h.h2{ top:66.666%; }
+    #pg-camera #cam-range-label{
+      position:absolute;
+      top:6px;
+      right:8px;
+      padding:2px 6px;
+      font-family:'Share Tech Mono',monospace;
+      font-size:9px;
+      letter-spacing:.8px;
+      color:#dff9ff;
+      background:rgba(0,0,0,.42);
+      border:1px solid rgba(0,212,255,.55);
+      border-radius:999px;
+      text-shadow:0 0 8px rgba(0,212,255,.25);
+    }
+
+    /* FIX4: 倍率UIはデフォルト非表示。必要な時だけ開く */
+    #pg-camera .zoom-toggle-row{
+      display:flex;
+      justify-content:flex-end;
+      gap:8px;
+      margin-top:6px;
+      margin-bottom:2px;
+      padding-inline:10px;
+    }
+    #pg-camera #btn-zoom-toggle,
+    #pg-camera #btn-save-unsaved{
+      min-width:84px;
+      height:32px;
+      border-radius:999px;
+      font-family:'Share Tech Mono',monospace;
+      font-size:10px;
+      letter-spacing:.5px;
+      color:#9fdfff;
+      border:1px solid rgba(0,212,255,.42);
+      background:rgba(3,10,18,.82);
+    }
+    #pg-camera #btn-zoom-toggle.on{
+      color:#00161f;
+      background:rgba(0,212,255,.88);
+      border-color:rgba(0,212,255,.96);
+      box-shadow:0 0 12px rgba(0,212,255,.22);
+    }
+    #pg-camera #btn-save-unsaved{
+      color:#00ff88;
+      border-color:rgba(0,255,136,.55);
+      background:rgba(0,255,136,.10);
+    }
+    #pg-camera #btn-save-unsaved:disabled{
+      opacity:.38;
+      color:#8aa0aa;
+      border-color:rgba(120,150,165,.35);
+      background:rgba(3,10,18,.55);
+    }
+
+    #pg-camera #zoom-controls{
+      display:none;
+      margin-top:0;
+    }
+    #pg-camera #zoom-controls.on{
+      display:flex !important;
+    }
+    body.cam-full-mode #pg-camera .zoom-toggle-row,
+    body.cam-full-mode #pg-camera #zoom-controls{
+      position:relative;
+      z-index:56;
+    }
+
+
+
+    /* FIX5: カメラ範囲ガイドは外枠だけ。中央線・3分割線は出さない */
+    #pg-camera #cam-range-box::before,
+    #pg-camera #cam-range-box::after,
+    #pg-camera .cam-range-third-v,
+    #pg-camera .cam-range-third-h{
+      display:none !important;
+      content:none !important;
+    }
+    #pg-camera #cam-range-box{
+      border:2px solid rgba(0,212,255,.98) !important;
+      box-shadow:0 0 0 1px rgba(255,255,255,.18) inset, 0 0 18px rgba(0,212,255,.22) !important;
+      background:transparent !important;
+    }
+
+    /* FIX5: スキャン開始/停止 7 : カメラ 3 */
+    #pg-scan .scan-action-row{
+      display:flex;
+      gap:8px;
+      align-items:stretch;
+      width:100%;
+      margin-top:8px;
+    }
+    #pg-scan .scan-action-row #btn-scan{
+      flex:7 1 0;
+      margin-top:0 !important;
+      width:auto !important;
+      min-width:0;
+    }
+    #pg-scan .scan-action-row #btn-scan-to-camera{
+      flex:3 1 0;
+      min-width:0;
+      border:1px solid rgba(0,255,136,.78);
+      color:#00ff88;
+      background:rgba(0,255,136,.10);
+      border-radius:10px;
+      font-family:'Share Tech Mono',monospace;
+      font-size:11px;
+      letter-spacing:.8px;
+      font-weight:700;
+      white-space:nowrap;
+    }
+    #pg-scan .scan-action-row #btn-scan-to-camera:active{
+      transform:scale(.98);
+      background:rgba(0,255,136,.20);
+    }
+
+    /* FIX9 final override: FULLだけ拡大クロップ禁止 */
+    body.cam-full-mode #pg-camera #cam-video,
+    #pg-camera.full-preview #cam-video{
+      object-fit:contain !important;
+      width:100% !important;
+      height:100% !important;
+      background:#000 !important;
+    }
+
+
+    /* FIX10: 未保存数・保存結果・バージョン表示 */
+    .unsaved-indicator{
+      margin-left:auto;
+      padding:3px 8px;
+      border:1px solid rgba(0,255,136,.45);
+      border-radius:999px;
+      color:#00ff88;
+      background:rgba(0,255,136,.08);
+      font-family:'Share Tech Mono',monospace;
+      font-size:10px;
+      white-space:nowrap;
+    }
+    #pg-camera .save-status-row{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      justify-content:flex-end;
+      padding:0 10px 3px;
+      font-family:'Share Tech Mono',monospace;
+      font-size:9px;
+      color:#8fb5c8;
+      min-height:14px;
+    }
+    #pg-camera #save-result-mini.warn{ color:#ffaa44; }
+    #pg-camera #save-result-mini.err{ color:#ff6688; }
+    #pg-camera #save-result-mini.ok{ color:#00ff88; }
+    .photo-save-badge{
+      position:absolute;
+      left:5px;
+      bottom:5px;
+      z-index:6;
+      padding:2px 6px;
+      border-radius:999px;
+      font-family:'Share Tech Mono',monospace;
+      font-size:9px;
+      line-height:1.2;
+      background:rgba(0,0,0,.62);
+      border:1px solid rgba(255,255,255,.18);
+      color:#dff9ff;
+      backdrop-filter:blur(4px);
+      pointer-events:none;
+    }
+    .photo-save-badge.unsaved{
+      color:#00ff88;
+      border-color:rgba(0,255,136,.55);
+      background:rgba(0,80,45,.55);
+    }
+    .photo-save-badge.saved{
+      color:#9fdfff;
+      border-color:rgba(0,212,255,.38);
+      background:rgba(0,40,60,.50);
+    }
+    .mini-thumb{ position:relative; }
+    .mini-thumb .photo-save-badge{
+      left:3px;
+      bottom:3px;
+      padding:1px 4px;
+      font-size:8px;
+    }
+    .app-update-row{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+    .app-version-pill,
+    .save-log-pill{
+      padding:5px 8px;
+      border-radius:999px;
+      background:rgba(0,212,255,.08);
+      border:1px solid rgba(0,212,255,.35);
+      color:#9fdfff;
+      font-family:'Share Tech Mono',monospace;
+      font-size:10px;
+    }
+    .save-log-pill.warn{ color:#ffaa44; border-color:rgba(255,170,68,.45); background:rgba(255,170,68,.08); }
+    .save-log-pill.err{ color:#ff6688; border-color:rgba(255,102,136,.45); background:rgba(255,102,136,.08); }
+    .settings-btn.update{
+      border-color:rgba(0,255,136,.45);
+      color:#00ff88;
+      background:rgba(0,255,136,.08);
+    }
+
+
+
+    /* FIX11: FULLプレビューは横幅優先。保存データはtakePhoto側でFULLのまま保持 */
+    body.cam-full-mode #pg-camera #cam-video,
+    #pg-camera.full-preview #cam-video{
+      object-fit:cover !important;
+      width:100% !important;
+      height:100% !important;
+      background:#000 !important;
+    }
+    body.cam-full-mode #pg-camera #cam-range-guide{
+      inset:0 !important;
+    }
+    body.cam-full-mode #pg-camera #cam-range-box{
+      width:calc(100% - 20px) !important;
+      height:calc(100% - 20px) !important;
+      max-width:none !important;
+      max-height:none !important;
+    }
+
+
+    /* FIX13 final: FULLは大きさ維持。上下だけ軽くクロップして横幅を広く見せる */
+    body.cam-full-mode #pg-camera #cam-video,
+    #pg-camera.full-preview #cam-video{
+      object-fit:cover !important;
+      object-position:center center !important;
+      width:100% !important;
+      height:100% !important;
+      background:#000 !important;
+    }
+    body.cam-full-mode #pg-camera #cam-vf,
+    #pg-camera.full-preview #cam-vf{
+      overflow:hidden !important;
+    }
+    body.cam-full-mode #pg-camera #cam-range-box,
+    #pg-camera.full-preview #cam-range-box{
+      width:calc(100% - 16px) !important;
+      height:calc(100% - 16px) !important;
+      max-width:none !important;
+      max-height:none !important;
+    }
+
+
+    /* FIX13: FULLはプレビュー範囲=保存範囲。最近写真は操作ボタンから離して横スクロール優先 */
+    body.cam-full-mode #pg-camera #cam-video,
+    #pg-camera.full-preview #cam-video{
+      object-fit:cover !important;
+      object-position:center center !important;
+      width:100% !important;
+      height:100% !important;
+      background:#000 !important;
+    }
+    body.cam-full-mode #pg-camera #thumb-strip-wrap{
+      position:absolute !important;
+      left:8px !important;
+      right:8px !important;
+      bottom:230px !important;
+      margin:0 !important;
+      z-index:80 !important;
+      pointer-events:auto !important;
+      max-height:92px !important;
+      touch-action:pan-x !important;
+    }
+    body.cam-full-mode #pg-camera #thumb-strip{
+      touch-action:pan-x !important;
+      overscroll-behavior-x:contain;
+      -webkit-overflow-scrolling:touch;
+      padding-bottom:8px !important;
+    }
+    body.cam-full-mode #pg-camera #cam-controls{
+      z-index:60 !important;
+    }
+    body.cam-full-mode #pg-camera .cam-bottom-row{
+      z-index:61 !important;
+    }
+    #pg-camera #cam-controls .btn-row.ratio-swipe-locked::after{
+      content:'写真スクロール中' !important;
+      color:rgba(0,255,136,.65) !important;
+    }
+
+
+
+    /* FIX16: FULL = 4:3基準の縦拡張。横幅は4:3と同じ感覚で維持し、上下だけ増やす */
+    body.cam-full-mode #pg-camera #cam-vf,
+    #pg-camera.full-preview #cam-vf{
+      overflow:hidden !important;
+      position:relative !important;
+    }
+    body.cam-full-mode #pg-camera #cam-video,
+    #pg-camera.full-preview #cam-video{
+      object-fit:fill !important;
+      object-position:center center !important;
+      position:absolute !important;
+      left:0 !important;
+      top:50% !important;
+      width:100% !important;
+      height:auto !important;
+      min-height:0 !important;
+      max-width:none !important;
+      transform:translateY(-50%) !important;
+      background:#000 !important;
+    }
+    body.cam-full-mode #pg-camera #cam-range-box,
+    #pg-camera.full-preview #cam-range-box{
+      width:calc(100% - 16px) !important;
+      height:calc(100% - 16px) !important;
+      max-width:none !important;
+      max-height:none !important;
+    }
+
+
+
+    /* FIX16: FULLではなく「縦拡張」モード。4:3と同じ横幅感で高さだけ増やす */
+    body.cam-full-mode .hdr,
+    body.cam-full-mode .tabs{
+      display:flex !important;
+    }
+    body.cam-full-mode #app{
+      height:auto !important;
+      overflow:hidden !important;
+    }
+    body.cam-full-mode #pg-camera.cam-pg.on,
+    #pg-camera.full-preview{
+      height:calc(100dvh - 92px) !important;
+      padding-top:0 !important;
+    }
+    body.cam-full-mode #pg-camera #cam-group-bar,
+    body.cam-full-mode #pg-camera .cam-settings-row{
+      position:relative !important;
+      left:auto !important;
+      right:auto !important;
+      top:auto !important;
+      background:transparent !important;
+      backdrop-filter:none !important;
+    }
+    body.cam-full-mode #pg-camera #cam-controls,
+    body.cam-full-mode #pg-camera .cam-bottom-row{
+      position:relative !important;
+      left:auto !important;
+      right:auto !important;
+      bottom:auto !important;
+      z-index:60 !important;
+    }
+    body.cam-full-mode #pg-camera #cam-vf,
+    #pg-camera.full-preview #cam-vf{
+      width:100% !important;
+      aspect-ratio:1 / 1 !important;
+      flex:0 0 auto !important;
+      height:auto !important;
+      max-height:calc(100dvh - 290px) !important;
+      min-height:0 !important;
+      overflow:hidden !important;
+      background:#000 !important;
+      position:relative !important;
+    }
+    body.cam-full-mode #pg-camera #cam-video,
+    #pg-camera.full-preview #cam-video{
+      object-fit:cover !important;
+      object-position:center center !important;
+      position:absolute !important;
+      inset:0 !important;
+      width:100% !important;
+      height:100% !important;
+      transform:none !important;
+      background:#000 !important;
+    }
+    body.cam-full-mode #pg-camera #cam-range-box,
+    #pg-camera.full-preview #cam-range-box{
+      width:calc(100% - 16px) !important;
+      height:calc(100% - 16px) !important;
+      max-width:none !important;
+      max-height:none !important;
+    }
+    body.cam-full-mode #pg-camera #thumb-strip-wrap{
+      position:relative !important;
+      left:auto !important;
+      right:auto !important;
+      bottom:auto !important;
+      margin:6px 8px 4px !important;
+      z-index:54 !important;
+      max-height:92px !important;
+      pointer-events:auto !important;
+      touch-action:pan-x !important;
+    }
+
+  
+    /* FIX16 FINAL: 横幅固定の高さ追加モード。FULL表記でも横方向は4:3基準。 */
+    #pg-camera.full-preview #cam-vf,
+    body.cam-full-mode #pg-camera #cam-vf{
+      aspect-ratio:1 / 1 !important;
+      width:100% !important;
+      flex:0 0 auto !important;
+      overflow:hidden !important;
+      max-height:calc(100dvh - 290px) !important;
+    }
+    #pg-camera.full-preview #cam-video,
+    body.cam-full-mode #pg-camera #cam-video{
+      width:100% !important;
+      height:100% !important;
+      object-fit:cover !important;
+      object-position:center center !important;
+      position:absolute !important;
+      inset:0 !important;
+    }
+    #pg-camera.full-preview #cam-range-box,
+    body.cam-full-mode #pg-camera #cam-range-box{
+      width:calc(100% - 20px) !important;
+      height:calc(100% - 20px) !important;
+    }
+
+
+    /* FIX30 FINAL: 拡大しないカメラ表示。FULL/デフォルトは取得映像を切らずに表示・保存する */
+    #pg-camera.full-preview #cam-video,
+    body.cam-full-mode #pg-camera #cam-video,
+    #pg-camera.default-preview #cam-video{
+      object-fit:contain !important;
+      object-position:center center !important;
+      position:absolute !important;
+      inset:0 !important;
+      width:100% !important;
+      height:100% !important;
+      transform:none !important;
+      background:#000 !important;
+    }
+    #pg-camera.default-preview #cam-vf{
+      background:#000 !important;
+      overflow:hidden !important;
+    }
+    #pg-camera.full-preview #cam-vf,
+    body.cam-full-mode #pg-camera #cam-vf{
+      background:#000 !important;
+      overflow:hidden !important;
+    }
+    #pg-camera.full-preview #cam-range-box,
+    body.cam-full-mode #pg-camera #cam-range-box,
+    #pg-camera.default-preview #cam-range-box{
+      width:calc(100% - 20px) !important;
+      height:calc(100% - 20px) !important;
+      max-width:none !important;
+      max-height:none !important;
+    }
+
+
+
+    /* FIX30: 商品撮影優先。グループ選択はカメラ画面から常時消す */
+    #pg-camera #cam-group-bar{ display:none !important; }
+
+    /* FIX30: カメラ内ボタンを同じ高さで扱いやすく */
+    #pg-camera #btn-native-camera,
+    #pg-camera #btn-wide-camera,
+    #pg-camera #btn-save-unsaved,
+    #pg-camera #btn-zoom-toggle{
+      min-width:76px;
+      height:34px;
+      padding:0 10px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      white-space:nowrap;
+    }
+    #pg-camera #btn-wide-camera.on{
+      background:rgba(255,170,68,.20) !important;
+      border-color:#ffaa44 !important;
+      color:#ffaa44 !important;
+    }
+    #pg-camera #btn-native-camera{
+      color:#d9f7ff;
+      border:1px solid rgba(0,212,255,.52);
+      background:rgba(0,212,255,.10);
+      font-family:'Share Tech Mono',monospace;
+      font-size:10px;
+    }
+
+    /* FIX30: 最近の写真は操作ボタンに埋もれない位置・高さへ */
+    #pg-camera #thumb-strip-wrap{
+      z-index:80 !important;
+      margin:8px 8px 6px !important;
+      max-height:98px !important;
+      overflow:hidden !important;
+    }
+    #pg-camera #thumb-strip{
+      min-height:64px !important;
+      overflow-x:auto !important;
+      overflow-y:hidden !important;
+      touch-action:pan-x !important;
+    }
+    body.cam-full-mode #pg-camera #thumb-strip-wrap{
+      position:absolute !important;
+      left:8px !important;
+      right:8px !important;
+      bottom:182px !important;
+      max-height:104px !important;
+      margin:0 !important;
+      background:rgba(3,10,18,.86) !important;
+    }
+
+    /* FIX30: デフォルト/FULL/比率変更で勝手に範囲を狭めない。映像全体を優先 */
+    #pg-camera #cam-video{
+      object-fit:contain !important;
+      object-position:center center !important;
+      background:#000 !important;
+    }
+
+
+
+    /* FIX30 final override: FULLでもUIは通常のまま。デフォルトは最大範囲優先 */
+    body.cam-full-mode .hdr,
+    body.cam-full-mode .tabs{ display:flex !important; }
+    body.cam-full-mode #app{ height:auto !important; overflow:visible !important; }
+    body.cam-full-mode #pg-camera.cam-pg.on,
+    #pg-camera.full-preview{ height:calc(100dvh - 92px) !important; padding-top:0 !important; }
+    body.cam-full-mode #pg-camera #cam-controls,
+    body.cam-full-mode #pg-camera .cam-bottom-row,
+    body.cam-full-mode #pg-camera .cam-settings-row,
+    body.cam-full-mode #pg-camera #thumb-strip-wrap{
+      position:relative !important;
+      left:auto !important; right:auto !important; top:auto !important; bottom:auto !important;
+    }
+    #pg-camera.default-preview #cam-video,
+    #pg-camera.full-preview #cam-video{
+      object-fit:contain !important;
+      object-position:center center !important;
+      transform:none;
+    }
+    #pg-camera.default-preview #cam-range-box{
+      width:calc(100% - 20px) !important;
+      height:calc(100% - 20px) !important;
+    }
+
+  
+    /* FIX30: 広角/倍率状態表示 */
+    #pg-camera .wide-status-pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:64px;
+      height:32px;
+      padding:0 8px;
+      border-radius:999px;
+      font-family:'Share Tech Mono',monospace;
+      font-size:10px;
+      letter-spacing:.4px;
+      color:#9fdfff;
+      border:1px solid rgba(0,212,255,.38);
+      background:rgba(3,10,18,.78);
+      white-space:nowrap;
+    }
+    #pg-camera .wide-status-pill.on{
+      color:#00161f;
+      background:rgba(255,170,68,.92);
+      border-color:rgba(255,170,68,.95);
+    }
+    #pg-camera .wide-status-pill.err{
+      color:#fff;
+      background:rgba(255,80,110,.72);
+      border-color:rgba(255,80,110,.95);
+    }
+    /* FIX30: iPhoneは最近写真を軽量・操作しやすく */
+    body.ios-like #pg-camera #thumb-strip .mini-thumb{
+      flex-basis:54px !important;
+      width:54px !important;
+      height:54px !important;
+    }
+    body.ios-like #pg-camera #thumb-strip-wrap{
+      max-height:96px !important;
+    }
+
+
+    /* FIX30: 広角/倍率表示は不要。広角ボタンも非表示 */
+    #pg-camera #wide-status,
+    #pg-camera #btn-wide-camera{
+      display:none !important;
+    }
+
+  
+
+    /* FIX35: 時間ごとのスキャン区切り・3件移動・写真番号 */
+    .time-section-header{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:6px 8px; margin:8px 0 4px;
+      border:1px solid rgba(0,212,255,.30); border-radius:8px;
+      background:rgba(0,212,255,.08); color:rgba(220,245,255,.96);
+      font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:.4px;
+      position:sticky; top:0; z-index:3; backdrop-filter:blur(6px);
+    }
+    .time-section-header .time-count{ color:#00ff88; font-size:10px; }
+    .btn-jump-3{
+      border-color:rgba(0,255,136,.55) !important;
+      color:#00ff88 !important;
+      background:rgba(0,255,136,.08) !important;
+      font-family:'Share Tech Mono',monospace;
+      min-width:42px;
+    }
+    .photo-order-badge{
+      position:absolute; left:4px; top:4px; z-index:7;
+      padding:2px 5px; border-radius:999px;
+      background:rgba(0,0,0,.72); border:1px solid rgba(0,212,255,.70);
+      color:#e8fbff; font-family:'Share Tech Mono',monospace;
+      font-size:10px; line-height:1.2; letter-spacing:.2px;
+      pointer-events:none;
+    }
+    .mini-thumb .photo-order-badge{ font-size:8px; padding:1px 4px; }
+
+
+    /* FIX36: ↓3ボタンをバーコード横に置けるようにする */
+    .bc-value-row{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      width:100%;
+      min-width:0;
+    }
+    .bc-value-row .bc-val-large{
+      flex:1 1 auto;
+      min-width:0;
+      overflow-wrap:anywhere;
+    }
+    .bc-inline-jump{
+      flex:0 0 auto;
+      height:30px;
+      min-width:48px;
+      padding:0 8px;
+      border-radius:999px;
+      border:1px solid rgba(0,255,136,.65);
+      background:rgba(0,255,136,.10);
+      color:#00ff88;
+      font-family:'Share Tech Mono',monospace;
+      font-size:11px;
+      letter-spacing:.5px;
+    }
+    .bc-inline-jump:active{ transform:scale(.96); }
+    body.jump-toolbar-fixed #pg-history .toolbar,
+    body.jump-toolbar-fixed #pg-photos .photo-toolbar{
+      position:sticky;
+      top:0;
+      z-index:30;
+      background:rgba(5,10,16,.92);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid rgba(0,212,255,.22);
+    }
+    body.jump-place-barcode #btn-bc-jump-3{ display:none !important; }
+    body.jump-place-toolbar .bc-inline-jump{ display:none !important; }
+
+</style>
 </head>
 <body class="theme-cyan">
 <div id="app">
@@ -37,6 +909,7 @@
       <div class="hdr-sub">SCAN · PHOTO · STORE</div>
     </div>
     <div class="hdr-count" id="hdr-count">0BC / 0📷</div>
+    <div class="unsaved-indicator" id="unsaved-indicator">未保存 0</div>
   </div>
 
   <!-- タブナビゲーション -->
@@ -78,7 +951,10 @@
         </div>
       </div>
       <div class="sbar"><div class="sdot" id="sdot"></div><span id="stxt">待機中</span></div>
-      <button class="btn-main" id="btn-scan">▶ スキャン開始</button>
+      <div class="scan-action-row">
+        <button class="btn-main" id="btn-scan">▶ スキャン開始</button>
+        <button class="btn-main" id="btn-scan-to-camera" type="button">📷 カメラ</button>
+      </div>
     </div>
     <div class="scan-bc-section" id="scan-bc-section">
       <div class="scan-bc-placeholder" id="scan-bc-placeholder">— バーコード表示エリア —</div>
@@ -103,6 +979,7 @@
       <input class="sbox" id="search-box" placeholder="バーコード値を検索..." type="search"/>
       <button class="btn-sm" id="btn-bc-compact" title="画像を隠して1行で表示">☰ 1行</button>
       <button class="btn-sm" id="btn-bc-sort">↓ 新しい順</button>
+      <button class="btn-sm btn-jump-3" id="btn-bc-jump-3" title="3件下へ移動">↓3</button>
       <button class="btn-sm accent" id="btn-bc-select-mode" style="display:none">☑ 選択</button>
       <button class="btn-sm accent" id="btn-bc-csv" style="display:none">CSV</button>
       <button class="btn-sm danger" id="btn-bc-clear" style="display:none">全削除</button>
@@ -158,6 +1035,11 @@
           <span id="crop-ratio-label" class="crop-ratio-label">16:9</span>
         </div>
       </div>
+      <div id="cam-range-guide" aria-hidden="true">
+        <div id="cam-range-box">
+          <span id="cam-range-label">FULL</span>
+        </div>
+      </div>
       <div id="cam-ph" style="display:flex;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#000;">
         <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#4a6a8a" stroke-width="1.5">
           <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/>
@@ -186,8 +1068,8 @@
       <!-- アスペクト比選択セクション [INTEGRATED] -->
       <div class="ratio-row" id="ratio-row">
         <span class="ratio-lbl">ASPECT:</span>
-        <button class="ratio-btn on" data-r="full">FULL</button>
-        <button class="ratio-btn" data-r="4/3">4:3</button>
+        <button class="ratio-btn" data-r="full">FULL</button>
+        <button class="ratio-btn on" data-r="default">デフォルト</button>
         <button class="ratio-btn" data-r="16/9">16:9</button>
         <button class="ratio-btn" data-r="21/9">21:9</button>
       </div>
@@ -197,11 +1079,14 @@
         <button id="btn-folder-toggle" class="btn-sub" aria-label="フォルダ切り替え">📁</button>
         <button id="btn-torch" class="btn-sub" aria-label="ライト切り替え">🔦</button>
         <button id="btn-shutter" class="shutter btn-shutter" aria-label="シャッター"></button>
+        <button id="btn-goto-scan-main" class="btn-sub" title="スキャンモードへ移動" aria-label="スキャンモードへ移動" style="background:rgba(0,255,136,.10);border-color:#00ff88;color:#00ff88;font-family:'Share Tech Mono',monospace;font-size:10px;">SCAN</button>
         <button id="btn-horizontal" class="btn-sub" title="横固定モード" aria-label="横固定モード">⟲</button>
         <button id="btn-direction" class="btn-sub" title="撮影方向を反転" aria-label="撮影方向を反転" style="font-size:13px;font-family:'Share Tech Mono',monospace;letter-spacing:-1px;">→</button>
       </div>
+      <div class="zoom-toggle-row"><button id="btn-zoom-toggle" aria-label="倍率スライダー表示切替">🔍 倍率</button><button id="btn-native-camera" aria-label="純正カメラで撮影して取り込み">純正</button><button id="btn-save-unsaved" aria-label="未保存の写真を保存">保存</button><input id="native-camera-input" type="file" accept="image/*" capture="environment" style="display:none"></div>
+      <div class="save-status-row"><span id="unsaved-count-inline">未保存 0</span><span id="save-result-mini"></span></div>
       <!-- ズームスライダー: 倍率1未満の超広角にも対応 -->
-      <div class="zoom-controls">
+      <div class="zoom-controls" id="zoom-controls">
         <span id="uw-label" style="display:none;font-family:'Share Tech Mono',monospace;font-size:9px;color:#ffaa44;letter-spacing:1px;">UW</span>
         <input type="range" id="zoom-slider" min="0.5" max="5" step="0.05" value="1">
         <span id="zoom-level">1.00x</span>
@@ -220,6 +1105,7 @@
         <span class="orient-label" id="orient-label">センサー待機中</span>
       </div>
       <span id="stab-ind" style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#4a6a8a;letter-spacing:1px;"></span>
+      <button class="thumb-toggle-btn" id="btn-goto-scan" style="background:rgba(0,255,136,.08);border-color:#00ff88;color:#00ff88;">▶ スキャン</button>
       <button class="thumb-toggle-btn" id="btn-thumb-toggle">🖼 サムネ</button>
     </div>
     <div class="save-folder-row" id="save-folder-row" style="display:none;">
@@ -240,10 +1126,12 @@
   <div class="page photo-pg" id="pg-photos">
     <div class="photo-toolbar">
       <span class="photo-count" id="photo-count-txt">0 / 200 枚</span>
+      <span class="save-log-pill" id="photo-unsaved-count">未保存 0</span>
       <div id="hist-ph-group-sel" style="display:flex;">
         <select id="hist-ph-group-select" class="group-select" style="padding:2px 4px; font-size:10px;"></select>
       </div>
       <button class="btn-sm" id="btn-ph-sort" style="margin-left:auto;">↓ 新しい順</button>
+      <button class="btn-sm btn-jump-3" id="btn-ph-jump-3" title="3枚下へ移動">↓3</button>
       <button class="btn-sm accent" id="btn-ph-select-mode" style="display:none">☑ 選択</button>
       <button class="btn-sm accent" id="btn-merge-mode" style="display:none">📐 結合</button>
       <button class="btn-sm danger" id="btn-photo-clear" style="display:none">全削除</button>
@@ -288,6 +1176,17 @@
         </div>
         <input type="range" id="set-photo-size" min="50" max="300" step="10" value="80" style="width:100%; margin-top:12px;" />
       </div>
+      <div class="settings-row">
+        <div><div class="settings-lbl">↓3ボタン位置</div><div class="settings-sub">バーコード横に置くと、スクロール中でも押しやすいです。</div></div>
+        <div class="settings-ctrl">
+          <button class="seg-btn" data-jump-place="barcode">バーコード横</button>
+          <button class="seg-btn" data-jump-place="toolbar">上部</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-lbl">↓3ボタン位置を固定</div><div class="settings-sub">上部表示の時はスクロールしてもツールバーを残します。設定は保存されます。</div></div>
+        <label class="toggle-sw"><input type="checkbox" id="set-jump-fixed"/><span class="toggle-slider"></span></label>
+      </div>
     </div>
     <div class="settings-divider"></div>
 
@@ -299,7 +1198,7 @@
       </div>
       <div class="settings-row">
         <div><div class="settings-lbl">スキャン自動開始</div><div class="settings-sub">タブを開くと自動でスキャン開始</div></div>
-        <label class="toggle-sw"><input type="checkbox" id="set-auto-scan" checked/><span class="toggle-slider"></span></label>
+        <label class="toggle-sw"><input type="checkbox" id="set-auto-scan"/><span class="toggle-slider"></span></label>
       </div>
       <div class="settings-row">
         <div><div class="settings-lbl">デフォルトフォーマット</div><div class="settings-sub">スキャン対象コードの種類</div></div>
@@ -330,12 +1229,21 @@
     <div class="settings-section">
       <div class="settings-title">⚙ システム / 保存設定</div>
       <div class="settings-row">
+        <div><div class="settings-lbl">Android撮影後に自動保存</div><div class="settings-sub">Androidだけ撮影後に端末へ自動ダウンロードします。iPhoneはOFF固定です。</div></div>
+        <label class="toggle-sw"><input type="checkbox" id="set-android-auto-download"/><span class="toggle-slider"></span></label>
+      </div>
+      <div class="settings-row">
+        <div><div class="settings-lbl">自動保存設定を固定</div><div class="settings-sub">このON/OFFは設定に保存され、次回起動後も維持されます。</div></div>
+        <span class="app-version-pill">固定済み</span>
+      </div>
+      <div class="settings-row">
         <div><div class="settings-lbl">最大保存枚数</div><div class="settings-sub">超えると古いものから削除</div></div>
         <div class="settings-ctrl">
           <button class="seg-btn" data-mp="50">50</button>
           <button class="seg-btn" data-mp="100">100</button>
-          <button class="seg-btn on" data-mp="200">200</button>
+          <button class="seg-btn" data-mp="200">200</button>
           <button class="seg-btn" data-mp="500">500</button>
+          <button class="seg-btn on" data-mp="1000">1000</button>
         </div>
       </div>
       <div class="settings-row" style="margin-top:10px;">
@@ -360,6 +1268,11 @@
     </div>
     <div class="settings-divider"></div>
     <div class="settings-ver">SCANNER + CAMERA · v4.1</div>
+    <div class="app-update-row">
+      <span class="app-version-pill" id="app-version-text">VERSION FIX36</span>
+      <span class="save-log-pill" id="save-log-text">保存結果: なし</span>
+      <button class="settings-btn update" id="btn-force-update" type="button">更新</button>
+    </div>
   </div>
 </div>
 
@@ -432,13 +1345,13 @@
 <div class="toast" id="toast"></div>
 
 <!-- ==================== JSモジュールの読み込み ==================== -->
-<script src="state.js"></script>
-<script src="utils.js"></script>
-<script src="storage.js"></script>
-<script src="scanner.js"></script>
-<script src="camera.js"></script>
-<script src="photos.js"></script>
-<script src="main.js"></script>
+<script src="state.js?v=fix36"></script>
+<script src="utils.js?v=fix36"></script>
+<script src="storage.js?v=fix36"></script>
+<script src="scanner.js?v=fix36"></script>
+<script src="camera.js?v=fix36"></script>
+<script src="photos.js?v=fix36"></script>
+<script src="main.js?v=fix36"></script>
 
 <!-- Service Worker 登録 -->
 <script>

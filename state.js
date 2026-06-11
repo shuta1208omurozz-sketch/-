@@ -1,5 +1,8 @@
 'use strict';
 
+const APP_VERSION = 'FIX36';
+const IS_IOS_LIKE = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 /* ════ キー定数 ════ */
 const SETTINGS_KEY = 'sc-settings-v1';
 const BC_KEY       = 'sc-bc-v3';
@@ -7,18 +10,25 @@ let   MAX_PH       = 200;
 
 /* ════ 設定 ════ */
 let cfg = {
-  autoStartScan:  true,
+  autoStartScan:  false,
   scanFormat:     'ean13',
   camQuality:     'mid',
-  maxPhotos:      200,
+  maxPhotos:      1000,
   photoSize:      80,
   bcCompactMode:  false,
   continuousScan: false,
   useGroup:       false,
   groups:         ['未分類', '食品', '機械', '文具'],
   currentGroup:   '未分類',
-  aspectRatio:    'full',
-  outdoorMode:    false
+  aspectRatio:    'default',
+  outdoorMode:    false,
+  cameraDeviceId: '',
+  cameraDeviceLabel: '',
+  preferUltraWide: true,
+  _wideMinZoom: 1,
+  androidAutoDownload: false,
+  jumpButtonPlace: 'barcode',
+  jumpButtonFixed: true
 };
 
 /* ════ データ ════ */
@@ -39,6 +49,7 @@ let globalCamTrack    = null;   // 共有トラック参照
 let scanStream        = null;   // 後方互換のための参照（globalStream と同一）
 let camStream         = null;   // 後方互換のための参照（globalStream と同一）
 let detector          = null;
+let detectorMode      = ''; // BarcodeDetectorの生成モードキャッシュ
 let raf               = null;
 let lastCode          = null;
 let lastCodeTime      = 0;
@@ -70,12 +81,12 @@ let groupMoveTarget = 'ph';
 /* ════ 定数マッピング ════ */
 const CAM_QUALITY = {
   low:  { width: { ideal:  640 }, height: { ideal:  480 } },
-  mid:  { width: { ideal: 1280 }, height: { ideal:  720 } },
-  high: { width: { ideal: 1920 }, height: { ideal: 1080 } },
-  max:  { width: { ideal: 3840 }, height: { ideal: 2160 } }
+  mid:  { width: { ideal: 1280 }, height: { ideal:  960 } },
+  high: { width: { ideal: 1920 }, height: { ideal: 1440 } },
+  max:  { width: { ideal: 4000 }, height: { ideal: 3000 } }
 };
 
-const ASPECT_RATIOS = { '4/3': 4/3, '16/9': 16/9, '21/9': 21/9 };
+const ASPECT_RATIOS = { 'default': 0, '16/9': 16/9, '21/9': 21/9 };
 
 const JS_FMT = {
   ean_13: 'EAN13', ean_8: 'EAN8',   code_128: 'CODE128',
