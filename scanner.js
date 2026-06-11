@@ -645,7 +645,7 @@ function renderBcList() {
     thumbDiv.appendChild(canvas);
     if (cfg.bcCompactMode) thumbDiv.style.display = 'none';
 
-    // 値テキスト + FIX36: ↓3ボタンをバーコード横に配置
+    // 値テキスト + FIX37: ↓3ボタンをバーコード横に配置
     const valueRow = document.createElement('div');
     valueRow.className = 'bc-value-row';
 

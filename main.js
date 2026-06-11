@@ -184,31 +184,55 @@ document.querySelectorAll('.tab').forEach(btn => {
   btn.onclick = () => switchTab(btn.dataset.tab);
 });
 
-function jumpListItems(containerId, itemSelector, count) {
+function scrollTargetIntoView(target) {
+  if (!target) return;
+  // FIX37: offsetTopでscrollToすると、履歴ページ/本文スクロールの環境差で動かないことがある。
+  // scrollIntoViewはAndroid Chrome/iPhone Safari両方で一番安定する。
+  try {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+  } catch (_) {
+    target.scrollIntoView(true);
+  }
+}
+
+function getVisibleListItems(containerId, itemSelector) {
   const container = $(containerId);
-  if (!container) return;
-  const items = Array.from(container.querySelectorAll(itemSelector)).filter(el => el.offsetParent !== null);
+  if (!container) return [];
+  return Array.from(container.querySelectorAll(itemSelector)).filter(el => {
+    const r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0;
+  });
+}
+
+function jumpListItems(containerId, itemSelector, count) {
+  const items = getVisibleListItems(containerId, itemSelector);
   if (!items.length) { showToast('移動できる項目がありません', 'warn'); return; }
-  const scroller = container.closest('.page') || document.scrollingElement || document.documentElement;
-  const currentTop = scroller.scrollTop || 0;
-  let currentIdx = items.findIndex(el => (el.offsetTop + el.offsetHeight) > currentTop + 12);
+
+  // 今画面内で一番上に近いカードを基準に、3件下へ移動
+  const topLine = 8;
+  let currentIdx = items.findIndex(el => el.getBoundingClientRect().bottom > topLine);
   if (currentIdx < 0) currentIdx = 0;
+
   const targetIdx = Math.min(items.length - 1, currentIdx + Math.max(1, count || 3));
-  const target = items[targetIdx];
-  scroller.scrollTo({ top: Math.max(0, target.offsetTop - 8), behavior: 'smooth' });
+  if (targetIdx === currentIdx) { showToast('これ以上下はありません', 'warn'); return; }
+  scrollTargetIntoView(items[targetIdx]);
 }
 
 function jumpListItemsFromElement(containerId, itemSelector, fromEl, count) {
-  const container = $(containerId);
-  if (!container || !fromEl) return;
-  const items = Array.from(container.querySelectorAll(itemSelector)).filter(el => el.offsetParent !== null);
-  if (!items.length) { showToast('移動できる項目がありません', 'warn'); return; }
-  const currentIdx = Math.max(0, items.indexOf(fromEl));
+  const items = getVisibleListItems(containerId, itemSelector);
+  if (!items.length || !fromEl) { showToast('移動できる項目がありません', 'warn'); return; }
+
+  const currentIdx = items.indexOf(fromEl.closest(itemSelector) || fromEl);
+  if (currentIdx < 0) { showToast('移動位置を取得できません', 'warn'); return; }
+
   const targetIdx = Math.min(items.length - 1, currentIdx + Math.max(1, count || 3));
-  const target = items[targetIdx];
-  const scroller = container.closest('.page') || document.scrollingElement || document.documentElement;
-  scroller.scrollTo({ top: Math.max(0, target.offsetTop - 8), behavior: 'smooth' });
+  if (targetIdx === currentIdx) { showToast('これ以上下はありません', 'warn'); return; }
+  scrollTargetIntoView(items[targetIdx]);
 }
+
+// scanner.js側のバーコード横ボタンから確実に呼べるように公開
+window.jumpListItems = jumpListItems;
+window.jumpListItemsFromElement = jumpListItemsFromElement;
 
 /* ════ イベント登録 ════ */
 function bindEvents() {
