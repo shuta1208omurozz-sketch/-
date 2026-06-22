@@ -350,6 +350,7 @@ function getCaptureCrop(vw, vh) {
 
 /* ════ カメラ停止 ════ */
 function stopCam() {
+  if (typeof forceTorchOff === 'function') void forceTorchOff();
   camActive = false;
   // ストリームは共有のため物理停止しない。ビデオ要素からのみ切断する
   const video = $('cam-video');
@@ -366,6 +367,7 @@ let _resumeScanWanted = false;
 let _lastResumeAt = 0;
 
 function pauseAllCameraForBackground() {
+  if (typeof forceTorchOff === 'function') void forceTorchOff();
   _resumeScanWanted = activeTab === 'scan' && !!scanning;
 
   const sv = $('scan-video');
@@ -554,13 +556,37 @@ async function applyZoom(val) {
 }
 
 /* ════ トーチ ════ */
+function setTorchButtonOff() {
+  const btn = $('btn-torch');
+  if (!btn) return;
+  btn.classList.remove('on', 'active');
+  btn.style.color = '';
+  btn.setAttribute('aria-pressed', 'false');
+}
+
+async function forceTorchOff() {
+  const track = camTrack || globalCamTrack;
+  // UIは先にOFFへ戻す。モード移動後にボタンだけON表示で残る事故を防ぐ。
+  setTorchButtonOff();
+  try {
+    if (track && track.readyState !== 'ended') {
+      const st = track.getSettings?.() || {};
+      if (st.torch) await track.applyConstraints({ advanced: [{ torch: false }] });
+    }
+  } catch (e) { console.warn('[Camera] Torch off:', e); }
+}
+
 async function toggleTorch() {
   if (!camTrack) return;
   try {
     const newState = !camTrack.getSettings().torch;
     await camTrack.applyConstraints({ advanced: [{ torch: newState }] });
     const btn = $('btn-torch');
-    if (btn) { btn.classList.toggle('on', newState); btn.style.color = newState ? 'var(--accent)' : ''; }
+    if (btn) {
+      btn.classList.toggle('on', newState);
+      btn.style.color = newState ? 'var(--accent)' : '';
+      btn.setAttribute('aria-pressed', newState ? 'true' : 'false');
+    }
   } catch (e) { console.error('[Camera] Torch:', e); }
 }
 
@@ -754,19 +780,14 @@ function goToScanModeFromCamera() {
 /* ════ 横固定モード ════ */
 function updateHorizontalUI() {
   const btn = $('btn-horizontal');
-  if (btn) btn.classList.toggle('on', forceHorizontal);
-  // 方向ボタン: 横固定ONのとき有効化、状態を反映
-  const dirBtn = $('btn-direction');
-  if (dirBtn) {
-    // 「→」だけだと意味が分かりにくいので、横固定ONの時だけ「向き→/向き←」として表示する
-    dirBtn.style.display      = forceHorizontal ? 'flex' : 'none';
-    dirBtn.style.opacity      = forceHorizontal ? '1' : '0';
-    dirBtn.style.pointerEvents= forceHorizontal ? '' : 'none';
-    dirBtn.textContent        = rotateRight ? '向き→' : '向き←';
-    dirBtn.title              = '横向き保存の回転方向を反転';
-    dirBtn.setAttribute('aria-label', '横向き保存の回転方向を反転');
-    dirBtn.classList.toggle('direction-right',  forceHorizontal && rotateRight);
-    dirBtn.classList.toggle('direction-left',   forceHorizontal && !rotateRight);
+  if (btn) {
+    btn.classList.toggle('on', forceHorizontal);
+    btn.textContent = !forceHorizontal ? '↔' : (rotateRight ? '→' : '←');
+    const title = !forceHorizontal
+      ? '横向き回転OFF。押すと右向きに回転'
+      : (rotateRight ? '右向き回転中。押すと左向きに回転' : '左向き回転中。押すとOFF');
+    btn.title = title;
+    btn.setAttribute('aria-label', title);
   }
 }
 
@@ -778,11 +799,11 @@ function updateArrow() {
     return;
   }
   arrow.style.display = 'flex';
-  arrow.textContent = rotateRight ? '→' : '←';
+  arrow.textContent = rotateRight ? '↻' : '↺';
   // 方向ボタンのテキストも更新
   const dirBtn = $('btn-direction');
   if (dirBtn) {
-    dirBtn.textContent = rotateRight ? '向き→' : '向き←';
+    dirBtn.textContent = rotateRight ? '画面↻' : '画面↺';
     dirBtn.classList.toggle('direction-right',  rotateRight);
     dirBtn.classList.toggle('direction-left',   !rotateRight);
   }
@@ -810,7 +831,16 @@ function updatePreview(video) {
 }
 
 function toggleHorizontal() {
-  forceHorizontal = !forceHorizontal;
+  // 1ボタンで循環: OFF(↔) → 右回転(→) → 左回転(←) → OFF
+  if (!forceHorizontal) {
+    forceHorizontal = true;
+    rotateRight = true;
+  } else if (rotateRight) {
+    rotateRight = false;
+  } else {
+    forceHorizontal = false;
+    rotateRight = true;
+  }
   applyCameraVideoFit();
   updateHorizontalUI();
   updateArrow();
@@ -944,6 +974,13 @@ document.addEventListener('DOMContentLoaded', () => {
   on('btn-direction',  toggleDirection);
   on('btn-goto-scan',      goToScanFromCamera);
   on('btn-goto-scan-main', goToScanFromCamera);
+  on('btn-goto-history-main', () => {
+    if (typeof forceTorchOff === 'function') void forceTorchOff();
+    if (typeof switchTab === 'function') {
+      switchTab('history');
+      setTimeout(() => { if (typeof renderBcList === 'function') renderBcList(); }, 0);
+    }
+  });
   on('btn-zoom-toggle',    () => setZoomPanel(!zoomPanelOpen));
   on('btn-wide-camera',    activateWideCamera);
   on('btn-native-camera',  openNativeCameraCapture);

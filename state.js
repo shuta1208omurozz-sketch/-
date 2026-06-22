@@ -1,11 +1,12 @@
 'use strict';
 
-const APP_VERSION = 'FIX38';
+const APP_VERSION = 'FIX56';
 const IS_IOS_LIKE = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 /* ════ キー定数 ════ */
 const SETTINGS_KEY = 'sc-settings-v1';
 const BC_KEY       = 'sc-bc-v3';
+const MASTER_KEY   = 'sc-product-master-v1';
 let   MAX_PH       = 200;
 
 /* ════ 設定 ════ */
@@ -28,12 +29,16 @@ let cfg = {
   _wideMinZoom: 1,
   androidAutoDownload: false,
   jumpButtonPlace: 'barcode',
-  jumpButtonFixed: true
+  jumpButtonFixed: true,
+  jumpStep: 1,
+  countMode: false,
+  lockOrientation: false
 };
 
 /* ════ データ ════ */
-let bcHistory = [];
-let photos    = [];
+let bcHistory     = [];
+let productMaster = {};
+let photos        = [];
 
 /* ════ カメラ・スキャン状態 ════ */
 let scanning        = false;

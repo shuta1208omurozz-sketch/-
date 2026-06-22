@@ -10,19 +10,62 @@ function updateDeviceClassUI() {
   document.body.classList.toggle('ios-like', !!(typeof IS_IOS_LIKE !== 'undefined' && IS_IOS_LIKE));
 }
 
+async function applyOrientationLock(showResult = false) {
+  document.body.classList.toggle('orientation-lock-wanted', !!cfg.lockOrientation);
+  const api = (typeof screen !== 'undefined') ? screen.orientation : null;
+  if (!api) {
+    if (showResult) showToast('この端末では画面回転固定APIが使えません', 'warn', 3500);
+    return false;
+  }
+  try {
+    if (cfg.lockOrientation) {
+      await api.lock('portrait');
+      if (showResult) showToast('画面回転: 縦固定ON', 'ok');
+      return true;
+    }
+    if (typeof api.unlock === 'function') api.unlock();
+    if (showResult) showToast('画面回転固定OFF', '');
+    return true;
+  } catch (e) {
+    console.warn('[OrientationLock]', e);
+    if (showResult) showToast('この端末/ブラウザでは完全固定できません', 'warn', 4000);
+    return false;
+  }
+}
+
 function updateAppVersionUI() {
+  const versionText = 'VERSION ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : 'UNKNOWN');
   const el = $('app-version-text');
-  if (el) el.textContent = 'VERSION ' + (typeof APP_VERSION !== 'undefined' ? APP_VERSION : 'UNKNOWN');
+  if (el) el.textContent = versionText;
+  const top = $('app-version-top');
+  if (top) top.textContent = versionText;
+}
+
+function getJumpStep() {
+  const n = Math.floor(Number(cfg.jumpStep));
+  if (!Number.isFinite(n) || n < 1) return 1;
+  return Math.min(20, n);
 }
 
 function updateJumpButtonUI() {
   const place = cfg.jumpButtonPlace || 'barcode';
+  const step = getJumpStep();
   document.body.classList.toggle('jump-place-barcode', place === 'barcode');
   document.body.classList.toggle('jump-place-toolbar', place === 'toolbar');
   document.body.classList.toggle('jump-toolbar-fixed', !!cfg.jumpButtonFixed);
   document.querySelectorAll('[data-jump-place]').forEach(b => b.classList.toggle('on', b.dataset.jumpPlace === place));
   const fixed = $('set-jump-fixed');
   if (fixed) fixed.checked = !!cfg.jumpButtonFixed;
+  const stepInput = $('set-jump-step');
+  if (stepInput) stepInput.value = String(step);
+  const bcBtn = $('btn-bc-jump-3');
+  if (bcBtn) { bcBtn.textContent = '↓' + step; bcBtn.title = step + '件下へ移動'; }
+  const phBtn = $('btn-ph-jump-3');
+  if (phBtn) { phBtn.textContent = '↓' + step; phBtn.title = step + '枚下へ移動'; }
+  document.querySelectorAll('.bc-inline-jump').forEach(btn => {
+    btn.textContent = '↓' + step;
+    btn.title = 'この位置から' + step + '件下へ移動';
+  });
 }
 
 async function forceAppUpdate() {
@@ -49,12 +92,13 @@ async function forceAppUpdate() {
 function updateGroupUI() {
   const gOn  = cfg.useGroup;
   const show = (id, v) => { const el = $(id); if (el) el.style.display = v ? (el.tagName === 'SELECT' || el.tagName === 'DIV' ? 'flex' : '') : 'none'; };
+  // スキャン時の自動グループ付けだけ設定ON/OFF。履歴からの後分け・編集は常に使える。
   show('scan-group-bar',     gOn);
   // FIX25: カメラ画面ではグループUIを常に非表示（設定/履歴側のON/OFFは維持）
   show('cam-group-bar',      false);
-  show('hist-bc-group-sel',  gOn);
-  show('hist-ph-group-sel',  gOn);
-  $('group-mgr-area').style.display = gOn ? 'block' : 'none';
+  show('hist-bc-group-sel',  true);
+  show('hist-ph-group-sel',  true);
+  $('group-mgr-area').style.display = 'block';
   $('btn-bc-select-mode').style.display = bcHistory.length ? '' : 'none';
 
   if (!cfg.groups.includes(cfg.currentGroup))
@@ -76,14 +120,39 @@ function updateGroupUI() {
   renderSettingsGroupList();
 }
 
+function escapeHtmlText(v) {
+  return String(v ?? '').replace(/[&<>"]/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[ch]));
+}
+
 function renderSettingsGroupList() {
   const list = $('grp-list-el');
+  if (!list) return;
   list.innerHTML = '';
   cfg.groups.forEach((g, i) => {
     const item = document.createElement('div');
     item.className = 'grp-item';
-    item.innerHTML = `<span>${g}</span> <button class="btn-del" data-idx="${i}">削除</button>`;
+    item.innerHTML = `<span>${escapeHtmlText(g)}</span> <button class="btn-edit" data-idx="${i}">編集</button> <button class="btn-del" data-idx="${i}">削除</button>`;
     list.appendChild(item);
+  });
+  list.querySelectorAll('.btn-edit').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const idx = +btn.dataset.idx;
+      const oldName = cfg.groups[idx];
+      const val = prompt('新しいグループ名', oldName)?.trim();
+      if (!val || val === oldName) return;
+      if (cfg.groups.includes(val)) { showToast('[E031] 既に存在します', 'warn'); return; }
+      cfg.groups[idx] = val;
+      if (cfg.currentGroup === oldName) cfg.currentGroup = val;
+      bcHistory.forEach(b => { if (b.group === oldName) b.group = val; });
+      localStorage.setItem(BC_KEY, JSON.stringify(bcHistory));
+      try {
+        await Promise.all(photos.map(p => {
+          if (p.group === oldName) { p.group = val; return dbPut(p); }
+          return null;
+        }).filter(Boolean));
+      } catch(e) { console.warn('[Group rename photos]', e); }
+      saveCfg(); updateGroupUI(); renderBcList(); renderPhotoGrid(); showToast('グループ名を変更しました', 'ok');
+    });
   });
   list.querySelectorAll('.btn-del').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -102,6 +171,7 @@ function applyCfgToUI() {
   setChk('set-cont-scan',    cfg.continuousScan);
   setChk('set-use-group',    cfg.useGroup);
   setChk('set-outdoor-mode', cfg.outdoorMode);
+  setChk('set-lock-orientation', !!cfg.lockOrientation);
   setChk('set-android-auto-download', !!cfg.androidAutoDownload);
   setChk('set-jump-fixed', !!cfg.jumpButtonFixed);
   // 屋外モードをbodyクラスに反映
@@ -111,7 +181,15 @@ function applyCfgToUI() {
   document.querySelectorAll('[data-cq]').forEach(b  => b.classList.toggle('on', b.dataset.cq  === cfg.camQuality));
   document.querySelectorAll('.quality-btn').forEach(b=> b.classList.toggle('on', b.dataset.q   === cfg.camQuality));
   document.querySelectorAll('[data-mp]').forEach(b  => b.classList.toggle('on', b.dataset.mp  === String(cfg.maxPhotos)));
-  document.querySelectorAll('.mode-btn').forEach(b  => b.classList.toggle('on', b.dataset.mode === cfg.scanFormat));
+  document.querySelectorAll('.mode-btn[data-mode]').forEach(b  => b.classList.toggle('on', b.dataset.mode === cfg.scanFormat));
+  ['btn-count-mode', 'btn-count-mode-bc'].forEach(id => {
+    const countBtn = $(id);
+    if (countBtn) {
+      countBtn.classList.toggle('on', !!cfg.countMode);
+      countBtn.textContent = cfg.countMode ? '個数ON' : '個数OFF';
+      countBtn.title = cfg.countMode ? '同じバーコードは新品数+1' : '通常登録モード';
+    }
+  });
   document.querySelectorAll('.ratio-btn').forEach(b => b.classList.toggle('on', b.dataset.r   === cfg.aspectRatio));
 
   if (typeof applyCameraViewportLayout === 'function') applyCameraViewportLayout();
@@ -140,11 +218,18 @@ function switchTab(newTab, pushHistory = true) {
 
   const prevTab = activeTab;
   activeTab = newTab;
+  if (prevTab === 'camera' && newTab !== 'camera' && typeof forceTorchOff === 'function') {
+    void forceTorchOff();
+  }
   if (typeof updateCameraModeClass === 'function') updateCameraModeClass();
 
   // 戻るボタン対策: タブ遷移を履歴に積む
   if (pushHistory) {
     history.pushState({ tab: newTab }, '', '#' + newTab);
+  }
+
+  if (newTab === 'master') {
+    if (typeof renderMasterList === 'function') renderMasterList();
   }
 
   if (newTab === 'scan') {
@@ -208,12 +293,13 @@ function jumpListItems(containerId, itemSelector, count) {
   const items = getVisibleListItems(containerId, itemSelector);
   if (!items.length) { showToast('移動できる項目がありません', 'warn'); return; }
 
-  // 今画面内で一番上に近いカードを基準に、3件下へ移動
+  // 今画面内で一番上に近いカードを基準に、指定件数だけ下へ移動
   const topLine = 8;
   let currentIdx = items.findIndex(el => el.getBoundingClientRect().bottom > topLine);
   if (currentIdx < 0) currentIdx = 0;
 
-  const targetIdx = Math.min(items.length - 1, currentIdx + Math.max(1, count || 3));
+  const step = Math.max(1, Math.min(20, Math.floor(Number(count ?? getJumpStep())) || 1));
+  const targetIdx = Math.min(items.length - 1, currentIdx + step);
   if (targetIdx === currentIdx) { showToast('これ以上下はありません', 'warn'); return; }
   scrollTargetIntoView(items[targetIdx]);
 }
@@ -225,7 +311,8 @@ function jumpListItemsFromElement(containerId, itemSelector, fromEl, count) {
   const currentIdx = items.indexOf(fromEl.closest(itemSelector) || fromEl);
   if (currentIdx < 0) { showToast('移動位置を取得できません', 'warn'); return; }
 
-  const targetIdx = Math.min(items.length - 1, currentIdx + Math.max(1, count || 3));
+  const step = Math.max(1, Math.min(20, Math.floor(Number(count ?? getJumpStep())) || 1));
+  const targetIdx = Math.min(items.length - 1, currentIdx + step);
   if (targetIdx === currentIdx) { showToast('これ以上下はありません', 'warn'); return; }
   scrollTargetIntoView(items[targetIdx]);
 }
@@ -238,8 +325,8 @@ window.jumpListItemsFromElement = jumpListItemsFromElement;
 function bindEvents() {
   const on = (id, ev, fn) => $(id)?.addEventListener(ev, fn);
   on('btn-force-update', 'click', forceAppUpdate);
-  on('btn-bc-jump-3', 'click', () => jumpListItems('bc-list', '.bc-card', 3));
-  on('btn-ph-jump-3', 'click', () => jumpListItems('photo-grid', '.photo-card', 3));
+  on('btn-bc-jump-3', 'click', () => jumpListItems('bc-list', '.bc-card', getJumpStep()));
+  on('btn-ph-jump-3', 'click', () => jumpListItems('photo-grid', '.photo-card', getJumpStep()));
 
 
 
@@ -252,23 +339,42 @@ function bindEvents() {
     saveCfg();
     updateJumpButtonUI();
     renderBcList();
-    showToast('↓3位置: ' + (cfg.jumpButtonPlace === 'barcode' ? 'バーコード横' : '上部'), 'ok');
+    showToast('↓x位置: ' + (cfg.jumpButtonPlace === 'barcode' ? 'バーコード横' : '上部'), 'ok');
   }));
   on('set-jump-fixed', 'change', e => {
     cfg.jumpButtonFixed = !!e.target.checked;
     saveCfg();
     updateJumpButtonUI();
-    showToast('↓3固定: ' + (cfg.jumpButtonFixed ? 'ON' : 'OFF'), cfg.jumpButtonFixed ? 'ok' : '');
+    showToast('↓x固定: ' + (cfg.jumpButtonFixed ? 'ON' : 'OFF'), cfg.jumpButtonFixed ? 'ok' : '');
+  });
+  on('set-jump-step', 'change', e => {
+    const n = Math.max(1, Math.min(20, Math.floor(Number(e.target.value)) || 1));
+    cfg.jumpStep = n;
+    e.target.value = String(n);
+    saveCfg();
+    updateJumpButtonUI();
+    renderBcList();
+    showToast('↓x: ' + n + '件下', 'ok');
   });
 
   // スキャン設定
   on('set-cont-scan', 'change', e => { cfg.continuousScan = e.target.checked; saveCfg(); showToast('連続スキャン: ' + (cfg.continuousScan ? 'ON' : 'OFF'), cfg.continuousScan ? 'ok' : ''); });
   on('set-auto-scan', 'change', e => { cfg.autoStartScan  = e.target.checked; saveCfg(); });
-  document.querySelectorAll('[data-sf]').forEach(btn => btn.addEventListener('click', () => {
-    cfg.scanFormat = btn.dataset.sf; saveCfg(); applyCfgToUI();
+  document.querySelectorAll('[data-sf], .mode-btn[data-mode]').forEach(btn => btn.addEventListener('click', () => {
+    cfg.scanFormat = btn.dataset.sf || btn.dataset.mode;
+    saveCfg(); applyCfgToUI();
     if (scanning) { stopScan(); setTimeout(startScan, 200); }
     showToast('フォーマット: ' + (cfg.scanFormat === 'ean13' ? 'EAN-13' : '全て'), 'ok');
   }));
+  const toggleCountMode = () => {
+    cfg.countMode = !cfg.countMode;
+    saveCfg();
+    applyCfgToUI();
+    renderBcList();
+    showToast(cfg.countMode ? '個数カウントON: 同じバーコードで新品数+1' : '個数カウントOFF', cfg.countMode ? 'ok' : '');
+  };
+  on('btn-count-mode', 'click', toggleCountMode);
+  on('btn-count-mode-bc', 'click', toggleCountMode);
 
   // カメラ設定
   document.querySelectorAll('[data-cq]').forEach(btn => btn.addEventListener('click', () => {
@@ -295,6 +401,12 @@ function bindEvents() {
     saveCfg();
     document.body.classList.toggle('outdoor-mode', cfg.outdoorMode);
     showToast(cfg.outdoorMode ? '☀ 屋外モード ON' : '屋外モード OFF', cfg.outdoorMode ? 'ok' : '');
+  });
+  on('set-lock-orientation', 'change', async e => {
+    cfg.lockOrientation = !!e.target.checked;
+    saveCfg();
+    await applyOrientationLock(true);
+    applyCfgToUI();
   });
   on('set-android-auto-download', 'change', e => {
     if (typeof IS_IOS_LIKE !== 'undefined' && IS_IOS_LIKE) {
@@ -556,6 +668,7 @@ async function startGlobalCamera(forceRestart = false) {
 }
 
 function stopGlobalCamera() {
+  if (typeof forceTorchOff === 'function') void forceTorchOff();
   // 物理カメラを完全停止（バックグラウンド移行時のみ呼ぶ）
   if (globalStream) {
     globalStream.getTracks().forEach(t => t.stop());
@@ -568,6 +681,14 @@ function stopGlobalCamera() {
   camTrack   = null;
 }
 
+
+window.addEventListener('orientationchange', () => {
+  if (cfg.lockOrientation) setTimeout(() => { void applyOrientationLock(false); }, 250);
+});
+window.addEventListener('resize', () => {
+  if (cfg.lockOrientation) setTimeout(() => { void applyOrientationLock(false); }, 250);
+});
+
 /* ════ 初期化 ════ */
 async function init() {
   loadCfg();
@@ -576,13 +697,17 @@ async function init() {
   MAX_PH = cfg.maxPhotos || 200;
   try { bcHistory = JSON.parse(localStorage.getItem(BC_KEY) || '[]'); } catch(_) { bcHistory = []; }
   bcHistory = bcHistory.map(x => ({ checked: false, ...x }));
+  try { productMaster = JSON.parse(localStorage.getItem(MASTER_KEY) || '{}'); } catch(_) { productMaster = {}; }
+  if (!productMaster || Array.isArray(productMaster)) productMaster = {};
   try { photos = (await dbAll()).reverse(); } catch(_) { photos = []; }
   applyCfgToUI();
+  void applyOrientationLock(false);
   updateAppVersionUI();
   if (typeof updateUnsavedSaveButton === 'function') updateUnsavedSaveButton();
   if (typeof updateSaveResultLogUI === 'function') updateSaveResultLogUI();
   setThumbVisible(thumbStripVisible);
   updateCounts();
+  if (typeof renderMasterList === 'function') renderMasterList();
   restoreFolderHandle();
   bindEvents();
   initOrientationSensor();

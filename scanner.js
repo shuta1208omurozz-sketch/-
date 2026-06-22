@@ -1,5 +1,218 @@
 'use strict';
 
+let _lastInvalidEan13NotifyAt = 0;
+function notifyInvalidEan13(val = '') {
+  const now = Date.now();
+  if (now - _lastInvalidEan13NotifyAt < 2500) return;
+  _lastInvalidEan13NotifyAt = now;
+  const msg = '13桁ではありません' + (val ? ': ' + val : '');
+  if (typeof showToast === 'function') showToast(msg, 'warn', 2500);
+  if (typeof setStatus === 'function') setStatus('err', msg);
+}
+
+function getBcNewCount(item) {
+  const n = Math.floor(Number(item?.newCount));
+  return Number.isFinite(n) && n >= 0 ? n : 1;
+}
+
+function saveBcHistory() {
+  localStorage.setItem(BC_KEY, JSON.stringify(bcHistory));
+}
+
+function adjustBcNewCount(item, delta) {
+  if (!item) return;
+  item.newCount = Math.max(0, getBcNewCount(item) + delta);
+  item.timestamp = Date.now();
+  if (typeof adjustProductCountByCode === 'function') adjustProductCountByCode(item.value, delta, item.format || 'ean_13', item.group || '未分類');
+  saveBcHistory();
+  renderBcList();
+  updateCounts();
+  showToast('新品: ' + item.newCount + '個', 'ok');
+}
+
+
+/* ════ 商品マスター（履歴を消しても残す固定データ） ════ */
+function toNonNegativeInt(v, fallback = 0) {
+  const n = Math.floor(Number(String(v ?? '').replace(/,/g, '').trim()));
+  return Number.isFinite(n) && n >= 0 ? n : fallback;
+}
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+function saveProductMaster() {
+  try { localStorage.setItem(MASTER_KEY, JSON.stringify(productMaster || {})); } catch(e) { console.warn('[ProductMaster] save failed', e); }
+  updateMasterCountUI();
+}
+function getProductRecord(code) {
+  return (productMaster || {})[String(code)] || null;
+}
+function ensureProductRecord(code, opt = {}) {
+  const barcode = String(code || '').trim();
+  if (!barcode) return null;
+  if (!productMaster || Array.isArray(productMaster)) productMaster = {};
+  let rec = productMaster[barcode];
+  let changed = false;
+  if (!rec) {
+    rec = productMaster[barcode] = {
+      barcode,
+      name: '',
+      expectedNew: 0,
+      countNew: 0,
+      group: opt.group || '未分類',
+      format: opt.format || 'ean_13',
+      updatedAt: Date.now()
+    };
+    changed = true;
+  }
+  if (!rec.barcode) { rec.barcode = barcode; changed = true; }
+  if (rec.name == null) { rec.name = ''; changed = true; }
+  const exp = toNonNegativeInt(rec.expectedNew, 0);
+  const cnt = toNonNegativeInt(rec.countNew, 0);
+  if (rec.expectedNew !== exp) { rec.expectedNew = exp; changed = true; }
+  if (rec.countNew !== cnt) { rec.countNew = cnt; changed = true; }
+  if (!rec.group) { rec.group = opt.group || '未分類'; changed = true; }
+  if (!rec.format) { rec.format = opt.format || 'ean_13'; changed = true; }
+  if (opt.group && (!rec.group || rec.group === '未分類') && rec.group !== opt.group) { rec.group = opt.group; changed = true; }
+  if (opt.format && !rec.format) { rec.format = opt.format; changed = true; }
+  if (Number.isFinite(opt.delta) && opt.delta !== 0) { rec.countNew = Math.max(0, rec.countNew + opt.delta); changed = true; }
+  if (changed) { rec.updatedAt = Date.now(); saveProductMaster(); }
+  return rec;
+}
+function adjustProductCountByCode(code, delta, format = 'ean_13', group = '未分類') {
+  const rec = ensureProductRecord(code, { format, group, delta });
+  renderMasterList();
+  return rec;
+}
+function productDiff(rec) {
+  return toNonNegativeInt(rec?.countNew, 0) - toNonNegativeInt(rec?.expectedNew, 0);
+}
+function productNameLabel(rec) {
+  return rec?.name ? rec.name : '未登録商品';
+}
+function productScanMeta(format, timestamp, rec) {
+  const base = (format || '').toUpperCase().replace('_', ' ') + ' · ' + fmtShort(timestamp || Date.now());
+  if (!rec) return base;
+  const diff = productDiff(rec);
+  const diffTxt = diff === 0 ? '差異0' : ('差異' + (diff > 0 ? '+' : '') + diff);
+  return `${productNameLabel(rec)} · 登録${toNonNegativeInt(rec.expectedNew)} / 実数${toNonNegativeInt(rec.countNew)} · ${diffTxt}`;
+}
+function updateMasterCountUI() {
+  const list = Object.values(productMaster || {});
+  const count = list.length;
+  const expected = list.reduce((a,r)=>a+toNonNegativeInt(r.expectedNew),0);
+  const counted = list.reduce((a,r)=>a+toNonNegativeInt(r.countNew),0);
+  const diff = counted - expected;
+  const c = $('master-count'); if (c) c.textContent = count;
+  const sum = $('master-summary');
+  if (sum) {
+    sum.innerHTML = `<span class="master-pill">商品 ${count}</span><span class="master-pill">登録 ${expected}</span><span class="master-pill">実数 ${counted}</span><span class="master-pill">差異 ${diff>0?'+':''}${diff}</span>`;
+  }
+}
+function renderMasterList() {
+  const listEl = $('master-list');
+  const emptyEl = $('master-empty');
+  if (!listEl) { updateMasterCountUI(); return; }
+  const q = ($('master-search')?.value || '').trim().toLowerCase();
+  let list = Object.values(productMaster || {}).map(r => ensureProductRecord(r.barcode || r.value || '')).filter(Boolean);
+  if (q) list = list.filter(r => String(r.barcode).includes(q) || String(r.name||'').toLowerCase().includes(q) || String(r.group||'').toLowerCase().includes(q));
+  list.sort((a,b) => String(a.name||a.barcode).localeCompare(String(b.name||b.barcode), 'ja'));
+  updateMasterCountUI();
+  if (emptyEl) emptyEl.style.display = list.length ? 'none' : '';
+  listEl.style.display = list.length ? 'flex' : 'none';
+  listEl.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  list.forEach(rec => {
+    const diff = productDiff(rec);
+    const card = document.createElement('div');
+    card.className = 'master-card';
+    const name = document.createElement('div');
+    name.className = 'master-name';
+    name.textContent = rec.name || '未登録商品';
+    const code = document.createElement('div');
+    code.className = 'master-code';
+    code.textContent = rec.barcode;
+    const cnt = document.createElement('div');
+    cnt.className = 'master-count-row';
+    cnt.innerHTML = `<span>登録:${toNonNegativeInt(rec.expectedNew)}</span><span class="ok">実数:${toNonNegativeInt(rec.countNew)}</span><span class="${diff===0?'ok':(diff>0?'warn':'bad')}">差異:${diff>0?'+':''}${diff}</span>` + (rec.group ? `<span>${escapeHtml(rec.group)}</span>` : '');
+    const act = document.createElement('div');
+    act.className = 'master-actions';
+    const plus = document.createElement('button'); plus.className='accent'; plus.textContent='+1';
+    const minus = document.createElement('button'); minus.className='accent'; minus.textContent='-1';
+    const nameBtn = document.createElement('button'); nameBtn.textContent='名前編集';
+    const expBtn = document.createElement('button'); expBtn.textContent='登録数';
+    const countBtn = document.createElement('button'); countBtn.textContent='実数';
+    const delBtn = document.createElement('button'); delBtn.className='danger'; delBtn.textContent='削除';
+    plus.onclick = () => { rec.countNew = toNonNegativeInt(rec.countNew)+1; rec.updatedAt=Date.now(); saveProductMaster(); renderMasterList(); showToast('実数 +1', 'ok'); };
+    minus.onclick = () => { rec.countNew = Math.max(0, toNonNegativeInt(rec.countNew)-1); rec.updatedAt=Date.now(); saveProductMaster(); renderMasterList(); showToast('実数 -1', 'ok'); };
+    nameBtn.onclick = () => { const v = prompt('商品名', rec.name || '')?.trim(); if (v === undefined) return; rec.name = v || ''; rec.updatedAt=Date.now(); saveProductMaster(); renderMasterList(); };
+    expBtn.onclick = () => { const v = prompt('登録在庫数', String(toNonNegativeInt(rec.expectedNew))); if (v === null) return; rec.expectedNew = toNonNegativeInt(v, rec.expectedNew); rec.updatedAt=Date.now(); saveProductMaster(); renderMasterList(); };
+    countBtn.onclick = () => { const v = prompt('今回カウント数', String(toNonNegativeInt(rec.countNew))); if (v === null) return; rec.countNew = toNonNegativeInt(v, rec.countNew); rec.updatedAt=Date.now(); saveProductMaster(); renderMasterList(); };
+    delBtn.onclick = () => { if (!confirm(`${rec.barcode} を商品マスターから削除しますか？`)) return; delete productMaster[rec.barcode]; saveProductMaster(); renderMasterList(); };
+    [plus, minus, nameBtn, expBtn, countBtn, delBtn].forEach(b => act.appendChild(b));
+    card.appendChild(name); card.appendChild(code); card.appendChild(cnt); card.appendChild(act);
+    frag.appendChild(card);
+  });
+  listEl.appendChild(frag);
+}
+function exportProductMasterCSV() {
+  const rows = ['\uFEFFバーコード,商品名,登録在庫,今回カウント,差異,グループ,最終更新'];
+  Object.values(productMaster || {}).forEach(r => {
+    rows.push([r.barcode, r.name||'', toNonNegativeInt(r.expectedNew), toNonNegativeInt(r.countNew), productDiff(r), r.group||'', r.updatedAt ? fmtTime(r.updatedAt) : ''].map(escapeCsv).join(','));
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type:'text/csv' }));
+  a.download = 'product_master_' + Date.now() + '.csv';
+  a.click();
+}
+function escapeCsv(v) { return '"' + String(v ?? '').replace(/"/g, '""') + '"'; }
+function findHeaderIndex(headers, names) {
+  const hs = headers.map(h => String(h).trim().toLowerCase());
+  for (const n of names) {
+    const idx = hs.findIndex(h => h === n.toLowerCase());
+    if (idx >= 0) return idx;
+  }
+  return -1;
+}
+function importProductMasterCSV(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      let text = String(e.target.result || '').replace(/^\uFEFF/, '');
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (lines.length < 2) { showToast('商品データがありません', 'warn'); return; }
+      const headers = parseCsvRow(lines[0]);
+      const iCode = findHeaderIndex(headers, ['バーコード','barcode','jan','JAN','値','コード']);
+      const iName = findHeaderIndex(headers, ['商品名','name','品名','タイトル']);
+      const iExp  = findHeaderIndex(headers, ['登録在庫','在庫','新品数','expected','stock']);
+      const iCnt  = findHeaderIndex(headers, ['今回カウント','実数','count','counted']);
+      const iGrp  = findHeaderIndex(headers, ['グループ','group','カテゴリ']);
+      if (iCode < 0) { showToast('バーコード列が見つかりません', 'warn'); return; }
+      let added=0, updated=0;
+      lines.slice(1).forEach(line => {
+        const cols = parseCsvRow(line);
+        const code = String(cols[iCode] || '').trim();
+        if (!code) return;
+        const existed = !!productMaster[code];
+        const rec = ensureProductRecord(code, { format:'ean_13', group: iGrp>=0 ? (cols[iGrp]||'未分類').trim() : '未分類' });
+        if (iName >= 0) rec.name = String(cols[iName] || '').trim();
+        if (iExp >= 0) rec.expectedNew = toNonNegativeInt(cols[iExp], rec.expectedNew);
+        if (iCnt >= 0 && String(cols[iCnt] ?? '').trim() !== '') rec.countNew = toNonNegativeInt(cols[iCnt], rec.countNew);
+        if (iGrp >= 0 && String(cols[iGrp] || '').trim()) rec.group = String(cols[iGrp]).trim();
+        rec.updatedAt = Date.now();
+        existed ? updated++ : added++;
+      });
+      saveProductMaster(); renderMasterList(); showToast(`商品マスター取込: 追加${added} / 更新${updated}`, 'ok', 3500);
+    } catch (err) { console.error(err); showToast('商品CSV取込に失敗しました', 'err'); }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+function resetProductCounts() {
+  if (!confirm('今回カウントだけ0に戻しますか？商品名と登録在庫は残ります。')) return;
+  Object.values(productMaster || {}).forEach(r => { r.countNew = 0; r.updatedAt = Date.now(); });
+  saveProductMaster(); renderMasterList(); showToast('今回カウントをリセットしました', 'ok');
+}
+
 /* ════ iPhone/非対応ブラウザ用 ZXing フォールバック ════ */
 let zxingReader = null;
 let zxingControls = null;
@@ -360,7 +573,7 @@ async function startZxingScan() {
         let fmtRaw = typeof result.getBarcodeFormat === 'function' ? result.getBarcodeFormat() : result.format;
         let fmt = normalizeZxingFormat(fmtRaw);
         if (scanMode === 'ean13' && val.length === 12) val = '0' + val;
-        if (scanMode === 'ean13' && val.length !== 13) return;
+        if (scanMode === 'ean13' && val.length !== 13) { notifyInvalidEan13(val); return; }
         handleScanSuccess(val, fmt === 'unknown' && scanMode === 'ean13' ? 'ean_13' : fmt);
       } else if (error) {
         const name = error.name || '';
@@ -483,7 +696,7 @@ async function detect() {
       const b = barcodes[0];
       let val = b.rawValue;
       if (scanMode === 'ean13' && val.length === 12) val = '0' + val;
-      if (scanMode === 'ean13' && val.length !== 13) { raf = requestAnimationFrame(detect); return; }
+      if (scanMode === 'ean13' && val.length !== 13) { notifyInvalidEan13(val); raf = requestAnimationFrame(detect); return; }
 
       handleScanSuccess(val, b.format);
     }
@@ -512,8 +725,34 @@ function handleScanSuccess(val, format) {
   lastScannedValue = val;
   _requiresClearFrame = true;
 
-  // ── 同一数値の重複登録を禁止 ──
-  if (bcHistory.some(x => x.value === val)) {
+  // ── 同一数値の扱い ──
+  const existing = bcHistory.find(x => x.value === val);
+  if (existing && cfg.countMode) {
+    existing.newCount = getBcNewCount(existing) + 1;
+    existing.timestamp = Date.now();
+    existing.format = existing.format || format;
+    if (cfg.useGroup && (!existing.group || existing.group === '未分類')) existing.group = cfg.currentGroup;
+    const masterRec = ensureProductRecord(val, { format, group: existing.group || '未分類', delta: 1 });
+    saveBcHistory();
+    renderMasterList();
+
+    const dispEl = $('scan-bc-display');
+    const phEl   = $('scan-bc-placeholder');
+    const valEl  = $('scan-bc-val');
+    const metaEl = $('scan-bc-meta');
+    if (phEl)   phEl.style.display   = 'none';
+    if (dispEl) dispEl.style.display = '';
+    if (valEl)  valEl.textContent    = val;
+    if (metaEl) metaEl.textContent   = productScanMeta(existing.format || format, existing.timestamp, masterRec);
+    updateCounts();
+    renderBcList();
+    showToast('実数 +1: ' + masterRec.countNew + '個', 'ok');
+    if (!cfg.continuousScan) stopScan();
+    return;
+  }
+
+  // 通常モードでは同一数値の重複登録を禁止
+  if (existing) {
     const dupEl = $('scan-bc-dup');
     if (dupEl) { dupEl.style.display = ''; setTimeout(() => { dupEl.style.display = 'none'; }, 1500); }
     showToast('既に登録済み: ' + val, '');
@@ -524,14 +763,19 @@ function handleScanSuccess(val, format) {
     if (phEl)   phEl.style.display   = 'none';
     if (dispEl) dispEl.style.display = '';
     if (valEl)  valEl.textContent    = val;
+    const masterRec = ensureProductRecord(val, { format, group: existing.group || '未分類' });
+    if (metaEl) metaEl.textContent = productScanMeta(existing.format || format, existing.timestamp, masterRec);
+    renderMasterList();
     if (!cfg.continuousScan) stopScan();
     return;
   }
 
   const grp  = cfg.useGroup ? cfg.currentGroup : '未分類';
-  const item = { id: Date.now(), value: val, format, timestamp: Date.now(), group: grp, checked: false };
+  const item = { id: Date.now(), value: val, format, timestamp: Date.now(), group: grp, checked: false, newCount: cfg.countMode ? 1 : undefined };
   bcHistory.unshift(item);
-  localStorage.setItem(BC_KEY, JSON.stringify(bcHistory));
+  const masterRec = ensureProductRecord(val, { format, group: grp, delta: cfg.countMode ? 1 : 0 });
+  saveBcHistory();
+  renderMasterList();
 
   /* ── スキャン結果表示エリアを更新 ── */
   const dispEl = $('scan-bc-display');
@@ -543,7 +787,7 @@ function handleScanSuccess(val, format) {
   if (phEl)   phEl.style.display   = 'none';
   if (dispEl) dispEl.style.display = '';
   if (valEl)  valEl.textContent    = val;
-  if (metaEl) metaEl.textContent   = (format || '').toUpperCase().replace('_', ' ') + ' · ' + fmtShort(item.timestamp);
+  if (metaEl) metaEl.textContent   = productScanMeta(format, item.timestamp, masterRec);
   if (cnvEl && wrapEl) {
     if (JS_FMT[format]) {
       wrapEl.style.display = '';
@@ -555,7 +799,7 @@ function handleScanSuccess(val, format) {
 
   updateCounts();
   renderBcList();
-  showToast('スキャン成功: ' + val, 'ok');
+  showToast(cfg.countMode ? '実数 1個: ' + val : 'スキャン成功: ' + val, 'ok');
 
   if (!cfg.continuousScan) stopScan();
 }
@@ -645,7 +889,7 @@ function renderBcList() {
     thumbDiv.appendChild(canvas);
     if (cfg.bcCompactMode) thumbDiv.style.display = 'none';
 
-    // 値テキスト + FIX37: ↓3ボタンをバーコード横に配置
+    // 値テキスト + FIX44: ↓xボタンをバーコード左側に配置
     const valueRow = document.createElement('div');
     valueRow.className = 'bc-value-row';
 
@@ -656,11 +900,12 @@ function renderBcList() {
     const inlineJumpBtn = document.createElement('button');
     inlineJumpBtn.className = 'bc-inline-jump';
     inlineJumpBtn.type = 'button';
-    inlineJumpBtn.title = 'この位置から3件下へ移動';
-    inlineJumpBtn.textContent = '↓3';
+    const jumpStep = (typeof getJumpStep === 'function') ? getJumpStep() : 1;
+    inlineJumpBtn.title = 'この位置から' + jumpStep + '件下へ移動';
+    inlineJumpBtn.textContent = '↓' + jumpStep;
 
-    valueRow.appendChild(valDiv);
     valueRow.appendChild(inlineJumpBtn);
+    valueRow.appendChild(valDiv);
 
     // メタ行
     const metaRow = document.createElement('div');
@@ -671,13 +916,30 @@ function renderBcList() {
     metaInfo.innerHTML = `<span class="card-fmt${isEan ? ' ean' : ''}">${fmtUpper}</span>`
       + `<span class="card-time">${fmtShort(item.timestamp)}</span>`
       + `<span class="card-num">#${item.value.slice(-4)}</span>`
+      + (getProductRecord(item.value)?.name ? `<span class="card-count">${escapeHtml(getProductRecord(item.value).name)}</span>` : '')
+      + (getProductRecord(item.value) ? `<span class="card-count">実:${toNonNegativeInt(getProductRecord(item.value).countNew)}</span>` : '')
+      + ((cfg.countMode || item.newCount !== undefined) ? `<span class="card-count">履歴:${getBcNewCount(item)}</span>` : '')
       + (item.checked ? '<span class="card-chk-lbl">✓済</span>' : '');
-    if (cfg.useGroup && item.group) {
+    if (item.group && item.group !== '未分類') {
       const badge = document.createElement('span');
       badge.className = 'card-group-badge';
       badge.textContent = item.group;
       el.appendChild(badge);
     }
+
+    const plusBtn = document.createElement('button');
+    plusBtn.className = 'card-count-btn';
+    plusBtn.type = 'button';
+    plusBtn.title = '新品数を+1';
+    plusBtn.textContent = '+1';
+    plusBtn.style.display = (cfg.countMode || item.newCount !== undefined) ? '' : 'none';
+
+    const minusBtn = document.createElement('button');
+    minusBtn.className = 'card-count-btn';
+    minusBtn.type = 'button';
+    minusBtn.title = '新品数を-1';
+    minusBtn.textContent = '-1';
+    minusBtn.style.display = (cfg.countMode || item.newCount !== undefined) ? '' : 'none';
 
     const checkBtn = document.createElement('button');
     checkBtn.className = 'card-check';
@@ -688,7 +950,16 @@ function renderBcList() {
     deleteBtn.title = '削除';
     deleteBtn.innerHTML = '&#x1F5D1;';
 
+    const groupBtn = document.createElement('button');
+    groupBtn.className = 'card-group-move';
+    groupBtn.type = 'button';
+    groupBtn.title = 'このバーコードをグループ移動';
+    groupBtn.textContent = '📁';
+
     metaRow.appendChild(metaInfo);
+    metaRow.appendChild(groupBtn);
+    metaRow.appendChild(plusBtn);
+    metaRow.appendChild(minusBtn);
     metaRow.appendChild(checkBtn);
     metaRow.appendChild(deleteBtn);
 
@@ -700,8 +971,16 @@ function renderBcList() {
     // イベント
     el.onclick = (e) => {
       if (multiSelModeBc) { toggleMultiSelectBc(item.id, el); return; }
-      if (e.target === checkBtn || e.target === selChk || e.target === deleteBtn || e.target === inlineJumpBtn) return;
+      if (e.target === checkBtn || e.target === selChk || e.target === deleteBtn || e.target === groupBtn || e.target === inlineJumpBtn || e.target === plusBtn || e.target === minusBtn) return;
       openBcModal(item);
+    };
+    plusBtn.onclick = (e) => {
+      e.stopPropagation();
+      adjustBcNewCount(item, +1);
+    };
+    minusBtn.onclick = (e) => {
+      e.stopPropagation();
+      adjustBcNewCount(item, -1);
     };
     checkBtn.onclick = (e) => {
       e.stopPropagation();
@@ -713,6 +992,16 @@ function renderBcList() {
       e.stopPropagation();
       deleteBc(item.id);
     };
+    groupBtn.onclick = (e) => {
+      e.stopPropagation();
+      multiSelectedBc = [item.id];
+      groupMoveTarget = 'bc';
+      if (typeof updateGroupUI === 'function') updateGroupUI();
+      const sel = $('group-move-select');
+      if (sel && item.group) sel.value = item.group;
+      const pop = $('group-move-popup');
+      if (pop) pop.style.display = 'flex';
+    };
     selChk.onclick = (e) => {
       e.stopPropagation();
       toggleMultiSelectBc(item.id, el);
@@ -721,7 +1010,7 @@ function renderBcList() {
     inlineJumpBtn.onclick = (e) => {
       e.stopPropagation();
       if (typeof jumpListItemsFromElement === 'function') {
-        jumpListItemsFromElement('bc-list', '.bc-card', el, 3);
+        jumpListItemsFromElement('bc-list', '.bc-card', el, (typeof getJumpStep === 'function') ? getJumpStep() : 1);
       }
     };
 
@@ -771,7 +1060,7 @@ function updateMultiSelTxtBc() {
 function openBcModal(item) {
   currentDetail = item;
   $('modal-val').textContent  = item.value;
-  $('modal-meta').textContent = (item.format||'').toUpperCase().replace('_',' ') + ' · ' + fmtTime(item.timestamp);
+  $('modal-meta').textContent = (item.format||'').toUpperCase().replace('_',' ') + ' · ' + fmtTime(item.timestamp) + ((cfg.countMode || item.newCount !== undefined) ? ' · 新品 ' + getBcNewCount(item) + '個' : '');
   $('copied-msg').style.display = 'none';
   const hasFmt = !!JS_FMT[item.format];
   $('modal-bc').style.display  = hasFmt ? '' : 'none';
@@ -788,11 +1077,12 @@ function closeBcModal() {
 function exportCSV() {
   if (!bcHistory.length) return;
   const hasG = cfg.useGroup;
-  const hdr  = hasG ? '\uFEFF値,フォーマット,グループ,日時,確認済み' : '\uFEFF値,フォーマット,日時,確認済み';
+  const hdr  = hasG ? '\uFEFF値,フォーマット,新品数,グループ,日時,確認済み' : '\uFEFF値,フォーマット,新品数,日時,確認済み';
   const rows = [hdr, ...bcHistory.map(x => {
     const v = `"${x.value}","${(x.format||'').replace('_',' ')}"`;
+    const cnt = `,"${getBcNewCount(x)}"`;
     const g = hasG ? `,"${x.group||''}"` : '';
-    return v + g + `,"${fmtTime(x.timestamp)}","${x.checked?'済':''}"`;
+    return v + cnt + g + `,"${fmtTime(x.timestamp)}","${x.checked?'済':''}"`;
   })];
   const a = document.createElement('a');
   a.href     = URL.createObjectURL(new Blob([rows.join('\n')], { type:'text/csv' }));
@@ -959,5 +1249,15 @@ document.addEventListener('DOMContentLoaded', () => {
   on('btn-multi-move-bc', 'click', () => {
     if (!multiSelectedBc.length) return;
     groupMoveTarget = 'bc'; $('group-move-popup').style.display = 'flex';
+  });
+
+  on('master-search', 'input', renderMasterList);
+  on('btn-master-import', 'click', () => $('master-import-input')?.click());
+  $('master-import-input')?.addEventListener('change', e => { importProductMasterCSV(e.target.files?.[0]); e.target.value = ''; });
+  on('btn-master-export', 'click', exportProductMasterCSV);
+  on('btn-master-reset-count', 'click', resetProductCounts);
+  on('btn-master-clear', 'click', () => {
+    if (!confirm('商品マスターを全て削除しますか？バーコード履歴は消えません。')) return;
+    productMaster = {}; saveProductMaster(); renderMasterList(); showToast('商品マスターを削除しました', 'ok');
   });
 });
